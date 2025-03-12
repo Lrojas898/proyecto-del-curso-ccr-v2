@@ -1,14 +1,12 @@
 package com.example.ccrHospitalManagement.model;
-import jakarta.persistence.Entity;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "STAFF_TYPE")
+@Table(name = "LOCATION_TYPE")
 @Data
-public class StaffType {
+public class LocationType {
     @Id
-    @Column(length = 100)
+    @Column(length = 30)
     private String name;
 }

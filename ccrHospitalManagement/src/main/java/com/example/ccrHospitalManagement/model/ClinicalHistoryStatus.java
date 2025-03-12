@@ -1,5 +1,14 @@
 package com.example.ccrHospitalManagement.model;
+import jakarta.persistence.Entity;
 
-public enum ClinicalHistoryStatus {
-    
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "CLINIC_HISTORIAL_STATUS")
+@Data
+public class ClinicalHistoryStatus {
+    @Id
+    @Column(length = 8)
+    private String name;
 }
