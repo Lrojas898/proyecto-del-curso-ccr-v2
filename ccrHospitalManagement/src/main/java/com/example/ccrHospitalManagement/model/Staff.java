@@ -28,14 +28,6 @@ public class Staff {
     @JoinColumn(name = "USER_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "COUNTRY_id")
-    private Country country;
-
-    @ManyToOne
-    @JoinColumn(name = "CITY_id")
-    private City city;
-
     @Column(length = 50)
     private String address;
 
