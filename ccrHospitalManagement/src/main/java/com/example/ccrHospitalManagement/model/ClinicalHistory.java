@@ -1,6 +1,8 @@
 package com.example.ccrHospitalManagement.model;
 
 
+import java.sql.Date;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +23,9 @@ public class ClinicalHistory {
     @Column(nullable = false)
     private java.sql.Date date; // "date"
 
-    @Column(nullable = false)
-    private java.sql.Date hour; // hour
+    @Column(name = "\"hour\"", nullable = false)
+    private Date hour;
+
 
     @Lob
     @Column(name = "general_observations", nullable = false)
