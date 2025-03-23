@@ -2,35 +2,34 @@ package com.example.ccrHospitalManagement.model;
 
 
 
-import jakarta.persistence.Entity;
-
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Date;
+import lombok.*;
 
 @Entity
 @Table(name = "ASSISTANCE_ACT")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AssistanceAct {
+
     @Id
-    @Column(length = 50)
+    @Column(length = 40)
     private String id;
 
-    @Temporal(TemporalType.DATE)
-    private Date issueDate;
+    @Column(nullable = false)
+    private java.sql.Date issueDate; // issue_date -> issueDate
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(nullable = false)
     private String description;
 
+    // Relación con AttentionEpisode
     @ManyToOne
-    @JoinColumn(name = "ASSISTANCE_ACT_TYPE_name")
-    private AssistanceActType assistanceActType;
-
-    @ManyToOne
-    @JoinColumn(name = "ATTENTION_EPISODE_id")
+    @JoinColumn(name = "ATTENTION_EPISODE_Id", nullable = false)
     private AttentionEpisode attentionEpisode;
 
+    // Relación con AssistanceActType
     @ManyToOne
-    @JoinColumn(name = "STAFF_id")
-    private Staff staff;
+    @JoinColumn(name = "ASSISTANCE_ACT_TYPE_id", nullable = false)
+    private AssistanceActType type;
 }

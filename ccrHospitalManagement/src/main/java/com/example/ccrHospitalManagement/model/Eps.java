@@ -1,15 +1,20 @@
 package com.example.ccrHospitalManagement.model;
+
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "EPS")
 @Data
-public class Eps {
-    @Id
-    @Column(length = 30)
-    private String id;
+@NoArgsConstructor
+@AllArgsConstructor
+public class EPS {
 
-    @Column(length = 50, nullable = false)
+    @Id
+    @Column(length = 30, nullable = false)
+    private String nit;
+
+    @Column(length = 30, nullable = false)
     private String name;
+
 }

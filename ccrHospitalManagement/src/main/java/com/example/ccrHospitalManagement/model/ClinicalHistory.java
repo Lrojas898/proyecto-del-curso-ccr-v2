@@ -1,26 +1,35 @@
 package com.example.ccrHospitalManagement.model;
-import jakarta.persistence.Entity;
+
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Date;
+import lombok.*;
 
 @Entity
-@Table(name = "CLINICAL_HISTORY")
+@Table(name = "CLINICAL_HISTORY",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"PATIENT_Id"})
+        })
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClinicalHistory {
+
     @Id
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String id;
 
-    @Temporal(TemporalType.DATE)
-    private Date creationDate;
+    @Column(nullable = false)
+    private java.sql.Date date; // "date"
 
-    @ManyToOne
-    @JoinColumn(name = "CLINIC_HISTORIAL_STATUS_name")
-    private ClinicalHistoryStatus clinicalHistoryStatus;
+    @Column(nullable = false)
+    private java.sql.Date hour; // hour
 
-    @ManyToOne
-    @JoinColumn(name = "PATIENT_id")
+    @Lob
+    @Column(name = "general_observations", nullable = false)
+    private String generalObservations;
+
+    // 1:1 con Patient
+    @OneToOne
+    @JoinColumn(name = "PATIENT_Id", unique = true, nullable = false)
     private Patient patient;
 }

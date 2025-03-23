@@ -1,39 +1,25 @@
 package com.example.ccrHospitalManagement.model;
-import jakarta.persistence.Entity;
+
+
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Date;
+import lombok.*;
 
 @Entity
 @Table(name = "ATTENTION_EPISODE")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AttentionEpisode {
+
     @Id
-    @Column(length = 30)
+    @Column(length = 30, nullable = false)
     private String id;
 
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    @Column(nullable = false)
+    private java.sql.Date creationDate; // creation_date -> creationDate
 
-    @Temporal(TemporalType.TIME)
-    private Date startHour;
-
-    @Temporal(TemporalType.TIME)
-    private Date finalHour;
-
-    @Column(columnDefinition = "TEXT")
-    private String generalObservations;
-
+    // muchos Episodios se relacionan con 1 ClinicalHistory (1:N)
     @ManyToOne
-    @JoinColumn(name = "CLINICAL_HISTORY_id")
+    @JoinColumn(name = "CLINICAL_HISTORY_id", nullable = false)
     private ClinicalHistory clinicalHistory;
-
-    @ManyToOne
-    @JoinColumn(name = "APPOINTMENT_id")
-    private Appointment appointment;
-
-    @ManyToOne
-    @JoinColumn(name = "STAFF_id")
-    private Staff staff;
 }
-

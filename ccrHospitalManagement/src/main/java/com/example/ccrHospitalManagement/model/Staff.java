@@ -1,37 +1,37 @@
 package com.example.ccrHospitalManagement.model;
-import jakarta.persistence.Entity;
+
+
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
-@Table(name = "STAFF")
+@Table(name = "STAFF",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"USER_id"})
+        })
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Staff {
+
     @Id
-    @Column(length = 50)
+    @Column(length = 30, nullable = false)
     private String id;
 
-    @Column(length = 50, nullable = false)
-    private String firstName;
+    @Column(length = 30, nullable = false)
+    private String professionId; // profession_id -> professionId
 
-    @Column(length = 50, nullable = false)
-    private String lastName;
+    @Column
+    private String phoneExtension; // sin especificar length, puedes agregarlo
 
-    @Column(length = 50)
-    private String phone;
-
-    @Column(length = 50, nullable = false, unique = true)
-    private String email;
-
-    @ManyToOne
-    @JoinColumn(name = "USER_id", nullable = false)
+    // Relación 1:1 con User
+    @OneToOne
+    @JoinColumn(name = "USER_id", nullable = false, unique = true)
     private User user;
 
-    @Column(length = 50)
-    private String address;
+    @Column(nullable = false)
+    private String undergraduate; // define length si deseas
 
-    @ManyToOne
-    @JoinColumn(name = "PROFESSION_name")
-    private Profession profession;
+    private String speciality; // define length si deseas
 }

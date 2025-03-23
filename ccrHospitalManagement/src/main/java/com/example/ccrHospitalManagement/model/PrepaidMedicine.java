@@ -1,16 +1,19 @@
 package com.example.ccrHospitalManagement.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "PREPAID_MEDICINE")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PrepaidMedicine {
-    @Id
-    @Column(length = 30)
-    private String id;
 
-    @Column(length = 40)
+    @Id
+    @Column(length = 30, nullable = false)
+    private String nit;
+
+    @Column(length = 30, nullable = false)
     private String name;
 }

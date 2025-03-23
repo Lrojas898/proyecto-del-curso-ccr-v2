@@ -1,45 +1,40 @@
 package com.example.ccrHospitalManagement.model;
 
-import jakarta.persistence.Entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Date;
+import lombok.*;
 
 @Entity
 @Table(name = "APPOINTMENT")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Appointment {
+
     @Id
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String id;
 
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    private java.sql.Date date;
 
-    @Temporal(TemporalType.TIME)
-    private Date startTime;
+    private java.sql.Date startTime; // start_time -> startTime
 
-    @Temporal(TemporalType.TIME)
-    private Date endTime;
-
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(nullable = false)
     private String description;
 
+    // Relación con Patient
     @ManyToOne
-    @JoinColumn(name = "STAFF_id")
-    private Staff staff;
-
-    @ManyToOne
-    @JoinColumn(name = "LOCATION_id")
-    private Location location;
-
-    @ManyToOne
-    @JoinColumn(name = "PATIENT_id")
+    @JoinColumn(name = "PATIENT_Id", nullable = false)
     private Patient patient;
 
+    // Relación con Staff
     @ManyToOne
-    @JoinColumn(name = "APPOINTMENT_TYPE_name")
-    private AppointmentType appointmentType;
-}
+    @JoinColumn(name = "STAFF_id", nullable = false)
+    private Staff staff;
 
+    // Relación con Location
+    @ManyToOne
+    @JoinColumn(name = "LOCATION_id", nullable = false)
+    private Location location;
+}

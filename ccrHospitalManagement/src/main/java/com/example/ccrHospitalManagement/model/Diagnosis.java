@@ -1,21 +1,25 @@
 package com.example.ccrHospitalManagement.model;
-import jakarta.persistence.Entity;
+
+
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "DIAGNOSIS")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Diagnosis {
+
     @Id
-    @Column(length = 50)
+    @Column(length = 30, nullable = false)
     private String id;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(length = 50, nullable = false)
+    private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "ATTENTION_EPISODE_id")
-    private AttentionEpisode attentionEpisode;
+    @Lob
+    @Column(nullable = false)
+    private String description;
 }

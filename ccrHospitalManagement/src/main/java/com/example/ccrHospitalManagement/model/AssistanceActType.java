@@ -1,14 +1,20 @@
 package com.example.ccrHospitalManagement.model;
-import jakarta.persistence.Entity;
+
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "ASSISTANCE_ACT_TYPE")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AssistanceActType {
+
     @Id
-    @Column(length = 50)
+    @Column(length = 40, nullable = false)
+    private String id;
+
+    @Column(length = 40, nullable = false)
     private String name;
 }
