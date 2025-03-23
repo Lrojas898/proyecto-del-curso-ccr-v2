@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Rol</title>
+    <link rel="stylesheet" href="/css/styles.css"/>
+</head>
+<body>
+<h1 th:text="${#strings.isEmpty(role.id) ? 'Crear Rol' : 'Editar Rol'}"></h1>
+<form th:action="@{/roles/save}" th:object="${role}" method="post">
+    <div>
+        <label>ID:</label>
+        <input type="text" th:field="*{id}" placeholder="Ingrese ID" />
+    </div>
+    <div>
+        <label>Nombre:</label>
+        <input type="text" th:field="*{name}" placeholder="Ingrese nombre" />
+    </div>
+    <div>
+        <label>Permisos:</label>
+        <select name="permissionIds" multiple="multiple">
+            <option th:each="perm : ${allPermissions}" th:value="${perm.id}" th:text="${perm.name}"></option>
+        </select>
+    </div>
+    <div>
+        <button type="submit">Guardar</button>
+        <a href="/roles">Cancelar</a>
+    </div>
+</form>
+</body>
+</html>

@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "\"USER\"") // user es palabra reservada en algunos motores,
-// se escapa con comillas dobles
+@Table(name = "\"USER\"")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 public class User {
 
     @Id
