@@ -4,6 +4,9 @@ package com.example.ccrHospitalManagement.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "\"USER\"")
 @Data
@@ -53,7 +56,11 @@ public class User {
     @JoinColumn(name = "PREPAID_MEDICINE_nit", nullable = false)
     private PrepaidMedicine prepaidMedicine;
 
-    // Relación ManyToMany con Role a través de la tabla user_role
-    // Opción 1: Usar una entidad intermedia UserRole (ver más abajo).
-    // Opción 2: Usar @ManyToMany con @JoinTable. Depende de si guardas datos extra en "USER_ROLE".
+    @ManyToMany
+    @JoinTable(
+            name = "USER_ROLE",
+            joinColumns = @JoinColumn(name = "USER_id"),
+            inverseJoinColumns = @JoinColumn(name = "ROLE_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 }

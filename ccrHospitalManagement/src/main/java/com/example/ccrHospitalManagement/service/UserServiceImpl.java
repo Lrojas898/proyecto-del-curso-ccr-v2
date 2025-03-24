@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,23 +25,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(User user, List<String> roleIds) {
-
         if (roleIds == null || roleIds.isEmpty()) {
             throw new IllegalArgumentException("El usuario debe tener al menos un rol asignado.");
         }
 
-        User savedUser = userRepository.save(user);
+        List<Role> roles = roleIds.stream()
+                .map(roleId -> roleRepository.findById(roleId)
+                        .orElseThrow(() -> new IllegalArgumentException("El rol con id " + roleId + " no existe.")))
+                .collect(Collectors.toList());
 
-        roleIds.forEach(roleId -> {
-            Optional<Role> roleOpt = roleRepository.findById(roleId);
-            if (!roleOpt.isPresent()) {
-                throw new IllegalArgumentException("El rol con id " + roleId + " no existe.");
-            }
-            UserRoleId userRoleId = new UserRoleId(savedUser.getId(), roleId);
-            UserRole userRole = new UserRole(userRoleId, savedUser, roleOpt.get());
-            userRoleRepository.save(userRole);
-        });
-        return savedUser;
+        user.setRoles(new java.util.HashSet<>(roles));
+        return userRepository.save(user);
     }
 
     @Override
@@ -60,21 +55,13 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("El usuario debe tener al menos un rol asignado.");
         }
 
-        User updatedUser = userRepository.save(user);
+        List<Role> roles = roleIds.stream()
+                .map(roleId -> roleRepository.findById(roleId)
+                        .orElseThrow(() -> new IllegalArgumentException("El rol con id " + roleId + " no existe.")))
+                .collect(Collectors.toList());
 
-        userRoleRepository.findAll().stream()
-                .filter(ur -> ur.getUser().getId().equals(updatedUser.getId()))
-                .forEach(userRoleRepository::delete);
-        roleIds.forEach(roleId -> {
-            Optional<Role> roleOpt = roleRepository.findById(roleId);
-            if (!roleOpt.isPresent()) {
-                throw new IllegalArgumentException("El rol con id " + roleId + " no existe.");
-            }
-            UserRoleId userRoleId = new UserRoleId(updatedUser.getId(), roleId);
-            UserRole userRole = new UserRole(userRoleId, updatedUser, roleOpt.get());
-            userRoleRepository.save(userRole);
-        });
-        return updatedUser;
+        user.setRoles(new java.util.HashSet<>(roles));
+        return userRepository.save(user);
     }
 
     @Override

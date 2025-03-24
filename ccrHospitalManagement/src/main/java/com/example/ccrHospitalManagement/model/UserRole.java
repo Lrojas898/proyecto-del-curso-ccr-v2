@@ -27,11 +27,4 @@ public class UserRole {
     @MapsId("roleId")
     @JoinColumn(name = "ROLE_id", nullable = false)
     private Role role;
-
-    @OneToMany(mappedBy = "user")
-    private Set<UserRole> roles = new HashSet<>();
-
-
-
-    
 }
