@@ -22,11 +22,17 @@ public class Permission {
     private String name;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String description;
 
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles = new HashSet<>();
+
+    public Permission(String id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 
     public void addRole(Role role) {
         this.roles.add(role);

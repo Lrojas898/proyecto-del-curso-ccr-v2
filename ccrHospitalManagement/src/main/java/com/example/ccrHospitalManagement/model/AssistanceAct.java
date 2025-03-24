@@ -20,7 +20,7 @@ public class AssistanceAct {
     private java.sql.Date issueDate; // issue_date -> issueDate
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String description;
 
     // Relación con AttentionEpisode

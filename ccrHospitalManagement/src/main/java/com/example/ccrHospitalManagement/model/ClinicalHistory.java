@@ -23,12 +23,12 @@ public class ClinicalHistory {
     @Column(nullable = false)
     private java.sql.Date date; // "date"
 
-    @Column(name = "\"hour\"", nullable = false)
+    @Column(name = "hour", nullable = false)
     private Date hour;
 
 
     @Lob
-    @Column(name = "general_observations", nullable = false)
+    @Column(name = "general_observations", nullable = false, columnDefinition = "text")
     private String generalObservations;
 
     // 1:1 con Patient

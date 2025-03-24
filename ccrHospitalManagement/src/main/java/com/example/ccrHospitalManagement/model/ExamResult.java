@@ -19,10 +19,12 @@ public class ExamResult {
     private java.sql.Date resultDate; // result_date -> resultDate
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String description;
 
     @Lob
+    // de pronto esto se tenga que cambiar
+    @Column(columnDefinition = "text")
     private String attached;
 
     // Relación con ExamType

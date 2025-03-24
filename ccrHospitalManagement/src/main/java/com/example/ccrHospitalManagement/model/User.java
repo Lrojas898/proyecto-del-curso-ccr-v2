@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "\"USER\"")
+@Table(name = "MYUSER")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -58,8 +58,8 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-            name = "USER_ROLE",
-            joinColumns = @JoinColumn(name = "USER_id"),
+            name = "MYUSER_ROLE",
+            joinColumns = @JoinColumn(name = "MYUSER_id"),
             inverseJoinColumns = @JoinColumn(name = "ROLE_id")
     )
     private Set<Role> roles = new HashSet<>();

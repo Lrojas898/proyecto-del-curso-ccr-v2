@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 @Table(name = "PATIENT",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"USER_id"})
+                @UniqueConstraint(columnNames = {"MYUSER_id"})
         })
 @Data
 @NoArgsConstructor
@@ -26,7 +26,7 @@ public class Patient {
 
     // Relación 1:1 con User
     @OneToOne
-    @JoinColumn(name = "USER_id", nullable = false, unique = true)
+    @JoinColumn(name = "MYUSER_id", nullable = false, unique = true)
     private User user;
 }
 

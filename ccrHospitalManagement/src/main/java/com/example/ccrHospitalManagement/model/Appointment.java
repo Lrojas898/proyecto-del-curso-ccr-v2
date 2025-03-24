@@ -20,7 +20,7 @@ public class Appointment {
     private java.sql.Date startTime; // start_time -> startTime
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String description;
 
     // Relación con Patient

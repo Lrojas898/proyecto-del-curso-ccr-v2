@@ -20,7 +20,7 @@ public class UserRole {
     // Muchas veces se mapean también las referencias directas
     @ManyToOne
     @MapsId("userId") // indica que userId se toma del embebido
-    @JoinColumn(name = "USER_id", nullable = false)
+    @JoinColumn(name = "MYUSER_id", nullable = false)
     private User user;
 
     @ManyToOne

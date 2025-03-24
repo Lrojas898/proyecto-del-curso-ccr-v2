@@ -13,7 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class UserRoleId implements Serializable {
 
-    @Column(name = "USER_id", length = 30)
+    @Column(name = "MYUSER_id", length = 30)
     private String userId;
 
     @Column(name = "ROLE_id", length = 40)
