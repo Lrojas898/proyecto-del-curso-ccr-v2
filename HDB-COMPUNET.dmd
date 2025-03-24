@@ -1,8 +1,0 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="HDB-COMPUNET" id="A0090DF7-58EC-91FB-91E7-7822D951D3BF" version="3.5">
-<createdBy>luism</createdBy>
-<createdTime>2025-02-16 17:15:12 UTC</createdTime>
-<ownerDesignName>HDB-COMPUNET</ownerDesignName>
-<capitalNames>false</capitalNames>
-<designId>A0090DF7-58EC-91FB-91E7-7822D951D3BF</designId>
-</OSDM_Design>
