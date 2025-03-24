@@ -1,6 +1,9 @@
 package com.example.ccrHospitalManagement.model;
 
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +27,11 @@ public class UserRole {
     @MapsId("roleId")
     @JoinColumn(name = "ROLE_id", nullable = false)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private Set<UserRole> roles = new HashSet<>();
+
+
+
+    
 }
