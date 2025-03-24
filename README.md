@@ -3,5 +3,11 @@
 
 ## Integrantes:
 
+Ricardo Andres Chamorro Martinez
+Luis Manuel Rojas Correa
+Juan Camilo Corrales Osvalth
 
 ## Propuesta de modelo.
+
+![Diagrama Relacional del Sistema](Relational Diagram Documentation/RELATIONAL DIAGRAM.pdf)
+
