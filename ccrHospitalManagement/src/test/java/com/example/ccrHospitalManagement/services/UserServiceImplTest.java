@@ -1,4 +1,4 @@
-package com.example.ccrHospitalManagement;
+package com.example.ccrHospitalManagement.services;
 
 import com.example.ccrHospitalManagement.service.UserServiceImpl;
 import com.example.ccrHospitalManagement.model.Role;
@@ -8,7 +8,6 @@ import com.example.ccrHospitalManagement.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
