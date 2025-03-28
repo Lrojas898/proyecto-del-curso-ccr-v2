@@ -52,11 +52,13 @@ Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes 
     ```bash
     mvn clean test  
 
-2. **Ejecución del proyecto**:
+3. **Ejecución del proyecto**:
 
    Para ejecutar el proyecto, usa el siguiente comando:
 
    ```bash
     mvn spring-boot:run     
-
+4. **resultados de Jacoco**   
+Se tiene una cobertura del 100% en cuanto a los servicios solicitados
+![alt text](<jacoco.png>)
 
