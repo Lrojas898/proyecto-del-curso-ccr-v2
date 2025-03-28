@@ -21,8 +21,7 @@ public class Permission {
     @Column(length = 50, nullable = false)
     private String name;
 
-    @Lob
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(nullable = false)
     private String description;
 
     @ManyToMany(mappedBy = "permissions")

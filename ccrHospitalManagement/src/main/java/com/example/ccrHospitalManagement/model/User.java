@@ -63,4 +63,21 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "ROLE_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "patient")
+    private Set<Appointment> appointmentsAsPatient = new HashSet<>();
+
+    @OneToMany(mappedBy = "professional")
+    private Set<Appointment> appointmentsAsProfessional = new HashSet<>();
+
+    @OneToMany(mappedBy = "myuser")
+    private Set<ExamResult> myExamResults = new HashSet<>();
+
+    @OneToMany(mappedBy = "registeredBy")
+    private Set<ExamResult> uploadedExamResults = new HashSet<>();
+
+    @OneToOne(mappedBy = "user")
+    private ClinicalHistory clinicalHistory;
+
+
 }
