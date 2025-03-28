@@ -1,16 +1,23 @@
 INSERT INTO eps (nit, name) VALUES
                                 ('123456789', 'Salud Total'),
                                 ('987654321', 'Coomeva'),
-                                ('456789123', 'Sanitas');
+                                ('456789123', 'Sanitas'),
+                                ('555666777', 'Sura'),
+                                ('222333444', 'Compensar'),
+                                ('225588999', 'Nueva EPS');
 
 INSERT INTO prepaid_medicine (nit, name) VALUES
-                                             ('111222333', 'Medisanitas'),
-                                             ('444555666', 'Colmedica');
+                                             ('111222333', 'Compensar Medicina Prepagada'),
+                                             ('444555666', 'Sura Medicina Prepagada'),
+                                             ('101424794', 'Salud Total Medicina Prepagada'),
+                                             ('553451745', 'Coomeva Medicina Prepagada'),
+                                             ('227894265', 'Sanitas Medicina Prepagada'),
+                                             ('777989879', 'Nueva EPS Medicina Prepagada');
 
 INSERT INTO role (id, name) VALUES
-                                ('ROLE001', 'Administrator'),
+                                ('ROLE001', 'Patient'),
                                 ('ROLE002', 'Doctor'),
-                                ('ROLE003', 'Patient');
+                                ('ROLE003', 'Medical Assistant');
 
 INSERT INTO PERMISSION (id, name, description) VALUES
     ('PERM001', 'Manage Users', 'Allows creating, editing, and deleting users');

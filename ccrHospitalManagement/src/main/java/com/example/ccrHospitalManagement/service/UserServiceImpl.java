@@ -14,6 +14,7 @@ import com.example.ccrHospitalManagement.repository.UserRepository;
 import com.example.ccrHospitalManagement.repository.UserRoleRepository;
 
 import lombok.RequiredArgsConstructor;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new IllegalArgumentException("El rol con id " + roleId + " no existe.")))
                 .collect(Collectors.toList());
 
-        user.setRoles(new java.util.HashSet<>(roles));
+        user.setRoles(new HashSet<>(roles));
         return userRepository.save(user);
     }
 
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new IllegalArgumentException("El rol con id " + roleId + " no existe.")))
                 .collect(Collectors.toList());
 
-        user.setRoles(new java.util.HashSet<>(roles));
+        user.setRoles(new HashSet<>(roles));
         return userRepository.save(user);
     }
 
