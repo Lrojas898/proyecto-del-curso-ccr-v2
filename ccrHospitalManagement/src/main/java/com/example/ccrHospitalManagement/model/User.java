@@ -70,7 +70,7 @@ public class User {
     @OneToMany(mappedBy = "professional")
     private Set<Appointment> appointmentsAsProfessional = new HashSet<>();
 
-    @OneToMany(mappedBy = "myuser")
+    @OneToMany(mappedBy = "user")
     private Set<ExamResult> myExamResults = new HashSet<>();
 
     @OneToMany(mappedBy = "registeredBy")

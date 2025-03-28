@@ -20,9 +20,6 @@ public class ClinicalHistory {
     @Column(nullable = false)
     private java.sql.Date date; // "date"
 
-    @Column(name = "hour", nullable = false)
-    private Date hour;
-
     @Column(name = "general_observations", nullable = false)
     private String generalObservations;
 
