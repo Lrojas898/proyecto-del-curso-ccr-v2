@@ -18,13 +18,10 @@ public class ExamResult {
     @Column(nullable = false)
     private java.sql.Date resultDate; // result_date -> resultDate
 
-    @Lob
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(nullable = false)
     private String description;
 
-    @Lob
-    // de pronto esto se tenga que cambiar
-    @Column(columnDefinition = "text")
+    // si vamos a usar archivos/imagenes, hay que usar BLOB
     private String attached;
 
     // Relación con ExamType
@@ -32,8 +29,11 @@ public class ExamResult {
     @JoinColumn(name = "EXAM_TYPE_id", nullable = false)
     private ExamType examType;
 
-    // Relación con Patient
     @ManyToOne
-    @JoinColumn(name = "PATIENT_Id", nullable = false)
-    private Patient patient;
+    @JoinColumn(name = "myuser_id", nullable = false)
+    private User user; // Usuario al que pertenece el examen (rol paciente)
+
+    @ManyToOne
+    @JoinColumn(name = "registered_by_id", nullable = false)
+    private User registeredBy; // Profesional que subió o autorizó el examen
 }

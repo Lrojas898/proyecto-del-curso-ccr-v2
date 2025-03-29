@@ -4,6 +4,9 @@ package com.example.ccrHospitalManagement.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "APPOINTMENT")
 @Data
@@ -19,22 +22,20 @@ public class Appointment {
 
     private java.sql.Date startTime; // start_time -> startTime
 
-    @Lob
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(nullable = false)
     private String description;
-
-    // Relación con Patient
-    @ManyToOne
-    @JoinColumn(name = "PATIENT_Id", nullable = false)
-    private Patient patient;
-
-    // Relación con Staff
-    @ManyToOne
-    @JoinColumn(name = "STAFF_id", nullable = false)
-    private Staff staff;
 
     // Relación con Location
     @ManyToOne
     @JoinColumn(name = "LOCATION_id", nullable = false)
     private Location location;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private User patient;
+
+    @ManyToOne
+    @JoinColumn(name = "professional_id", nullable = false)
+    private User professional;
+
 }

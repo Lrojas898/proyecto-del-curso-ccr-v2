@@ -1,5 +1,5 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/2S86ERbh)
-# Proyecto-20251
+# Proyecto - Clinica OncoLogic IPS
 
 ## Integrantes:
 
@@ -12,3 +12,53 @@
 ## Propuesta de modelo.
 
 [Ver diagrama relacional (PDF)](docs/RELATIONAL%20DIAGRAM.pdf)
+
+## Contexto del Proyecto
+
+En la ciudad de **Cali**, una nueva **clínica especializada en oncología** ha sido inaugurada con el objetivo de ofrecer atención médica de alta calidad a sus pacientes. A pesar de contar con un personal médico altamente especializado y la infraestructura necesaria, la clínica aún no dispone de un sistema digital que facilite la gestión de sus actividades administrativas y operativas.
+
+Con el fin de optimizar los procesos internos y mejorar la atención al paciente, la clínica requiere una plataforma web integral que permita gestionar de manera eficiente varias áreas críticas de su operación. Esta plataforma debe cubrir desde el manejo de personal médico y administrativo, hasta la programación de citas médicas, gestión de historiales clínicos y la integración de módulos de laboratorio.
+
+## Objetivo del Proyecto
+
+Desarrollar una **aplicación web integral** para la **gestión administrativa y operativa** de la clínica oncológica. La solución permitirá un control eficiente sobre las citas médicas, los expedientes clínicos, el personal médico, los laboratorios y la facturación. A través de esta plataforma, se garantizará un flujo de trabajo ágil, seguro y optimizado, que contribuye a la mejora de la calidad del servicio médico brindado a los pacientes.
+
+## Objetivo de entrega 1
+
+Este primera parte del proyecto está diseñada en Backend para gestionar usuarios, roles y permisos dentro de un sistema. La aplicación está construida usando **Spring Boot**, **Hibernate** y **PostgreSQL** como base de datos. Cumpliendo todos los requisitos dados en esta entrega.
+
+## Requisitos Previos
+
+Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes programas en tu sistema:
+
+- **Java 17 o superior** (para ejecutar el proyecto Spring Boot)
+- **Maven 3.8 o superior** (para la construcción del proyecto)
+- **PostgreSQL** (como base de datos)
+- **IDE (opcional)**: Intellij IDEA, Eclipse, VSCode, o cualquier otro editor compatible con Java y Spring Boot.
+
+## Instalación
+
+1. **Clonar el repositorio**:
+
+   Clona este proyecto en tu máquina local utilizando Git:
+
+   ```bash
+   https://github.com/Computacion-2-2025/proyecto-del-curso-ccr.git
+
+2. **Ejecución de pruebas**:
+
+   Para ejecutar las pruebas y verificar el correcto funcionamiento de la aplicación, ejecuta el siguiente comando:
+
+    ```bash
+    mvn clean test  
+
+3. **Ejecución del proyecto**:
+
+   Para ejecutar el proyecto, usa el siguiente comando:
+
+   ```bash
+    mvn spring-boot:run     
+4. **resultados de Jacoco**   
+Se tiene una cobertura del 100% en cuanto a los servicios solicitados
+![alt text](<jacoco.png>)
+
