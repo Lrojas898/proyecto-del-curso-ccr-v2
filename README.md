@@ -57,8 +57,16 @@ Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes 
    Para ejecutar el proyecto, usa el siguiente comando:
 
    ```bash
-    mvn spring-boot:run     
+    mvn spring-boot:run
+      
 4. **resultados de Jacoco**   
 Se tiene una cobertura del 100% en cuanto a los servicios solicitados
 ![alt text](<jacoco.png>)
+
+5. **Videos de prueba del proyecto**:
+
+   Aqui estaran todos los videos de prueba del proyecto, actualizado por cada entrega:
+
+   Link: https://drive.google.com/drive/folders/1Ht_G1X5HLWBC3ynD3_I4aguyx-lPqKzC?usp=drive_link
+
 
