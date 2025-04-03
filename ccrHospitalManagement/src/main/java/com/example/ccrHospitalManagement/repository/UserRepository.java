@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-    // La PK de User es String (id)
+    User findByUsername(String username);
 
-    // Ejemplo de método para buscar por username:
-    // Optional<User> findByUsername(String username);
 }
