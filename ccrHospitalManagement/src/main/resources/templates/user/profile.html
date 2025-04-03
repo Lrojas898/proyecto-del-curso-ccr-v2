@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil del Usuario</title>
+</head>
+<body>
+<h1>Perfil de Usuario</h1>
+<p>Username: <span th:text="${user.username}"></span></p>
+<p>Email: <span th:text="${user.email}"></span></p>
+<p>Nombre: <span th:text="${user.firstName} + ' ' + ${user.lastName}"></span></p>
+<p>Teléfono: <span th:text="${user.phone}"></span></p>
+<p>Roles:
+    <span th:each="role : ${user.roles}" th:text="${role.name} + ' '"></span>
+</p>
+<a href="/users/edit" th:text="'Editar Perfil'"></a>
+</body>
+</html>
