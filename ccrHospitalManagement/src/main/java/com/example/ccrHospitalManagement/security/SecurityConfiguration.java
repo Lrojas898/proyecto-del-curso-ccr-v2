@@ -20,13 +20,13 @@ public class SecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())  // Deshabilitar CSRF para simplicidad
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/home", "/login", "/register").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -47,8 +47,8 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    @Bean
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
     }
 }
