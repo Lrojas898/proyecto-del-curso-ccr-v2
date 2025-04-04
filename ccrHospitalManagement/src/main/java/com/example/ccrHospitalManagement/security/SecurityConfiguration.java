@@ -28,7 +28,7 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/register").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/register", "/styles.css", "/static/**", "/webjars/**").permitAll() // Rutas públicas
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
@@ -46,7 +46,6 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
 
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
