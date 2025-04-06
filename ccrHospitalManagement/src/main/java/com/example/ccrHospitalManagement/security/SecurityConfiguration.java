@@ -28,24 +28,28 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/register", "/styles.css", "/static/**", "/webjars/**").permitAll() // Rutas públicas
+                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/medico/**").hasRole("MEDICO")
+                        .requestMatchers("/laboratorio/**").hasRole("LABORATORIO")
+                        .requestMatchers("/paciente/**").hasRole("PACIENTE")
+                        .requestMatchers("/asistente/**").hasRole("ASISTENTE")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .defaultSuccessUrl("/index", true)
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
-
         return http.build();
     }
+
+
+
 
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
