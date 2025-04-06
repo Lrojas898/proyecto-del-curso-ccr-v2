@@ -13,4 +13,10 @@ public class AuthController {
     }
 
 
+    @GetMapping("/register")
+    public String register() {
+        return "prebuilt-pages/default-register";
+    }
+
+
 }
