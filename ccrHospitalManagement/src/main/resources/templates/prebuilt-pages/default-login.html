@@ -8,20 +8,33 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Medjestic</title>
   <!-- Iconic Fonts -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="../../vendors/iconic-fonts/font-awesome/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../../vendors/iconic-fonts/flat-icons/flaticon.css">
-  <link rel="stylesheet" href="../../vendors/iconic-fonts/cryptocoins/cryptocoins.css">
-  <link rel="stylesheet" href="../../vendors/iconic-fonts/cryptocoins/cryptocoins-colors.css">
-  <!-- Bootstrap core CSS -->
-  <link href="../../assets/css/bootstrap.min.css" rel="stylesheet">
-  <!-- jQuery UI -->
-  <link href="../../assets/css/jquery-ui.min.css" rel="stylesheet">
-  <!-- Medjestic styles -->
-  <link href="../../assets/css/style.css" rel="stylesheet">
+    <!-- CSS References for Thymeleaf -->
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="../../favicon.ico">
+    <!-- General CSS -->
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/cropper.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/datatables.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/driver.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/ion.rangeSlider.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/jquery-jvectormap-2.0.3.css}" />
+    <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/morris.css}" />
+    <link rel="stylesheet" th:href="@{/css/slick.css}" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/css/sweetalert2.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/toastr.min.css}" />
+
+    <!-- Iconic Fonts -->
+    <link rel="stylesheet" th:href="@{/vendors/iconic-fonts/font-awesome/css/all.min.css}" />
+    <link rel="stylesheet" th:href="@{/vendors/iconic-fonts/font-awesome/css/fontawesome-all.min.css}" />
+    <link rel="stylesheet" th:href="@{/vendors/iconic-fonts/flat-icons/flaticon.css}" />
+    <link rel="stylesheet" th:href="@{/vendors/iconic-fonts/cryptocoins/cryptocoins.css}" />
+    <link rel="stylesheet" th:href="@{/vendors/iconic-fonts/cryptocoins/cryptocoins-colors.css}" />
+
+
 
 </head>
 
@@ -538,20 +551,20 @@
 
   </main>
 
-  <!-- SCRIPTS -->
   <!-- Global Required Scripts Start -->
-  <script src="../../assets/js/jquery-3.3.1.min.js"></script>
-  <script src="../../assets/js/popper.min.js"></script>
-  <script src="../../assets/js/bootstrap.min.js"></script>
-  <script src="../../assets/js/perfect-scrollbar.js"> </script>
-  <script src="../../assets/js/jquery-ui.min.js"> </script>
+  <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+  <script th:src="@{/js/popper.min.js}"></script>
+  <script th:src="@{/js/bootstrap.min.js}"></script>
+  <script th:src="@{/js/perfect-scrollbar.js}"></script>
+  <script th:src="@{/js/jquery-ui.min.js}"></script>
   <!-- Global Required Scripts End -->
 
   <!-- Medjestic core JavaScript -->
-  <script src="../../assets/js/framework.js"></script>
+  <script th:src="@{/js/framework.js}"></script>
 
   <!-- Settings -->
-  <script src="../../assets/js/settings.js"></script>
+  <script th:src="@{/js/settings.js}"></script>
+
 
 </body>
 
