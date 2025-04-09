@@ -38,7 +38,9 @@ public class UserRegistrationDto {
     private String phone;
 
     @NotBlank
+    @Pattern(regexp = "Hombre|Mujer", message = "El sexo debe ser 'Hombre' o 'Mujer'")
     private String sex;
+
 
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")

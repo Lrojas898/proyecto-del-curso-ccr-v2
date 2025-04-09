@@ -58,7 +58,11 @@
                     <input type="text" th:field="*{lastName}" class="form-control" placeholder="Apellido" required>
                     <input type="text" th:field="*{address}" class="form-control" placeholder="Dirección" required>
                     <input type="text" th:field="*{phone}" class="form-control" placeholder="Teléfono" required>
-                    <input type="text" th:field="*{sex}" class="form-control" placeholder="Sexo" required>
+                    <select th:field="*{sex}" class="form-control" required>
+                        <option value="" disabled selected>Seleccione sexo</option>
+                        <option value="Hombre">Hombre</option>
+                        <option value="Mujer">Mujer</option>
+                    </select>
                     <input type="date" th:field="*{dateOfBirth}" class="form-control" required>
 
                     <select th:field="*{epsNit}" class="form-control" required>
