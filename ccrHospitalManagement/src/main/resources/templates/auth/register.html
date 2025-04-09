@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - CCR Hospital</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/jquery-ui.min.css}" rel="stylesheet"> <!-- opcional -->
+</head>
+
+<body class="ms-body ms-primary-theme ms-logged-out">
+<main class="body-content">
+    <div class="ms-content-wrapper ms-auth">
+        <div class="ms-auth-container">
+            <div class="ms-auth-col">
+                <div class="ms-auth-bg"></div>
+            </div>
+            <div class="ms-auth-col">
+                <div class="ms-auth-form">
+                    <form th:action="@{/register}" th:object="${user}" method="post" class="needs-validation" novalidate>
+                        <h3>Registro de usuario</h3>
+
+                        <input type="text" th:field="*{id}" class="form-control" placeholder="ID" required>
+                        <input type="text" th:field="*{username}" class="form-control" placeholder="Usuario" required>
+                        <input type="email" th:field="*{email}" class="form-control" placeholder="Correo" required>
+                        <input type="password" th:field="*{password}" class="form-control" placeholder="Contraseña" required>
+                        <input type="text" th:field="*{firstName}" class="form-control" placeholder="Nombre" required>
+                        <input type="text" th:field="*{lastName}" class="form-control" placeholder="Apellido" required>
+                        <input type="text" th:field="*{address}" class="form-control" placeholder="Dirección" required>
+                        <input type="text" th:field="*{phone}" class="form-control" placeholder="Teléfono" required>
+                        <input type="text" th:field="*{sex}" class="form-control" placeholder="Sexo" required>
+                        <input type="date" th:field="*{dateOfBirth}" class="form-control" required>
+
+                        <select th:field="*{epsNit}" class="form-control" required>
+                            <option value="" disabled selected>Seleccione EPS</option>
+                            <option th:each="eps : ${epsList}" th:value="${eps.nit}" th:text="${eps.name}"></option>
+                        </select>
+
+                        <select th:field="*{prepaidMedicineNit}" class="form-control" required>
+                            <option value="" disabled selected>Seleccione medicina prepagada</option>
+                            <option th:each="prep : ${prepaidList}" th:value="${prep.nit}" th:text="${prep.name}"></option>
+                        </select>
+
+                        <div th:if="${customError}" class="alert alert-danger mt-3">
+                            <p th:text="${customError}"></p>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3 w-100">Registrarse</button>
+                    </form>
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:src="@{/css/register-ux-helper.js}"></script>
+
+</body>
+</html>
