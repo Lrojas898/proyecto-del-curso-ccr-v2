@@ -1,6 +1,8 @@
 package com.example.ccrHospitalManagement.service;
 
+import com.example.ccrHospitalManagement.dto.RoleDTO;
 import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
+import com.example.ccrHospitalManagement.dto.UserRoleDTO;
 import com.example.ccrHospitalManagement.model.EPS;
 import com.example.ccrHospitalManagement.model.PrepaidMedicine;
 import com.example.ccrHospitalManagement.model.Role;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -116,7 +119,54 @@ public class UserServiceImpl implements  UserService{
         }
     }
 
+    public List<UserRoleDTO> getAllUsersWithRoles() {
+        List<User> users = userRepository.findAll();
+        List<Role> allRoles = roleRepository.findAll();
 
+        Set<RoleDTO> availableRoles = allRoles.stream()
+                .map(role -> new RoleDTO(role.getId(), role.getName()))
+                .collect(Collectors.toSet());
+
+        return users.stream()
+                .map(user -> {
+                    // Usamos una consulta separada para evitar inicializar la colección directamente
+                    Set<String> assignedRoleIds = userRepository.findRoleIdsByUserId(user.getId());
+                    return new UserRoleDTO(user.getId(), user.getUsername(), assignedRoleIds, availableRoles);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public UserRoleDTO getUserWithRoles(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        List<Role> allRoles = roleRepository.findAll();
+
+        // Usamos una consulta separada para evitar inicializar la colección directamente
+        Set<String> assignedRoleIds = userRepository.findRoleIdsByUserId(userId);
+        Set<RoleDTO> availableRoles = allRoles.stream()
+                .map(role -> new RoleDTO(role.getId(), role.getName()))
+                .collect(Collectors.toSet());
+
+        return new UserRoleDTO(user.getId(), user.getUsername(), assignedRoleIds, availableRoles);
+    }
+
+    @Transactional
+    public void updateUserRoles(String userId, Set<String> roleIds) {
+        // Cargar el usuario sin inicializar la colección de roles
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Cargar los roles seleccionados
+        Set<Role> rolesToAssign = new HashSet<>(roleRepository.findAllById(roleIds));
+
+        // Sincronizar la colección existente
+        Set<Role> currentRoles = user.getRoles();
+        currentRoles.clear();         // Elimina los roles actuales
+        currentRoles.addAll(rolesToAssign); // Añade los nuevos roles
+
+        // Guardar los cambios
+        userRepository.save(user);
+    }
 
 
 }

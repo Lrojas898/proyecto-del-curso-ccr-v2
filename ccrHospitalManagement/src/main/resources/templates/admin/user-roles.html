@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Gestionar Roles de <span th:text="${userRoleDTO.username}"></span></title>
+</head>
+<body>
+<h1>Gestionar Roles para <span th:text="${userRoleDTO.username}"></span></h1>
+<form th:action="@{/admin/users/{id}/roles(id=${userRoleDTO.userId})}" method="post">
+    <div th:each="role : ${userRoleDTO.availableRoles}">
+        <label>
+            <input type="checkbox"
+                   th:name="roleIds"
+                   th:value="${role.id}"
+                   th:checked="${userRoleDTO.assignedRoleIds.contains(role.id)}">
+            <span th:text="${role.name}"></span>
+        </label>
+    </div>
+    <button type="submit">Guardar</button>
+</form>
+<a th:href="@{/admin/users}">Volver</a>
+</body>
+</html>

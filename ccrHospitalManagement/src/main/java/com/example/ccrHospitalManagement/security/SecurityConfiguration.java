@@ -1,4 +1,4 @@
-package com.example.ccrHospitalManagement.config;
+package com.example.ccrHospitalManagement.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/admin/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
