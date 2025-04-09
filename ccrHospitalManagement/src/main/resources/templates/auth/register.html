@@ -4,63 +4,87 @@
     <meta charset="UTF-8">
     <title>Registro - CCR Hospital</title>
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/jquery-ui.min.css}" rel="stylesheet">
     <link th:href="@{/css/style.css}" rel="stylesheet">
-    <link th:href="@{/css/jquery-ui.min.css}" rel="stylesheet"> <!-- opcional -->
+
+    <style>
+        .ms-auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .ms-auth-form {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-control {
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p.text-center a {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body class="ms-body ms-primary-theme ms-logged-out">
 <main class="body-content">
     <div class="ms-content-wrapper ms-auth">
         <div class="ms-auth-container">
-            <div class="ms-auth-col">
-                <div class="ms-auth-bg"></div>
+
+            <div class="ms-auth-form">
+                <form th:action="@{/register}" th:object="${user}" method="post" class="needs-validation" novalidate>
+                    <h3>Registro de usuario</h3>
+                    <p class="text-center">Completa todos los campos para crear tu cuenta</p>
+
+                    <input type="text" th:field="*{id}" class="form-control" placeholder="ID" required>
+                    <input type="text" th:field="*{username}" class="form-control" placeholder="Usuario" required>
+                    <input type="email" th:field="*{email}" class="form-control" placeholder="Correo electrónico" required>
+                    <input type="password" th:field="*{password}" class="form-control" placeholder="Contraseña" required>
+                    <input type="text" th:field="*{firstName}" class="form-control" placeholder="Nombre" required>
+                    <input type="text" th:field="*{lastName}" class="form-control" placeholder="Apellido" required>
+                    <input type="text" th:field="*{address}" class="form-control" placeholder="Dirección" required>
+                    <input type="text" th:field="*{phone}" class="form-control" placeholder="Teléfono" required>
+                    <input type="text" th:field="*{sex}" class="form-control" placeholder="Sexo" required>
+                    <input type="date" th:field="*{dateOfBirth}" class="form-control" required>
+
+                    <select th:field="*{epsNit}" class="form-control" required>
+                        <option value="" disabled selected>Seleccione EPS</option>
+                        <option th:each="eps : ${epsList}" th:value="${eps.nit}" th:text="${eps.name}"></option>
+                    </select>
+
+                    <select th:field="*{prepaidMedicineNit}" class="form-control" required>
+                        <option value="" disabled selected>Seleccione medicina prepagada</option>
+                        <option th:each="prep : ${prepaidList}" th:value="${prep.nit}" th:text="${prep.name}"></option>
+                    </select>
+
+                    <div th:if="${customError}" class="alert alert-danger mt-3">
+                        <p th:text="${customError}"></p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Registrarse</button>
+
+                    <p class="text-center mt-3">¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión</a></p>
+                </form>
             </div>
-            <div class="ms-auth-col">
-                <div class="ms-auth-form">
-                    <form th:action="@{/register}" th:object="${user}" method="post" class="needs-validation" novalidate>
-                        <h3>Registro de usuario</h3>
 
-                        <input type="text" th:field="*{id}" class="form-control" placeholder="ID" required>
-                        <input type="text" th:field="*{username}" class="form-control" placeholder="Usuario" required>
-                        <input type="email" th:field="*{email}" class="form-control" placeholder="Correo" required>
-                        <input type="password" th:field="*{password}" class="form-control" placeholder="Contraseña" required>
-                        <input type="text" th:field="*{firstName}" class="form-control" placeholder="Nombre" required>
-                        <input type="text" th:field="*{lastName}" class="form-control" placeholder="Apellido" required>
-                        <input type="text" th:field="*{address}" class="form-control" placeholder="Dirección" required>
-                        <input type="text" th:field="*{phone}" class="form-control" placeholder="Teléfono" required>
-                        <input type="text" th:field="*{sex}" class="form-control" placeholder="Sexo" required>
-                        <input type="date" th:field="*{dateOfBirth}" class="form-control" required>
-
-                        <select th:field="*{epsNit}" class="form-control" required>
-                            <option value="" disabled selected>Seleccione EPS</option>
-                            <option th:each="eps : ${epsList}" th:value="${eps.nit}" th:text="${eps.name}"></option>
-                        </select>
-
-                        <select th:field="*{prepaidMedicineNit}" class="form-control" required>
-                            <option value="" disabled selected>Seleccione medicina prepagada</option>
-                            <option th:each="prep : ${prepaidList}" th:value="${prep.nit}" th:text="${prep.name}"></option>
-                        </select>
-
-                        <div th:if="${customError}" class="alert alert-danger mt-3">
-                            <p th:text="${customError}"></p>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary mt-3 w-100">Registrarse</button>
-                    </form>
-
-
-
-
-
-
-
-                </div>
-            </div>
         </div>
     </div>
 </main>
 
-<script th:src="@{/css/register-ux-helper.js}"></script>
-
+<script th:src="@{css/js/register-ux-helper.js}"></script>
 </body>
 </html>

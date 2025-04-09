@@ -116,3 +116,20 @@ form div {
 .navbar a:hover {
     background-color: #0056b3;
 }
+
+.ms-auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.ms-auth-form {
+    width: 100%;
+    max-width: 500px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
