@@ -28,7 +28,9 @@ public class UserServiceImpl implements  UserService{
     private final RoleRepository roleRepository;
 
     @Override
+    @Transactional
     public void saveUser(UserRegistrationDto dto) {
+
         if (userRepository.existsById(dto.getId())) {
             throw new IllegalArgumentException("El ID ya existe.");
         }
@@ -51,13 +53,12 @@ public class UserServiceImpl implements  UserService{
         user.setAddress(dto.getAddress());
         user.setPhone(dto.getPhone());
         user.setSex(dto.getSex());
-        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setDateOfBirth(java.sql.Date.valueOf(dto.getDateOfBirth()));
         user.setEps(eps);
         user.setPrepaidMedicine(prepaid);
 
         userRepository.save(user);
 
-        System.out.println("Usuario guardado con ID: " + user.getId());
 
 
     }

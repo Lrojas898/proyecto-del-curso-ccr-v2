@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 public class UserRegistrationDto {
@@ -42,9 +43,11 @@ public class UserRegistrationDto {
     private String sex;
 
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date dateOfBirth;
+    @NotNull(message = "La fecha de nacimiento es obligatoria")
+    private LocalDate dateOfBirth;
+
+
 
     @NotBlank
     private String epsNit;

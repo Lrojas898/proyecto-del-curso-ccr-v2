@@ -3,6 +3,7 @@ package com.example.ccrHospitalManagement.controller;
 import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
 import com.example.ccrHospitalManagement.service.EpsServiceImpl;
 import com.example.ccrHospitalManagement.service.PrepaidMedicineServiceImpl;
+import com.example.ccrHospitalManagement.service.UserService;
 import com.example.ccrHospitalManagement.service.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final EpsServiceImpl epsServiceImpl;
     private final PrepaidMedicineServiceImpl prepaidMedicineService;
 

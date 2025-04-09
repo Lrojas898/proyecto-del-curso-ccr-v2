@@ -47,8 +47,15 @@
 
             <div class="ms-auth-form">
                 <form th:action="@{/register}" th:object="${user}" method="post" class="needs-validation" novalidate>
+
                     <h3>Registro de usuario</h3>
                     <p class="text-center">Completa todos los campos para crear tu cuenta</p>
+
+                    <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                        <ul>
+                            <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                        </ul>
+                    </div>
 
                     <input type="text" th:field="*{id}" class="form-control" placeholder="ID" required>
                     <input type="text" th:field="*{username}" class="form-control" placeholder="Usuario" required>
@@ -58,11 +65,13 @@
                     <input type="text" th:field="*{lastName}" class="form-control" placeholder="Apellido" required>
                     <input type="text" th:field="*{address}" class="form-control" placeholder="Dirección" required>
                     <input type="text" th:field="*{phone}" class="form-control" placeholder="Teléfono" required>
+
                     <select th:field="*{sex}" class="form-control" required>
                         <option value="" disabled selected>Seleccione sexo</option>
                         <option value="Hombre">Hombre</option>
                         <option value="Mujer">Mujer</option>
                     </select>
+
                     <input type="date" th:field="*{dateOfBirth}" class="form-control" required>
 
                     <select th:field="*{epsNit}" class="form-control" required>
@@ -82,7 +91,10 @@
                     <button type="submit" class="btn btn-primary mt-3 w-100">Registrarse</button>
 
                     <p class="text-center mt-3">¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión</a></p>
+
                 </form>
+
+
             </div>
 
         </div>
