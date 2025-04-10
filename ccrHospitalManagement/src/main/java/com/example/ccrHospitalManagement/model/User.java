@@ -9,17 +9,22 @@ import java.util.Set;
 
 @Entity
 @Table(name = "MYUSER")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class User {
 
     @Id
     @Column(length = 30, nullable = false)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private String id;
 
     @Column(length = 100, nullable = false)
+    @ToString.Include
     private String username;
 
     @Column(length = 120, nullable = false)
@@ -29,15 +34,19 @@ public class User {
     private String email;
 
     @Column(length = 50, nullable = false)
+    @ToString.Include
     private String firstName;  // first_name -> firstName
 
     @Column(length = 50, nullable = false)
+    @ToString.Include
     private String lastName;
 
     @Column(length = 50, nullable = false)
+    @ToString.Include
     private String address;
 
     @Column(length = 30, nullable = false)
+    @ToString.Include
     private String phone;
 
     @Column(length = 30, nullable = false)
@@ -64,16 +73,16 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "patient")
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     private Set<Appointment> appointmentsAsPatient = new HashSet<>();
 
-    @OneToMany(mappedBy = "professional")
+    @OneToMany(mappedBy = "professional", fetch = FetchType.LAZY)
     private Set<Appointment> appointmentsAsProfessional = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<ExamResult> myExamResults = new HashSet<>();
 
-    @OneToMany(mappedBy = "registeredBy")
+    @OneToMany(mappedBy = "registeredBy", fetch = FetchType.LAZY)
     private Set<ExamResult> uploadedExamResults = new HashSet<>();
 
     @OneToOne(mappedBy = "user")

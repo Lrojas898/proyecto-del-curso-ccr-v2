@@ -24,16 +24,12 @@ public class Permission {
     @Column(nullable = false)
     private String description;
 
-    @ManyToMany(mappedBy = "permissions")
-    private Set<Role> roles = new HashSet<>();
+   /* @ManyToMany(mappedBy = "permissions")
+    private Set<Role> roles = new HashSet<>();*/
 
-    public Permission(String id, String name, String description) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-    }
 
-    public void addRole(Role role) {
+
+  /*  public void addRole(Role role) {
         this.roles.add(role);
         role.getPermissions().add(this);
     }
@@ -41,5 +37,5 @@ public class Permission {
     public void removeRole(Role role) {
         this.roles.remove(role);
         role.getPermissions().remove(this);
-    }
+    }*/
 }

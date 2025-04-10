@@ -18,21 +18,11 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
 
     @Override
     @Transactional
-    public Role createRole(Role role, List<String> permissionIds) {
-        if (permissionIds == null || permissionIds.isEmpty()) {
-            throw new IllegalArgumentException("El rol debe tener al menos un permiso asignado.");
-        }
-
-        List<Permission> permissions = permissionIds.stream()
-                .map(id -> permissionRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Permiso con ID " + id + " no existe")))
-                .collect(Collectors.toList());
-
-        role.setPermissions(new HashSet<>(permissions));
+    public Role createRole(Role role) {
+        // Simplemente guardar el rol sin permisos
         return roleRepository.save(role);
     }
 
@@ -48,23 +38,21 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public Role updateRole(Role role, List<String> permissionIds) {
-        if (permissionIds == null || permissionIds.isEmpty()) {
-            throw new IllegalArgumentException("El rol debe tener al menos un permiso asignado.");
+    public Role updateRole(Role role) {
+        // Verificar que el rol existe antes de actualizar
+        if (!roleRepository.existsById(role.getId())) {
+            throw new IllegalArgumentException("El rol con ID " + role.getId() + " no existe.");
         }
-
-        List<Permission> permissions = permissionIds.stream()
-                .map(id -> permissionRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Permiso con ID " + id + " no existe")))
-                .collect(Collectors.toList());
-
-        role.setPermissions(new HashSet<>(permissions));
+        // Actualizar el rol sin permisos
         return roleRepository.save(role);
     }
 
     @Override
     @Transactional
     public void deleteRole(String id) {
+        if (!roleRepository.existsById(id)) {
+            throw new IllegalArgumentException("El rol con ID " + id + " no existe.");
+        }
         roleRepository.deleteById(id);
     }
 }
