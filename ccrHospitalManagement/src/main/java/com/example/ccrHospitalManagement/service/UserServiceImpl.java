@@ -8,7 +8,9 @@ import com.example.ccrHospitalManagement.model.PrepaidMedicine;
 import com.example.ccrHospitalManagement.model.Role;
 import com.example.ccrHospitalManagement.model.User;
 import com.example.ccrHospitalManagement.repository.*;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,6 @@ public class UserServiceImpl implements  UserService{
     @Override
     @Transactional
     public void saveUser(UserRegistrationDto dto) {
-
         if (userRepository.existsById(dto.getId())) {
             throw new IllegalArgumentException("El ID ya existe.");
         }
@@ -61,9 +62,6 @@ public class UserServiceImpl implements  UserService{
         user.setPrepaidMedicine(prepaid);
 
         userRepository.save(user);
-
-
-
     }
 
     @Transactional
@@ -81,16 +79,15 @@ public class UserServiceImpl implements  UserService{
         return userRepository.save(user);
     }
 
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
-
 
     public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
     }
-
 
     @Transactional
     public User updateUser(User user, List<String> roleIds) {
@@ -107,14 +104,12 @@ public class UserServiceImpl implements  UserService{
         return userRepository.save(user);
     }
 
-
     @Transactional
     public void deleteUser(String id) {
-        Optional<User> user = userRepository.findById(id); // Buscar al usuario primero
+        Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
-            userRepository.deleteById(id); // Si existe, lo eliminamos
+            userRepository.deleteById(id);
         } else {
-            // Si no existe, lanzar una excepción o simplemente no hacer nada
             throw new IllegalArgumentException("Usuario no encontrado");
         }
     }
@@ -129,7 +124,6 @@ public class UserServiceImpl implements  UserService{
 
         return users.stream()
                 .map(user -> {
-                    // Usamos una consulta separada para evitar inicializar la colección directamente
                     Set<String> assignedRoleIds = userRepository.findRoleIdsByUserId(user.getId());
                     return new UserRoleDTO(user.getId(), user.getUsername(), assignedRoleIds, availableRoles);
                 })
@@ -141,7 +135,6 @@ public class UserServiceImpl implements  UserService{
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         List<Role> allRoles = roleRepository.findAll();
 
-        // Usamos una consulta separada para evitar inicializar la colección directamente
         Set<String> assignedRoleIds = userRepository.findRoleIdsByUserId(userId);
         Set<RoleDTO> availableRoles = allRoles.stream()
                 .map(role -> new RoleDTO(role.getId(), role.getName()))
@@ -152,21 +145,35 @@ public class UserServiceImpl implements  UserService{
 
     @Transactional
     public void updateUserRoles(String userId, Set<String> roleIds) {
-        // Cargar el usuario sin inicializar la colección de roles
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        // Cargar los roles seleccionados
         Set<Role> rolesToAssign = new HashSet<>(roleRepository.findAllById(roleIds));
-
-        // Sincronizar la colección existente
+        Hibernate.initialize(user.getRoles());
         Set<Role> currentRoles = user.getRoles();
-        currentRoles.clear();         // Elimina los roles actuales
-        currentRoles.addAll(rolesToAssign); // Añade los nuevos roles
+        currentRoles.clear();
+        currentRoles.addAll(rolesToAssign);
 
-        // Guardar los cambios
         userRepository.save(user);
     }
 
+    // DTO y método de conversión
+    @Data
+    public static class UserDTO {
+        private String id;
+        private String username;
+        private String email;
+        private String firstName;
+        private String lastName;
+    }
 
+    private UserDTO convertToDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        return dto;
+    }
 }

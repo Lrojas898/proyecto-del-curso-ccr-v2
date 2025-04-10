@@ -8,19 +8,26 @@ import lombok.*;
 
 @Entity
 @Table(name = "CLINICAL_HISTORY")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class ClinicalHistory {
 
     @Id
     @Column(length = 50, nullable = false)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private String id;
 
     @Column(nullable = false)
+    @ToString.Include
     private java.sql.Date date; // "date"
 
     @Column(name = "general_observations", nullable = false)
+    @ToString.Include
     private String generalObservations;
 
     @OneToOne
