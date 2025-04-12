@@ -1,0 +1,212 @@
+
+:root {
+    --primary-dark-blue: #042940;
+    --primary-green: #005C53;
+    --lime-green: #9FC131;
+    --yellow: #DBF227;
+    --soft-beige: #D6D58E;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--soft-beige);
+    color: var(--primary-dark-blue);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark-blue);
+}
+
+.btn {
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark-blue);
+    border-color: var(--primary-dark-blue);
+}
+
+.btn-secondary {
+    background-color: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--primary-dark-blue);
+}
+
+.btn-secondary:hover {
+    background-color: #c7d01f;
+    border-color: #c7d01f;
+}
+
+.card {
+    border: none;
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    background-color: white;
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: none;
+    padding: 1.5rem;
+    border-radius: 1.25rem 1.25rem 0 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Estilos para user-list.html */
+.user-list-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.user-list-table thead {
+    background-color: var(--primary-dark-blue);
+    color: white;
+}
+
+.user-list-table th,
+.user-list-table td {
+    padding: 1rem;
+    text-align: left;
+}
+
+.user-list-table th {
+    font-weight: 600;
+}
+
+.user-list-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.user-list-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.user-list-table a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.user-list-table a:hover {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+/* Estilos para user-roles.html */
+.user-roles-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.user-roles-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.user-roles-form label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: var(--primary-dark-blue);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.user-roles-form input[type="checkbox"] {
+    accent-color: var(--primary-green);
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+.user-roles-form .checkbox-group {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-roles-form .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.user-roles-form button[type="submit"] {
+    background-color: var(--primary-green);
+    border: none;
+}
+
+.user-roles-form a {
+    color: var(--primary-green);
+    text-decoration: none;
+}
+
+.user-roles-form a:hover {
+    color: var(--primary-dark-blue);
+    text-decoration: underline;
+}
+
+.alert-danger {
+    background-color: var(--yellow);
+    color: var(--primary-dark-blue);
+    border: none;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .user-list-table th,
+    .user-list-table td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .user-roles-form {
+        padding: 0 1rem;
+    }
+
+    .user-roles-form .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-roles-form .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
