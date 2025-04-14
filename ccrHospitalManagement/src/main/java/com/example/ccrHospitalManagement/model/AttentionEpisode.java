@@ -4,6 +4,8 @@ package com.example.ccrHospitalManagement.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "ATTENTION_EPISODE")
 @Data
@@ -15,11 +17,23 @@ public class AttentionEpisode {
     @Column(length = 30, nullable = false)
     private String id;
 
-    @Column(nullable = false)
-    private java.sql.Date creationDate; // creation_date -> creationDate
+    private LocalDate creationDate;
 
-    // muchos Episodios se relacionan con 1 ClinicalHistory (1:N)
+    @Column(columnDefinition = "TEXT")
+    private String diagnosis;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "CLINICAL_HISTORY_id", nullable = false)
     private ClinicalHistory clinicalHistory;
+
+    @ManyToOne
+    @JoinColumn(name = "USER_DOCTOR_id", nullable = false)
+    private User doctor;
+
+    @OneToOne
+    @JoinColumn(name = "APPOINTMENT_id")
+    private Appointment appointment;
 }
