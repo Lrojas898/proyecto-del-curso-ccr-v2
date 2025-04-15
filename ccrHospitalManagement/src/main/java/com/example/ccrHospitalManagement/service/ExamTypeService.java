@@ -6,9 +6,9 @@ import java.util.Optional;
 
 public interface ExamTypeService {
 
-    ExamType registerExamType(ExamType examType);
+    ExamType createExamType(ExamType examType);
     List<ExamType> getAllExamTypes();
     Optional<ExamType> getExamTypeById(String id);
-    ExamType UpdateExamType(ExamType examType);
+    ExamType updateExamType(ExamType examType);
     void removeExamTypeById(String id);
 }

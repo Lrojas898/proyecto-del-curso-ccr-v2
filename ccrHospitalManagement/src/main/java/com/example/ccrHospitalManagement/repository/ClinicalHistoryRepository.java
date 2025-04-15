@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClinicalHistoryRepository extends JpaRepository<ClinicalHistory, String> {
-    // La PK de ClinicalHistory es String (id)
+    boolean existsByUserId(String userId);
 }

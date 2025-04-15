@@ -9,6 +9,6 @@ public interface AttentionEpisodeService {
     AttentionEpisode createAttentionEpisode(AttentionEpisode episode);
     List<AttentionEpisode> getAllAttentionEpisodes();
     Optional<AttentionEpisode> getAttentionEpisodeById(String id);
-    AttentionEpisode UpdateAttentionEpisode(AttentionEpisode episode);
+    AttentionEpisode updateAttentionEpisode(AttentionEpisode episode);
     void removeAttentionEpisodeById(String id);
 }

@@ -9,6 +9,6 @@ public interface LocationService {
     Location registerLocation(Location location);
     List<Location> getAllLocations();
     Optional<Location> getLocationById(String id);
-    Location UpdateLocation(Location location);
+    Location updateLocation(Location location);
     void removeLocationById(String id);
 }

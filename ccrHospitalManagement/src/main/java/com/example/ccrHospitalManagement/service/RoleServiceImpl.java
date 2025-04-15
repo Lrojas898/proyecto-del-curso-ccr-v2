@@ -1,17 +1,13 @@
 package com.example.ccrHospitalManagement.service;
 
-import com.example.ccrHospitalManagement.model.Permission;
 import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.repository.PermissionRepository;
 import com.example.ccrHospitalManagement.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +18,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public Role createRole(Role role) {
-        // Simplemente guardar el rol sin permisos
+        if (roleRepository.existsById(role.getId())) {
+            throw new IllegalArgumentException("Ya existe un rol con ese ID.");
+        }
+        validateRole(role, true);
         return roleRepository.save(role);
     }
 
@@ -39,11 +38,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public Role updateRole(Role role) {
-        // Verificar que el rol existe antes de actualizar
         if (!roleRepository.existsById(role.getId())) {
             throw new IllegalArgumentException("El rol con ID " + role.getId() + " no existe.");
         }
-        // Actualizar el rol sin permisos
+        validateRole(role, false);
         return roleRepository.save(role);
     }
 
@@ -54,5 +52,15 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("El rol con ID " + id + " no existe.");
         }
         roleRepository.deleteById(id);
+    }
+
+    private void validateRole(Role role, boolean isCreate) {
+        if (isCreate && (role.getId() == null || role.getId().isBlank())) {
+            throw new IllegalArgumentException("El ID del rol es obligatorio.");
+        }
+
+        if (role.getName() == null || role.getName().trim().length() < 3) {
+            throw new IllegalArgumentException("El nombre del rol debe tener al menos 3 caracteres.");
+        }
     }
 }

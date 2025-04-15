@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PrepaidMedicineService {
-    
+    PrepaidMedicine registerPrepaidMedicine(PrepaidMedicine medicine);
+    PrepaidMedicine updatePrepaidMedicine(PrepaidMedicine medicine);
     List<PrepaidMedicine> getAllPrepaidMedicines();
     Optional<PrepaidMedicine> getPrepaidMedicineById(String id);
-    PrepaidMedicine registerOrUpdatePrepaidMedicine(PrepaidMedicine entity);
     void removePrepaidMedicineById(String id);
 }
+
