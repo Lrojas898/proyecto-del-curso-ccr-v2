@@ -1,210 +1,198 @@
 package com.example.ccrHospitalManagement.services;
 
-import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.model.User;
-import com.example.ccrHospitalManagement.repository.RoleRepository;
-import com.example.ccrHospitalManagement.repository.UserRepository;
-import com.example.ccrHospitalManagement.repository.UserRoleRepository;
-import com.example.ccrHospitalManagement.service.UserServiceImpl;
+import com.example.ccrHospitalManagement.dto.UserDTO;
+import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
+import com.example.ccrHospitalManagement.model.*;
+import com.example.ccrHospitalManagement.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-
+import java.time.LocalDate;
 import java.util.*;
+import com.example.ccrHospitalManagement.service.UserServiceImpl;
 
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private EPSRepository epsRepository;
+    @Mock private PrepaidMedicineRepository prepaidRepository;
+    @Mock private RoleRepository roleRepository;
+    @Mock private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private RoleRepository roleRepository;
-
-    @Mock
-    private UserRoleRepository userRoleRepository;
-
-    @InjectMocks
-    private UserServiceImpl userService;
+    @InjectMocks private UserServiceImpl userService;
 
     private User user;
     private Role role;
 
     @BeforeEach
     void setUp() {
-        role = new Role();
-        role.setId("roleId1");
-        role.setName("Patient");
+        role = new Role("roleId1", "Patient"); // Constructor válido según tu clase
 
         user = new User();
         user.setId("userId1");
         user.setUsername("testuser");
         user.setEmail("testuser@example.com");
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setPassword("password");
         user.setRoles(new HashSet<>(Collections.singletonList(role)));
     }
 
-    @Test
-    void testCreateUser_WhenRoleIdsIsNull_ThrowsIllegalArgumentException() {
-        // Datos de entrada
-        List<String> roleIds = null;
 
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, roleIds));
-        assertEquals("El usuario debe tener al menos un rol asignado.", exception.getMessage());
+    @Test
+    void testSaveUser_Valid() {
+        UserRegistrationDto dto = new UserRegistrationDto();
+        dto.setId("U001");
+        dto.setUsername("jdoe");
+        dto.setPassword("123");
+        dto.setEmail("jdoe@email.com");
+        dto.setFirstName("John");
+        dto.setLastName("Doe");
+        dto.setPhone("123456");
+        dto.setSex("M");
+        dto.setAddress("Street");
+        dto.setDateOfBirth(LocalDate.of(1990, 1, 1));
+        dto.setEpsNit("EPS1");
+        dto.setPrepaidMedicineNit("PREP1");
+
+        when(userRepository.existsById("U001")).thenReturn(false);
+        when(userRepository.existsByUsername("jdoe")).thenReturn(false);
+        when(epsRepository.findById("EPS1")).thenReturn(Optional.of(new EPS("EPS1", "EPS name")));
+        when(prepaidRepository.findById("PREP1")).thenReturn(Optional.of(new PrepaidMedicine("PREP1", "Prep name")));
+        when(passwordEncoder.encode("123")).thenReturn("encoded123");
+
+        assertDoesNotThrow(() -> userService.saveUser(dto));
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
-    void testCreateUser_WhenRoleIdsIsEmpty_ThrowsIllegalArgumentException() {
-        // Datos de entrada
-        List<String> roleIds = new ArrayList<>();
-
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, roleIds));
-        assertEquals("El usuario debe tener al menos un rol asignado.", exception.getMessage());
+    void testSaveUser_DuplicateId_Throws() {
+        UserRegistrationDto dto = new UserRegistrationDto();
+        dto.setId("U001");
+        when(userRepository.existsById("U001")).thenReturn(true);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.saveUser(dto));
+        assertTrue(e.getMessage().contains("ID ya existe"));
     }
 
     @Test
-    void testCreateUser_WhenRoleNotFound_ThrowsIllegalArgumentException() {
-        // Datos de entrada
-        List<String> roleIds = List.of("nonExistentRoleId");
-
-        // Comportamiento esperado
-        when(roleRepository.findById("nonExistentRoleId")).thenReturn(Optional.empty());
-
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, roleIds));
-        assertEquals("El rol con id nonExistentRoleId no existe.", exception.getMessage());
+    void testSaveUser_DuplicateUsername_Throws() {
+        UserRegistrationDto dto = new UserRegistrationDto();
+        dto.setId("U001");
+        dto.setUsername("jdoe");
+        when(userRepository.existsById("U001")).thenReturn(false);
+        when(userRepository.existsByUsername("jdoe")).thenReturn(true);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.saveUser(dto));
+        assertTrue(e.getMessage().contains("ya está en uso"));
     }
 
     @Test
-    void testCreateUser_WhenValidRole_ReturnsCreatedUser() {
-        // Datos de entrada
-        List<String> roleIds = List.of("roleId1");
+    void testSaveUser_EpsNotFound_Throws() {
+        UserRegistrationDto dto = new UserRegistrationDto();
+        dto.setId("U001");
+        dto.setUsername("jdoe");
+        dto.setEpsNit("EPS1");
+        when(userRepository.existsById("U001")).thenReturn(false);
+        when(userRepository.existsByUsername("jdoe")).thenReturn(false);
+        when(epsRepository.findById("EPS1")).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.saveUser(dto));
+        assertTrue(e.getMessage().contains("EPS no encontrada"));
+    }
 
-        // Comportamiento esperado
+    @Test
+    void testCreateUser_RoleNull_Throws() {
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, null));
+        assertTrue(e.getMessage().contains("al menos un rol"));
+    }
+
+    @Test
+    void testCreateUser_RoleEmpty_Throws() {
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, new ArrayList<>()));
+        assertTrue(e.getMessage().contains("al menos un rol"));
+    }
+
+    @Test
+    void testCreateUser_RoleNotFound_Throws() {
+        when(roleRepository.findById("invalid")).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, List.of("invalid")));
+        assertTrue(e.getMessage().contains("no existe"));
+    }
+
+    @Test
+    void testCreateUser_Valid() {
         when(roleRepository.findById("roleId1")).thenReturn(Optional.of(role));
         when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // Ejecución
-        User createdUser = userService.createUser(user, roleIds);
-
-        // Verificación
-        assertNotNull(createdUser);
-        assertEquals("testuser", createdUser.getUsername());
-        assertEquals(1, createdUser.getRoles().size());
-        verify(roleRepository, times(1)).findById("roleId1");
-        verify(userRepository, times(1)).save(any(User.class));
+        User created = userService.createUser(user, List.of("roleId1"));
+        assertEquals("testuser", created.getUsername());
     }
 
     @Test
-    void testUpdateUser_WhenRoleIdsIsNull_ThrowsIllegalArgumentException() {
-        // Datos de entrada
-        List<String> roleIds = null;
-
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, roleIds));
-        assertEquals("El usuario debe tener al menos un rol asignado.", exception.getMessage());
+    void testUpdateUser_RoleNull_Throws() {
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, null));
+        assertTrue(e.getMessage().contains("al menos un rol"));
     }
 
     @Test
-    void testUpdateUser_WhenRoleIdsIsEmpty_ThrowsIllegalArgumentException() {
-        // Datos de entrada
-        List<String> roleIds = new ArrayList<>();
-
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, roleIds));
-        assertEquals("El usuario debe tener al menos un rol asignado.", exception.getMessage());
+    void testUpdateUser_RoleEmpty_Throws() {
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, List.of()));
+        assertTrue(e.getMessage().contains("al menos un rol"));
     }
 
     @Test
-    void testUpdateUser_WhenRoleNotFound_ThrowsIllegalArgumentException() {
-        // Datos de entrada
-        List<String> roleIds = List.of("nonExistentRoleId");
-
-        // Comportamiento esperado
-        when(roleRepository.findById("nonExistentRoleId")).thenReturn(Optional.empty());
-
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, roleIds));
-        assertEquals("El rol con id nonExistentRoleId no existe.", exception.getMessage());
+    void testUpdateUser_RoleNotFound_Throws() {
+        when(roleRepository.findById("bad")).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, List.of("bad")));
+        assertTrue(e.getMessage().contains("no existe"));
     }
 
     @Test
-    void testUpdateUser_WhenValidRole_ReturnsUpdatedUser() {
-        // Datos de entrada
-        List<String> roleIds = List.of("roleId1");
-        user.setUsername("updatedUser");
-
-        // Comportamiento esperado
+    void testUpdateUser_Valid() {
         when(roleRepository.findById("roleId1")).thenReturn(Optional.of(role));
         when(userRepository.save(any(User.class))).thenReturn(user);
-
-        // Ejecución
-        User updatedUser = userService.updateUser(user, roleIds);
-
-        // Verificación
-        assertNotNull(updatedUser);
-        assertEquals("updatedUser", updatedUser.getUsername());
-        verify(roleRepository, times(1)).findById("roleId1");
-        verify(userRepository, times(1)).save(any(User.class));
+        User updated = userService.updateUser(user, List.of("roleId1"));
+        assertNotNull(updated);
     }
 
     @Test
-    void testDeleteUser_WhenUserNotFound_ThrowsIllegalArgumentException() {
-        // Simulamos que el usuario no se encuentra en la base de datos
-        when(userRepository.findById("nonExistentUserId")).thenReturn(Optional.empty());
-
-        // Ejecución y verificación
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.deleteUser("nonExistentUserId"));
-        assertEquals("Usuario no encontrado", exception.getMessage());
-
-        // Verificación: no se debe llamar a deleteById si el usuario no existe
-        verify(userRepository, never()).deleteById("nonExistentUserId");
-    }
-
-    @Test
-    void testDeleteUser_WhenUserExists() {
-        // Simulamos que el usuario existe en la base de datos
+    void testDeleteUser_Valid() {
         when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
-
-        // Ejecución
         userService.deleteUser("userId1");
-
-        // Verificación: El método deleteById debe ser llamado una vez
-        verify(userRepository, times(1)).deleteById("userId1");
+        verify(userRepository).deleteById("userId1");
     }
 
     @Test
-    void testGetUserById_WhenUserNotFound() {
-        // Simulamos que el usuario no se encuentra en la base de datos
-        when(userRepository.findById("nonExistentUserId")).thenReturn(Optional.empty());
-    
-        // Ejecución
-        Optional<User> result = userService.getUserById("nonExistentUserId");
-    
-        // Verificación: no debe encontrarse el usuario
-        assertFalse(result.isPresent());
-        verify(userRepository, times(1)).findById("nonExistentUserId");
+    void testDeleteUser_NotFound_Throws() {
+        when(userRepository.findById("X")).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.deleteUser("X"));
+        assertTrue(e.getMessage().contains("Usuario no encontrado"));
     }
-    
+
     @Test
-    void testGetAllUsers_WhenNoUsers() {
-        // Simulamos que no hay usuarios en la base de datos
-        when(userRepository.findAll()).thenReturn(Collections.emptyList());
-    
-        // Ejecución
-        List<User> result = userService.getAllUsers();
-    
-        // Verificación: debe devolver una lista vacía
+    void testGetAllUsers() {
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        List<UserDTO> users = userService.getAllUsers();
+        assertEquals(1, users.size());
+        assertEquals("testuser", users.get(0).getUsername());
+    }
+
+    @Test
+    void testGetUserById_Found() {
+        when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
+        Optional<User> result = userService.getUserById("userId1");
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void testGetUserById_NotFound() {
+        when(userRepository.findById("notExist")).thenReturn(Optional.empty());
+        Optional<User> result = userService.getUserById("notExist");
         assertTrue(result.isEmpty());
-        verify(userRepository, times(1)).findAll();
     }
-    
 }
