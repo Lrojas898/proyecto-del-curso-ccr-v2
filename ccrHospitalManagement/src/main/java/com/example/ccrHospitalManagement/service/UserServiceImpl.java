@@ -14,6 +14,8 @@ import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.ccrHospitalManagement.dto.UserDTO;
+
 
 import java.util.HashSet;
 import java.util.List;
@@ -155,16 +157,6 @@ public class UserServiceImpl implements  UserService{
         currentRoles.addAll(rolesToAssign);
 
         userRepository.save(user);
-    }
-
-    // DTO y método de conversión
-    @Data
-    public static class UserDTO {
-        private String id;
-        private String username;
-        private String email;
-        private String firstName;
-        private String lastName;
     }
 
     private UserDTO convertToDTO(User user) {
