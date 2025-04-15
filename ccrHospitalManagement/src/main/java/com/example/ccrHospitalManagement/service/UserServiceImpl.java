@@ -57,7 +57,7 @@ public class UserServiceImpl implements  UserService{
         user.setAddress(dto.getAddress());
         user.setPhone(dto.getPhone());
         user.setSex(dto.getSex());
-        user.setDateOfBirth(java.sql.Date.valueOf(dto.getDateOfBirth()));
+        user.setDateOfBirth(dto.getDateOfBirth()); 
         user.setEps(eps);
         user.setPrepaidMedicine(prepaid);
 

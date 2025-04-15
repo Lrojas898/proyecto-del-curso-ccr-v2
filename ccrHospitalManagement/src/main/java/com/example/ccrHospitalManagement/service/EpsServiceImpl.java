@@ -1,20 +1,41 @@
 package com.example.ccrHospitalManagement.service;
 
 import com.example.ccrHospitalManagement.model.EPS;
-
 import com.example.ccrHospitalManagement.repository.EPSRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
-@RequiredArgsConstructor
-public class EpsServiceImpl {
-    private final EPSRepository epsRepository;
+public class EpsServiceImpl implements EpsService {
 
+    @Autowired
+    private EPSRepository epsRepository;
 
+    @Override
+    public EPS registerEPS(EPS eps) {
+        return epsRepository.save(eps);
+    }
 
-    public List<EPS> getAllEps() {
+    @Override
+    public List<EPS> getAllEPS() {
         return epsRepository.findAll();
+    }
+
+    @Override
+    public Optional<EPS> getEPSById(String id) {
+        return epsRepository.findById(id);
+    }
+
+    @Override
+    public EPS UpdateEPS(EPS eps) {
+        return epsRepository.save(eps);
+    }
+
+    @Override
+    public void removeEPSById(String id) {
+        epsRepository.deleteById(id);
     }
 }

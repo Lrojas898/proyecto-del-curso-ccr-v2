@@ -28,8 +28,8 @@ public class AuthController {
     @GetMapping("/register")
     public String register(Model model) {
         model.addAttribute("user", new UserRegistrationDto());
-        model.addAttribute("epsList", epsServiceImpl.getAllEps());
-        model.addAttribute("prepaidList", prepaidMedicineService.getAllPrepaids());
+        model.addAttribute("epsList", epsServiceImpl.getAllEPS());
+        model.addAttribute("prepaidList", prepaidMedicineService.getAllPrepaidMedicines());
         return "auth/register";
     }
 
@@ -37,8 +37,8 @@ public class AuthController {
     public String processRegister(@ModelAttribute("user") @Valid UserRegistrationDto dto,
                                   BindingResult result,
                                   Model model) {
-        model.addAttribute("epsList", epsServiceImpl.getAllEps());
-        model.addAttribute("prepaidList", prepaidMedicineService.getAllPrepaids());
+        model.addAttribute("epsList", epsServiceImpl.getAllEPS());
+        model.addAttribute("prepaidList", prepaidMedicineService.getAllPrepaidMedicines());
 
         if (result.hasErrors()) {
             return "auth/register";
