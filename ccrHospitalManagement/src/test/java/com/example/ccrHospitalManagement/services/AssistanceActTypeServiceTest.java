@@ -33,7 +33,7 @@ public class AssistanceActTypeServiceTest {
         type.setName("Consulta general");
     }
 
-    // ----------- CREATE -----------
+    // CREATE
 
     @Test
     void createAssistanceActType_Valid() {
@@ -85,7 +85,7 @@ public class AssistanceActTypeServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ----------- GET -----------
+    // GET
 
     @Test
     void getAllAssistanceActTypes_ReturnsList() {
@@ -121,7 +121,7 @@ public class AssistanceActTypeServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ----------- UPDATE -----------
+    // Update
 
     @Test
     void updateAssistanceActType_Valid() {
@@ -150,7 +150,7 @@ public class AssistanceActTypeServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ----------- DELETE -----------
+    // Delete
 
     @Test
     void deleteAssistanceActType_Valid() {

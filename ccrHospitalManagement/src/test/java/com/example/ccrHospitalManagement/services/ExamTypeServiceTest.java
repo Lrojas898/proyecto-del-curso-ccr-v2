@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +34,7 @@ public class ExamTypeServiceTest {
         type2 = new ExamType("T2", "Radiografía de tórax");
     }
 
-    // ---------- CREATE ----------
+    // Create
     @Test
     void createExamType_Valid() {
         when(examTypeRepository.existsById("T1")).thenReturn(false);
@@ -73,7 +74,15 @@ public class ExamTypeServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ---------- UPDATE ----------
+    @Test
+    void createExamType_BlankId_Throws() {
+        type1.setId("   "); 
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examTypeService.createExamType(type1));
+        assertTrue(e.getMessage().contains("ID del tipo de examen es obligatorio"));
+    }
+
+
+    // Update
     @Test
     void updateExamType_Valid() {
         when(examTypeRepository.existsById("T2")).thenReturn(true);
@@ -98,7 +107,7 @@ public class ExamTypeServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ---------- GET ----------
+    // Get
     @Test
     void getAllExamTypes_ReturnsList() {
         when(examTypeRepository.findAll()).thenReturn(List.of(type1, type2));
@@ -120,7 +129,7 @@ public class ExamTypeServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ---------- DELETE ----------
+    // Delete
     @Test
     void deleteExamType_Valid() {
         when(examTypeRepository.existsById("T1")).thenReturn(true);

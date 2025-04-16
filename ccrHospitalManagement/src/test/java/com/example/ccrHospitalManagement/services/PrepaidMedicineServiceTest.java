@@ -38,7 +38,7 @@ public class PrepaidMedicineServiceTest {
         allMedicines = List.of(medicine, medicine2, medicine3);
     }
 
-    // ---------- CREATE ----------
+    // Create
     @Test
     void registerPrepaidMedicine_Valid() {
         when(repository.existsById("PRE123")).thenReturn(false);
@@ -81,7 +81,16 @@ public class PrepaidMedicineServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ---------- UPDATE ----------
+    @Test
+    void registerPrepaidMedicine_BlankNIT_Throws() {
+        medicine.setNit("   "); 
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> service.registerPrepaidMedicine(medicine));
+        assertTrue(e.getMessage().contains("NIT es obligatorio"));
+    }
+
+
+    // Update
     @Test
     void updatePrepaidMedicine_Valid() {
         when(repository.existsById("PRE123")).thenReturn(true);
@@ -106,7 +115,7 @@ public class PrepaidMedicineServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ---------- GET ----------
+    // Get
     @Test
     void getAllPrepaidMedicines_ReturnsList() {
         when(repository.findAll()).thenReturn(allMedicines);
@@ -132,7 +141,7 @@ public class PrepaidMedicineServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ---------- DELETE ----------
+    // Delete
     @Test
     void deletePrepaidMedicine_Valid() {
         when(repository.existsById("PRE123")).thenReturn(true);

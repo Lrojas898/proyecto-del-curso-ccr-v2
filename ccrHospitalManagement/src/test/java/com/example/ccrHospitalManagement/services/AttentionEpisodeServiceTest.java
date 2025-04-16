@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +49,7 @@ public class AttentionEpisodeServiceTest {
         episode.setAppointment(appointment);
     }
 
-    // --------------------- CREATE ---------------------
+    //CREATE
 
     @Test
     void createAttentionEpisode_Valid() {
@@ -121,7 +122,33 @@ public class AttentionEpisodeServiceTest {
         assertTrue(e.getMessage().contains("fecha de creación"));
     }
 
-    // --------------------- UPDATE ---------------------
+    @Test
+    void createAttentionEpisode_NullDiagnosis_Throws() {
+        episode.setDiagnosis(null);
+        when(repository.existsById("EP1")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
+        assertTrue(e.getMessage().contains("diagnóstico"));
+    }
+
+    @Test
+    void createAttentionEpisode_NullDescription_Throws() {
+        episode.setDescription(null);
+        when(repository.existsById("EP1")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
+        assertTrue(e.getMessage().contains("descripción"));
+    }
+
+    @Test
+    void createAttentionEpisode_BlankId_Throws() {
+        episode.setId("   ");  
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
+        assertTrue(e.getMessage().contains("ID del episodio"));
+    }
+
+
+
+
+    //UPDATE
 
     @Test
     void updateAttentionEpisode_Valid() {
@@ -139,7 +166,7 @@ public class AttentionEpisodeServiceTest {
         assertTrue(e.getMessage().contains("no existe"));
     }
 
-    // --------------------- GET ---------------------
+    // GET
 
     @Test
     void getAllAttentionEpisodes_ReturnsList() {
@@ -163,7 +190,7 @@ public class AttentionEpisodeServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // --------------------- DELETE ---------------------
+    // Delete
 
     @Test
     void removeAttentionEpisodeById_Valid() {

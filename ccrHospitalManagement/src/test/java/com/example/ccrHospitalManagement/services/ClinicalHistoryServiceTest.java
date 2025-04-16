@@ -45,7 +45,7 @@ class ClinicalHistoryServiceTest {
         history.setUser(user);
     }
 
-    // -------------------- CREATE --------------------
+    //Create
 
     @Test
     void createClinicalHistory_Valid() {
@@ -62,11 +62,9 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_DuplicateId_Throws() {
         when(clinicalHistoryRepository.existsById("H1")).thenReturn(true);
-
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().toLowerCase().contains("ya existe"));
     }
-
 
     @Test
     void createClinicalHistory_NullId_Throws() {
@@ -74,6 +72,14 @@ class ClinicalHistoryServiceTest {
         when(clinicalHistoryRepository.existsById(null)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("ID"));
+    }
+
+    @Test
+    void createClinicalHistory_BlankId_Throws() {
+        history.setId("   ");
+        when(clinicalHistoryRepository.existsById("   ")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
+        assertTrue(e.getMessage().contains("ID de la historia clínica"));
     }
 
     @Test
@@ -109,8 +115,33 @@ class ClinicalHistoryServiceTest {
     }
 
     @Test
+    void createClinicalHistory_NullObservation_Throws() {
+        history.setGeneralObservations(null);
+        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
+        assertTrue(e.getMessage().contains("observaciones"));
+    }
+
+    @Test
+    void createClinicalHistory_OnlySpacesObservation_Throws() {
+        history.setGeneralObservations("        ");
+        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
+        assertTrue(e.getMessage().contains("observaciones"));
+    }
+
+    @Test
     void createClinicalHistory_NullUser_Throws() {
         history.setUser(null);
+        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
+        assertTrue(e.getMessage().contains("usuario"));
+    }
+
+    @Test
+    void createClinicalHistory_UserWithNullId_Throws() {
+        user.setId(null);
+        history.setUser(user);
         when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("usuario"));
@@ -133,7 +164,7 @@ class ClinicalHistoryServiceTest {
         assertTrue(e.getMessage().contains("ya tiene una historia clínica"));
     }
 
-    // -------------------- UPDATE --------------------
+    //Update
 
     @Test
     void updateClinicalHistory_Valid() {
@@ -151,7 +182,7 @@ class ClinicalHistoryServiceTest {
         assertTrue(e.getMessage().contains("no existe"));
     }
 
-    // -------------------- DELETE --------------------
+    //Remove
 
     @Test
     void removeClinicalHistoryById_Valid() {
@@ -165,12 +196,11 @@ class ClinicalHistoryServiceTest {
         when(clinicalHistoryRepository.existsById("H2")).thenReturn(false);
 
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.removeClinicalHistoryById("H2"));
-        assertTrue(e.getMessage().toLowerCase().contains("no se puede eliminar"));
+        assertEquals("No se puede eliminar una historia clínica que no existe.", e.getMessage());
     }
 
 
-    // -------------------- QUERY --------------------
-
+    //Get
     @Test
     void getClinicalHistoryById_Found() {
         when(clinicalHistoryRepository.findById("H1")).thenReturn(Optional.of(history));

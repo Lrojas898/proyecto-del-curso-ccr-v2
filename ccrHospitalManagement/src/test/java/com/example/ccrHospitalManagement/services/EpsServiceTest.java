@@ -38,7 +38,7 @@ public class EpsServiceTest {
         allEPS = List.of(eps, eps2, eps3, eps4, eps5);
     }
 
-    // ---------- CREATE ----------
+    // CREATE
     @Test
     void registerEPS_Valid() {
         when(epsRepository.existsById("EPS123")).thenReturn(false);
@@ -80,7 +80,15 @@ public class EpsServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ---------- UPDATE ----------
+    @Test
+    void registerEPS_BlankNIT_Throws() {
+        eps.setNit("   "); 
+        Exception e = assertThrows(IllegalArgumentException.class, () -> epsService.registerEPS(eps));
+        assertTrue(e.getMessage().contains("NIT de la EPS es obligatorio"));
+    }
+
+
+    // Update
     @Test
     void updateEPS_Valid() {
         when(epsRepository.existsById("EPS123")).thenReturn(true);
@@ -104,7 +112,7 @@ public class EpsServiceTest {
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
 
-    // ---------- GET ----------
+    // Get
     @Test
     void getAllEPS_ReturnsList() {
         when(epsRepository.findAll()).thenReturn(allEPS);
@@ -133,7 +141,7 @@ public class EpsServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ---------- DELETE ----------
+    // Delete
     @Test
     void deleteEPS_Valid() {
         when(epsRepository.existsById("EPS123")).thenReturn(true);

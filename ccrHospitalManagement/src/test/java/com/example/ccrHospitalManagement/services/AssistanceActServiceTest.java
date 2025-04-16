@@ -52,13 +52,13 @@ class AssistanceActServiceTest {
 
         act = new AssistanceAct();
         act.setId("A1");
-        act.setIssueDate(Date.valueOf(LocalDate.now()));  // fecha válida
+        act.setIssueDate(Date.valueOf(LocalDate.now())); 
         act.setDescription("Descripción válida de acto asistencial");
         act.setType(type);
         act.setAttentionEpisode(episode);
     }
 
-    // -------------------- CREATE --------------------
+    // CREATE
 
     @Test
     void createAssistanceAct_Valid() {
@@ -124,7 +124,34 @@ class AssistanceActServiceTest {
         assertTrue(e.getMessage().contains("fecha de emisión"));
     }
 
-    // -------------------- UPDATE --------------------
+    @Test
+    void createAssistanceAct_NullIdDirect_Throws() {
+        act.setId(null); // el ID es null
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> assistanceActService.createAssistanceAct(act));
+        assertTrue(e.getMessage().contains("ID del acto asistencial es obligatorio"));
+    }
+
+    @Test
+    void createAssistanceAct_NullDescription_Throws() {
+        act.setDescription(null);
+        when(assistanceActRepository.existsById("A1")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
+        assertTrue(e.getMessage().contains("descripción"));
+    }
+
+    @Test
+    void createAssistanceAct_BlankId_Throws() {
+        act.setId("   "); 
+
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> assistanceActService.createAssistanceAct(act));
+        assertTrue(e.getMessage().toLowerCase().contains("id"));
+    }
+
+
+    // Update
 
     @Test
     void updateAssistanceAct_Valid() {
@@ -142,7 +169,7 @@ class AssistanceActServiceTest {
         assertTrue(e.getMessage().contains("no existe"));
     }
 
-    // -------------------- DELETE --------------------
+    // Delete
 
     @Test
     void removeAssistanceActById_Valid() {
@@ -154,13 +181,12 @@ class AssistanceActServiceTest {
     @Test
     void removeAssistanceActById_NotFound_Throws() {
         when(assistanceActRepository.existsById("NotFound")).thenReturn(false);
-        Exception e = assertThrows(IllegalArgumentException.class, () ->
-                assistanceActService.removeAssistanceActById("NotFound"));
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> assistanceActService.removeAssistanceActById("NotFound"));
         assertTrue(e.getMessage().contains("No se puede eliminar un acto asistencial"));
     }
 
-
-    // -------------------- GET --------------------
+    // Get
 
     @Test
     void getAssistanceActById_Found() {

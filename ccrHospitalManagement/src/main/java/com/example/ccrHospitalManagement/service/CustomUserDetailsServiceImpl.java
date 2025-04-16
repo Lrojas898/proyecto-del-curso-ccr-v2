@@ -1,5 +1,6 @@
-package com.example.ccrHospitalManagement.security;
+package com.example.ccrHospitalManagement.service;
 
+import com.example.ccrHospitalManagement.model.CustomUserDetails;
 import com.example.ccrHospitalManagement.model.User;
 import com.example.ccrHospitalManagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

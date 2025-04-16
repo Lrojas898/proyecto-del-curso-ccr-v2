@@ -35,7 +35,7 @@ public class LocationServiceTest {
         location.setDescription("Ubicación para consulta externa");
     }
 
-    // ----------- CREATE -----------
+    // Create
 
     @Test
     void registerLocation_Valid() {
@@ -84,7 +84,44 @@ public class LocationServiceTest {
         assertTrue(e.getMessage().contains("descripción, no puede estar vacía"));
     }
 
-    // ----------- UPDATE -----------
+    @Test
+    void registerLocation_BlankId_Throws() {
+        location.setId("   ");
+        when(locationRepository.existsById("   ")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> locationService.registerLocation(location));
+        assertTrue(e.getMessage().contains("ID de la ubicación"));
+    }
+
+    @Test
+    void registerLocation_NullName_Throws() {
+        location.setName(null);
+        when(locationRepository.existsById("LOC123")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> locationService.registerLocation(location));
+        assertTrue(e.getMessage().contains("nombre"));
+    }
+
+    @Test
+    void registerLocation_NullAddress_Throws() {
+        location.setAddress(null);
+        when(locationRepository.existsById("LOC123")).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> locationService.registerLocation(location));
+        assertTrue(e.getMessage().contains("dirección"));
+    }
+
+    @Test
+    void registerLocation_DescriptionIsNull_DoesNotThrow() {
+        location.setDescription(null);  
+        when(locationRepository.existsById("LOC123")).thenReturn(false);
+        when(locationRepository.save(location)).thenReturn(location);
+        Location result = locationService.registerLocation(location);
+        assertNotNull(result);
+    }
+
+
+    // Update
 
     @Test
     void updateLocation_Valid() {
@@ -109,7 +146,7 @@ public class LocationServiceTest {
         assertTrue(e.getMessage().contains("al menos 5 caracteres"));
     }
 
-    // ----------- GET -----------
+    // Get
 
     @Test
     void getAllLocations_ReturnsList() {
@@ -132,7 +169,7 @@ public class LocationServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ----------- DELETE -----------
+    // Delete
 
     @Test
     void deleteLocation_Valid() {

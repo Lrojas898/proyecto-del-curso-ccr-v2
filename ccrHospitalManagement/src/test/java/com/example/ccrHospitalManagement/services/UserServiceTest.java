@@ -48,7 +48,7 @@ class UserServiceTest {
         user.setRoles(new HashSet<>(Collections.singletonList(role)));
     }
 
-    // ----- SAVE USER -----
+    // Save user
     @Test
     void testSaveUser_Valid() {
         UserRegistrationDto dto = new UserRegistrationDto();
@@ -101,6 +101,7 @@ class UserServiceTest {
         dto.setId("U001");
         dto.setUsername("jdoe");
         dto.setEpsNit("EPS1");
+        dto.setPrepaidMedicineNit("PREP1");
         when(userRepository.existsById("U001")).thenReturn(false);
         when(userRepository.existsByUsername("jdoe")).thenReturn(false);
         when(epsRepository.findById("EPS1")).thenReturn(Optional.empty());
@@ -108,7 +109,22 @@ class UserServiceTest {
         assertTrue(e.getMessage().contains("EPS no encontrada"));
     }
 
-    // ----- CREATE USER -----
+    @Test
+    void testSaveUser_PrepaidNotFound_Throws() {
+        UserRegistrationDto dto = new UserRegistrationDto();
+        dto.setId("U001");
+        dto.setUsername("jdoe");
+        dto.setEpsNit("EPS1");
+        dto.setPrepaidMedicineNit("PREP1");
+        when(userRepository.existsById("U001")).thenReturn(false);
+        when(userRepository.existsByUsername("jdoe")).thenReturn(false);
+        when(epsRepository.findById("EPS1")).thenReturn(Optional.of(new EPS("EPS1", "EPS name")));
+        when(prepaidRepository.findById("PREP1")).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.saveUser(dto));
+        assertTrue(e.getMessage().contains("Medicina prepagada no encontrada"));
+    }
+
+    // Create user
     @Test
     void testCreateUser_RoleNull_Throws() {
         Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, null));
@@ -136,7 +152,7 @@ class UserServiceTest {
         assertEquals("testuser", created.getUsername());
     }
 
-    // ----- UPDATE USER -----
+    // Update
     @Test
     void testUpdateUser_RoleNull_Throws() {
         Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, null));
@@ -164,7 +180,7 @@ class UserServiceTest {
         assertNotNull(updated);
     }
 
-    // ----- DELETE USER -----
+    // Delete
     @Test
     void testDeleteUser_Valid() {
         when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
@@ -179,7 +195,7 @@ class UserServiceTest {
         assertTrue(e.getMessage().contains("Usuario no encontrado"));
     }
 
-    // ----- GET USER -----
+    // get
     @Test
     void testGetAllUsers() {
         when(userRepository.findAll()).thenReturn(List.of(user));
@@ -202,7 +218,29 @@ class UserServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ----- getUserWithRoles -----
+    // get users with roles
+    @Test
+    void testGetAllUsersWithRoles() {
+        User user1 = new User();
+        user1.setId("U1");
+        user1.setUsername("user1");
+
+        User user2 = new User();
+        user2.setId("U2");
+        user2.setUsername("user2");
+
+        Role r1 = new Role("R1", "ADMIN");
+        Role r2 = new Role("R2", "PATIENT");
+
+        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+        when(roleRepository.findAll()).thenReturn(List.of(r1, r2));
+        when(userRepository.findRoleIdsByUserId("U1")).thenReturn(Set.of("R1"));
+        when(userRepository.findRoleIdsByUserId("U2")).thenReturn(Set.of("R2"));
+
+        List<UserRoleDTO> result = userService.getAllUsersWithRoles();
+        assertEquals(2, result.size());
+    }
+
     @Test
     void testGetUserWithRoles_Found() {
         Role role = new Role("R1", "ADMIN");
@@ -213,7 +251,6 @@ class UserServiceTest {
         when(userRepository.findRoleIdsByUserId("userId1")).thenReturn(roleIds);
 
         UserRoleDTO result = userService.getUserWithRoles("userId1");
-
         assertEquals("userId1", result.getUserId());
         assertTrue(result.getAssignedRoleIds().contains("R1"));
     }
@@ -228,10 +265,8 @@ class UserServiceTest {
     @Test
     void testUpdateUserRoles_Valid() {
         Role role = new Role("R1", "ADMIN");
-
         when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
         when(roleRepository.findAllById(Set.of("R1"))).thenReturn(List.of(role));
-
         assertDoesNotThrow(() -> userService.updateUserRoles("userId1", Set.of("R1")));
         verify(userRepository).save(any(User.class));
     }
@@ -239,7 +274,6 @@ class UserServiceTest {
     @Test
     void testUpdateUserRoles_UserNotFound_Throws() {
         when(userRepository.findById("X")).thenReturn(Optional.empty());
-
         Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUserRoles("X", Set.of("R1")));
         assertTrue(e.getMessage().contains("Usuario no encontrado"));
     }

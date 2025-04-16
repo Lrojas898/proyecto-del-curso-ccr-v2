@@ -47,7 +47,7 @@ public class ExamResultServiceTest {
         result.setTechnician(technician);
     }
 
-    // ---------- CREATE ----------
+    // CREATE
     @Test
     void createExamResult_Valid() {
         when(examResultRepository.existsById("R001")).thenReturn(false);
@@ -120,7 +120,52 @@ public class ExamResultServiceTest {
         assertTrue(e.getMessage().contains("no pueden ser la misma"));
     }
 
-    // ---------- UPDATE ----------
+    @Test
+    void createExamResult_BlankId_Throws() {
+        result.setId("   "); 
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.createExamResult(result));
+        assertTrue(e.getMessage().contains("ID del resultado"));
+    }
+
+    @Test
+    void createExamResult_OnlySpacesDescription_Throws() {
+        result.setDescription("     "); 
+        when(examResultRepository.existsById("R001")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.createExamResult(result));
+        assertTrue(e.getMessage().contains("descripción"));
+    }
+
+    @Test
+    void createExamResult_EmptyDescription_Throws() {
+        result.setDescription(""); 
+        when(examResultRepository.existsById("R001")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.createExamResult(result));
+        assertTrue(e.getMessage().contains("descripción"));
+    }
+
+    @Test
+    void createExamResult_NullResultDate_Throws() {
+        result.setResultDate(null);
+        when(examResultRepository.existsById("R001")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.createExamResult(result));
+        assertTrue(e.getMessage().contains("fecha del resultado"));
+    }
+
+    @Test
+    void createExamResult_NullDescription_Throws() {
+        result.setDescription(null);
+        when(examResultRepository.existsById("R001")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.createExamResult(result));
+        assertTrue(e.getMessage().contains("descripción"));
+    }
+
+
+    // Update
     @Test
     void updateExamResult_Valid() {
         when(examResultRepository.existsById("R001")).thenReturn(true);
@@ -136,7 +181,7 @@ public class ExamResultServiceTest {
         assertTrue(e.getMessage().contains("no existe"));
     }
 
-    // ---------- GET ----------
+    // Get
     @Test
     void getAllExamResults_ReturnsList() {
         when(examResultRepository.findAll()).thenReturn(List.of(result));
@@ -158,7 +203,7 @@ public class ExamResultServiceTest {
         assertTrue(res.isEmpty());
     }
 
-    // ---------- DELETE ----------
+    // Delete
     @Test
     void deleteExamResult_Valid() {
         when(examResultRepository.existsById("R001")).thenReturn(true);
