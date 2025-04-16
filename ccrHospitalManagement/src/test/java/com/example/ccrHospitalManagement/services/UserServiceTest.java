@@ -1,9 +1,12 @@
 package com.example.ccrHospitalManagement.services;
 
+import com.example.ccrHospitalManagement.dto.RoleDTO;
 import com.example.ccrHospitalManagement.dto.UserDTO;
 import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
+import com.example.ccrHospitalManagement.dto.UserRoleDTO;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.*;
+import com.example.ccrHospitalManagement.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.*;
-import com.example.ccrHospitalManagement.service.UserServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,7 +36,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        role = new Role("roleId1", "Patient"); // Constructor válido según tu clase
+        role = new Role("roleId1", "Patient");
 
         user = new User();
         user.setId("userId1");
@@ -46,7 +48,7 @@ class UserServiceTest {
         user.setRoles(new HashSet<>(Collections.singletonList(role)));
     }
 
-
+    // ----- SAVE USER -----
     @Test
     void testSaveUser_Valid() {
         UserRegistrationDto dto = new UserRegistrationDto();
@@ -106,6 +108,7 @@ class UserServiceTest {
         assertTrue(e.getMessage().contains("EPS no encontrada"));
     }
 
+    // ----- CREATE USER -----
     @Test
     void testCreateUser_RoleNull_Throws() {
         Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, null));
@@ -133,6 +136,7 @@ class UserServiceTest {
         assertEquals("testuser", created.getUsername());
     }
 
+    // ----- UPDATE USER -----
     @Test
     void testUpdateUser_RoleNull_Throws() {
         Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, null));
@@ -160,6 +164,7 @@ class UserServiceTest {
         assertNotNull(updated);
     }
 
+    // ----- DELETE USER -----
     @Test
     void testDeleteUser_Valid() {
         when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
@@ -174,6 +179,7 @@ class UserServiceTest {
         assertTrue(e.getMessage().contains("Usuario no encontrado"));
     }
 
+    // ----- GET USER -----
     @Test
     void testGetAllUsers() {
         when(userRepository.findAll()).thenReturn(List.of(user));
@@ -194,5 +200,47 @@ class UserServiceTest {
         when(userRepository.findById("notExist")).thenReturn(Optional.empty());
         Optional<User> result = userService.getUserById("notExist");
         assertTrue(result.isEmpty());
+    }
+
+    // ----- getUserWithRoles -----
+    @Test
+    void testGetUserWithRoles_Found() {
+        Role role = new Role("R1", "ADMIN");
+        Set<String> roleIds = Set.of("R1");
+
+        when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
+        when(roleRepository.findAll()).thenReturn(List.of(role));
+        when(userRepository.findRoleIdsByUserId("userId1")).thenReturn(roleIds);
+
+        UserRoleDTO result = userService.getUserWithRoles("userId1");
+
+        assertEquals("userId1", result.getUserId());
+        assertTrue(result.getAssignedRoleIds().contains("R1"));
+    }
+
+    @Test
+    void testGetUserWithRoles_NotFound_Throws() {
+        when(userRepository.findById("X")).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.getUserWithRoles("X"));
+        assertTrue(e.getMessage().contains("Usuario no encontrado"));
+    }
+
+    @Test
+    void testUpdateUserRoles_Valid() {
+        Role role = new Role("R1", "ADMIN");
+
+        when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
+        when(roleRepository.findAllById(Set.of("R1"))).thenReturn(List.of(role));
+
+        assertDoesNotThrow(() -> userService.updateUserRoles("userId1", Set.of("R1")));
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateUserRoles_UserNotFound_Throws() {
+        when(userRepository.findById("X")).thenReturn(Optional.empty());
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUserRoles("X", Set.of("R1")));
+        assertTrue(e.getMessage().contains("Usuario no encontrado"));
     }
 }
