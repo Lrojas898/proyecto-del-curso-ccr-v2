@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>Bienvenido - CCR Hospital Management</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<header>
+    <h1>Bienvenido al Sistema de Gestión Hospitalaria</h1>
+    <div th:if="${name}">
+        <p>Hola, <span th:text="${name}"></span>!</p>
+        <a th:href="@{/logout}">Cerrar sesión</a>
+    </div>
+</header>
+<main>
+    <p>Esta es la página de inicio. Aquí puedes añadir enlaces a las funcionalidades principales.</p>
+    <ul>
+        <li><a th:href="@{/appointments}">Ver citas</a></li>
+        <li><a th:href="@{/exam-results}">Ver resultados de exámenes</a></li>
+        <!-- enlaces según los roles -->
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/users}">Panel de administración de usuarios</a>
+        </li>
+
+    </ul>
+</main>
+</body>
+</html>

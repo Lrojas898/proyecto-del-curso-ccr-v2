@@ -55,7 +55,7 @@ public class User {
     @JoinColumn(name = "PREPAID_MEDICINE_nit", nullable = false)
     private PrepaidMedicine prepaidMedicine;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "MYUSER_ROLE",
             joinColumns = @JoinColumn(name = "MYUSER_id"),

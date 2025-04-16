@@ -12,8 +12,9 @@ INSERT INTO prepaid_medicine (nit, name) VALUES
 
 -- Insertar Roles
 INSERT INTO role (id, name) VALUES
-                                ('role_patient', 'Paciente'),
-                                ('role_doctor', 'Médico');
+                                ('role_patient', 'PATIENT'),
+                                ('role_doctor', 'DOCTOR'),
+                                ('role_admin', 'ADMIN');
 
 -- Insertar Permisos
 INSERT INTO permission (id, name, description) VALUES
@@ -38,7 +39,8 @@ INSERT INTO myuser (id, username, password, email, first_name, last_name, addres
                                                                                                                                                  ('user3', 'jgreen', 'password123', 'jgreen@example.com', 'James', 'Green', '789 Oak St', '555-9876', 'M', '1990-03-12', 'eps125', 'prepaid125'),
                                                                                                                                                  ('user4', 'mdavis', 'password123', 'mdavis@example.com', 'Michael', 'Davis', '321 Pine St', '555-2222', 'M', '1975-01-20', 'eps123', 'prepaid123'),
                                                                                                                                                  ('user5', 'lmiller', 'password123', 'lmiller@example.com', 'Laura', 'Miller', '654 Cedar St', '555-3333', 'F', '1982-07-18', 'eps124', 'prepaid124'),
-                                                                                                                                                 ('user6', 'rjohnson', 'password123', 'rjohnson@example.com', 'Robert', 'Johnson', '987 Birch St', '555-4444', 'M', '1970-11-05', 'eps125', 'prepaid125');
+                                                                                                                                                 ('user6', 'rjohnson', 'password123', 'rjohnson@example.com', 'Robert', 'Johnson', '987 Birch St', '555-4444', 'M', '1970-11-05', 'eps125', 'prepaid125'),
+                                                                                                                                                 ('user7', 'lrojas', 'hola1234', 'lrojas@gmail.com', 'luis', 'rojas', 'jamuncho', '3102987635', 'M', '1984-12-01', 'eps123', 'prepaid125');
 
 -- Insertar roles para usuarios
 INSERT INTO user_role (myuser_id, role_id) VALUES
@@ -47,7 +49,8 @@ INSERT INTO user_role (myuser_id, role_id) VALUES
                                              ('user3', 'role_patient'),  -- James Green es paciente
                                              ('user4', 'role_doctor'),   -- Michael Davis es médico
                                              ('user5', 'role_doctor'),   -- Laura Miller es médico
-                                             ('user6', 'role_doctor');   -- Robert Johnson es médico
+                                             ('user6', 'role_doctor'),   -- Robert Johnson es médico
+                                             ('user7', 'role_admin');  -- lucho es admin
 
 -- Insertar tipos de asistencia
 INSERT INTO assistance_act_type (id, name) VALUES
@@ -87,9 +90,10 @@ INSERT INTO assistance_act (id, issue_date, description, attention_episode_id, a
                                                                                                            ('assistance_act1', '2025-03-20', 'Examen de rutina', 'attention_episode1', 'exam1'),
                                                                                                            ('assistance_act2', '2025-03-21', 'Consulta médica', 'attention_episode2', 'exam2');
 
--- Insertar citas (appointments) con las fechas en formato YYYY-MM-DD
-INSERT INTO appointment (id, date, start_time, description, patient_id, professional_id, location_id) VALUES
-                                                                                                          ('appointment1', '2025-03-20', '2025-03-20', 'Consulta médica general', 'user1', 'user4', 'location1'),
-                                                                                                          ('appointment2', '2025-03-21', '2025-03-21', 'Examen de rutina', 'user2', 'user5', 'location2'),
-                                                                                                          ('appointment3', '2025-03-22', '2025-03-22', 'Consulta médica especializada', 'user3', 'user6', 'location1');
 
+
+-- Insertar citas (appointments)
+INSERT INTO appointment (id, date, start_time, description, location_id, user_id_patient, user_id_doctor) VALUES
+                                                                                                              ('appointment1', '2025-03-20', '14:30:00', 'Consulta médica general', 'location1', 'user1', 'user4'),
+                                                                                                              ('appointment2', '2025-03-21', '09:00:00', 'Examen de rutina', 'location2', 'user2', 'user5'),
+                                                                                                              ('appointment3', '2025-03-22', '16:00:00', 'Consulta médica especializada', 'location1', 'user3', 'user6');

@@ -26,7 +26,7 @@ public class ClinicalHistory {
     private String generalObservations;
 
     @OneToOne
-    @JoinColumn(name = "USER_id", nullable = false, unique = true)
+    @JoinColumn(name = "myuser_id", nullable = false, unique = true)
     private User user;
 }
 
