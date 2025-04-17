@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Error - CCR Hospital Management</title>
-    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <style>
         body {
             background-color: var(--soft-beige);
@@ -49,7 +49,7 @@
 <div class="error-container">
     <h1 th:text=\"${status}\">404</h1>
     <p>Lo sentimos, la página que buscas no existe o ha ocurrido un error inesperado.</p>
-    <a class="btn-home" th:href=\"@{/}\">Volver al inicio</a>
+    <a class="btn-home" th:href="@{/}">Volver al inicio</a>
 </div>
 </body>
 </html>

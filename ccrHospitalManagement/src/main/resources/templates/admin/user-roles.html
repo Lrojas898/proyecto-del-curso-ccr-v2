@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Gestionar Roles de <span th:text="${userRoleDTO.username}"></span></title>
-    <link rel="stylesheet" href="/css/roles.css" />
+    <link rel="stylesheet" th:href="@{/css/roles.css}" />
 </head>
 <body>
 <div class="container">
@@ -43,13 +43,13 @@
         const errorAlert = document.getElementById('error-alert');
 
         if (checkboxes.length === 0) {
-            event.preventDefault(); // Evitar enviar el formulario
-            errorAlert.style.display = 'block'; // Mostrar la alerta
+            event.preventDefault();
+            errorAlert.style.display = 'block';
             setTimeout(() => {
-                errorAlert.style.display = 'none'; // Ocultar después de 3 segundos
+                errorAlert.style.display = 'none';
             }, 3000);
         } else {
-            errorAlert.style.display = 'none'; // Asegurar que la alerta esté oculta
+            errorAlert.style.display = 'none';
         }
     });
 </script>
