@@ -16,7 +16,7 @@ import java.util.Set;
 public class User {
 
     @Id
-    @Column(length = 30, nullable = false)
+    @Column(length = 500, nullable = false)
     private String id;
 
     @Column(length = 100, nullable = false)
