@@ -20,6 +20,10 @@ public class AuthController {
     private final EpsServiceImpl epsServiceImpl;
     private final PrepaidMedicineServiceImpl prepaidMedicineService;
 
+    @GetMapping("/")
+    public String redirectLogin() {
+        return "auth/login";
+    }
     @GetMapping("/login")
     public String login() {
         return "auth/login";
