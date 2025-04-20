@@ -21,7 +21,5 @@ public class Location {
     @Column(length = 50, nullable = false)
     private String address;
 
-    @Lob
-    @Column(columnDefinition = "text")
     private String description;
 }

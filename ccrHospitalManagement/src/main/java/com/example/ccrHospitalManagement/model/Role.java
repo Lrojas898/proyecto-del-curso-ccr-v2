@@ -11,8 +11,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 public class Role {
 
     @Id
@@ -21,15 +19,4 @@ public class Role {
 
     @Column(length = 50, nullable = false)
     private String name;
-
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(name = "ROLE_PERMISSION",
-            joinColumns = @JoinColumn(name = "ROLE_id"),
-            inverseJoinColumns = @JoinColumn(name = "PERMISSION_id"))
-    private Set<Permission> permissions = new HashSet<>();
-
-
 }

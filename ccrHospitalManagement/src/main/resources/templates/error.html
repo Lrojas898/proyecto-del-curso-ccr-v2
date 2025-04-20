@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error - CCR Hospital Management</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <style>
+        body {
+            background-color: var(--soft-beige);
+            text-align: center;
+            padding: 3rem;
+            color: var(--primary-dark-blue);
+        }
+
+        .error-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        }
+
+        .error-container h1 {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-green);
+        }
+
+        .error-container p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-home {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+        }
+
+        .btn-home:hover {
+            background-color: var(--primary-dark-blue);
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1 th:text=\"${status}\">404</h1>
+    <p>Lo sentimos, la página que buscas no existe o ha ocurrido un error inesperado.</p>
+    <a class="btn-home" th:href="@{/}">Volver al inicio</a>
+</div>
+</body>
+</html>

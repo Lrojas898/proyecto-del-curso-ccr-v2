@@ -1,0 +1,176 @@
+package com.example.ccrHospitalManagement.services;
+
+import com.example.ccrHospitalManagement.model.AssistanceActType;
+import com.example.ccrHospitalManagement.repository.AssistanceActTypeRepository;
+import com.example.ccrHospitalManagement.service.AssistanceActTypeServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class AssistanceActTypeServiceTest {
+
+    @Mock
+    private AssistanceActTypeRepository repository;
+
+    @InjectMocks
+    private AssistanceActTypeServiceImpl service;
+
+    private AssistanceActType type;
+
+    @BeforeEach
+    void setUp() {
+        type = new AssistanceActType();
+        type.setId("TYPE1");
+        type.setName("Consulta general");
+    }
+
+    // CREATE
+
+    @Test
+    void createAssistanceActType_Valid() {
+        when(repository.existsById("TYPE1")).thenReturn(false);
+        when(repository.save(type)).thenReturn(type);
+
+        AssistanceActType result = service.createAssistanceActType(type);
+        assertNotNull(result);
+        verify(repository).save(type);
+    }
+
+    @Test
+    void createAssistanceActType_ExistingId_Throws() {
+        when(repository.existsById("TYPE1")).thenReturn(true);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAssistanceActType(type));
+        assertTrue(e.getMessage().contains("Ya existe un tipo"));
+    }
+
+    @Test
+    void createAssistanceActType_NullId_Throws() {
+        type.setId(null);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAssistanceActType(type));
+        assertTrue(e.getMessage().contains("ID del tipo"));
+    }
+
+    @Test
+    void createAssistanceActType_EmptyId_Throws() {
+        type.setId(" ");
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAssistanceActType(type));
+        assertTrue(e.getMessage().contains("ID del tipo"));
+    }
+
+    @Test
+    void createAssistanceActType_ShortName_Throws() {
+        type.setName("AB");
+        when(repository.existsById("TYPE1")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAssistanceActType(type));
+        assertTrue(e.getMessage().contains("al menos 3 caracteres"));
+    }
+
+    @Test
+    void createAssistanceActType_NullName_Throws() {
+        type.setName(null);
+        when(repository.existsById("TYPE1")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAssistanceActType(type));
+        assertTrue(e.getMessage().contains("al menos 3 caracteres"));
+    }
+
+    // GET
+
+    @Test
+    void getAllAssistanceActTypes_ReturnsList() {
+        when(repository.findAll()).thenReturn(List.of(type));
+
+        List<AssistanceActType> result = service.getAllAssistanceActTypes();
+        assertEquals(1, result.size());
+        assertEquals("TYPE1", result.get(0).getId());
+    }
+
+    @Test
+    void getAllAssistanceActTypes_EmptyList() {
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<AssistanceActType> result = service.getAllAssistanceActTypes();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getAssistanceActTypeById_Found() {
+        when(repository.findById("TYPE1")).thenReturn(Optional.of(type));
+
+        Optional<AssistanceActType> result = service.getAssistanceActTypeById("TYPE1");
+        assertTrue(result.isPresent());
+        assertEquals("TYPE1", result.get().getId());
+    }
+
+    @Test
+    void getAssistanceActTypeById_NotFound() {
+        when(repository.findById("X")).thenReturn(Optional.empty());
+
+        Optional<AssistanceActType> result = service.getAssistanceActTypeById("X");
+        assertTrue(result.isEmpty());
+    }
+
+    // Update
+
+    @Test
+    void updateAssistanceActType_Valid() {
+        when(repository.existsById("TYPE1")).thenReturn(true);
+        when(repository.save(type)).thenReturn(type);
+
+        AssistanceActType result = service.UpdateAssistanceActType(type);
+        assertEquals("TYPE1", result.getId());
+        verify(repository).save(type);
+    }
+
+    @Test
+    void updateAssistanceActType_NotFound_Throws() {
+        when(repository.existsById("TYPE1")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.UpdateAssistanceActType(type));
+        assertTrue(e.getMessage().contains("no existe"));
+    }
+
+    @Test
+    void updateAssistanceActType_ShortName_Throws() {
+        type.setName("a");
+        when(repository.existsById("TYPE1")).thenReturn(true);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.UpdateAssistanceActType(type));
+        assertTrue(e.getMessage().contains("al menos 3 caracteres"));
+    }
+
+    // Delete
+
+    @Test
+    void deleteAssistanceActType_Valid() {
+        when(repository.existsById("TYPE1")).thenReturn(true);
+
+        service.removeAssistanceActTypeById("TYPE1");
+        verify(repository).deleteById("TYPE1");
+    }
+
+    @Test
+    void deleteAssistanceActType_NotFound_Throws() {
+        when(repository.existsById("X")).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeAssistanceActTypeById("X");
+        });
+
+        assertEquals("No se puede eliminar un tipo que no existe.", e.getMessage());
+        verify(repository, times(1)).existsById("X");
+        verify(repository, never()).deleteById("X");
+    }
+
+}

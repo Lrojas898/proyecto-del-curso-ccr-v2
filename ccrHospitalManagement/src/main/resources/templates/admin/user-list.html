@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de Usuarios</title>
+    <link rel="stylesheet" th:href="@{/css/roles.css}" />
+
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>Gestión de Usuarios</h1>
+        </div>
+        <div class="card-body">
+            <table class="user-list-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.username}"></td>
+                    <td>
+                        <button class="btn btn-primary">
+                            <a th:href="@{/admin/users/{id}/roles(id=${user.id})}" >Gestionar Roles</a>
+                        </button>
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
