@@ -58,12 +58,24 @@ Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes 
 
    ```bash
     mvn spring-boot:run
+
+4. **Despliegue de la aplicación**:
+
+   Para acceder a la aplicacion desplegada, coloca el siguiente link en tu navegador de preferencia:
+
+   ```bash
+    http://10.147.19.21:8080/g1ccr/login
+
+5. **Uso de la aplicación**:
+
+   Los datos predefinidos en la entrada del apartado de login, "admin" y "123456" es un usuario predefinido para acceder rapidamente y comprobar la parte administrativa de la aplicacion, hay que tener en cuenta que como parte de la entrega solo esta implementada la parte del menu -> "Admin Usuarios" donde esta la parte de gestion de usuarios. El usuario puede registrarse como usuario normal en el link registrate del apartado de login si no tiene una cuenta creada y llenar el formulario respectivo, al crear la cuenta puedes ingresar tu "usuario" y "password" en el apartado de login para iniciar sesion en tu cuenta.
+
       
-4. **resultados de Jacoco**   
+6. **resultados de Jacoco**   
 Se tiene una cobertura del 100% en cuanto a los servicios solicitados
 ![alt text](<jacoco.png>)
 
-5. **Videos de prueba del proyecto**:
+7. **Videos de prueba del proyecto**:
 
    Aqui estaran todos los videos de prueba del proyecto, actualizado por cada entrega:
 
