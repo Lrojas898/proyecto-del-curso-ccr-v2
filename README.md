@@ -23,9 +23,9 @@ Con el fin de optimizar los procesos internos y mejorar la atención al paciente
 
 Desarrollar una **aplicación web integral** para la **gestión administrativa y operativa** de la clínica oncológica. La solución permitirá un control eficiente sobre las citas médicas, los expedientes clínicos, el personal médico, los laboratorios y la facturación. A través de esta plataforma, se garantizará un flujo de trabajo ágil, seguro y optimizado, que contribuye a la mejora de la calidad del servicio médico brindado a los pacientes.
 
-## Objetivo de entrega 1
+## Objetivo de entrega 2
 
-Este primera parte del proyecto está diseñada en Backend para gestionar usuarios, roles y permisos dentro de un sistema. La aplicación está construida usando **Spring Boot**, **Hibernate** y **PostgreSQL** como base de datos. Cumpliendo todos los requisitos dados en esta entrega.
+En esta entrega implementamos el patrón MVC utilizando Spring boot, Thymeleaf y Security para permitir a los usuarios registrarse e ingresar por medio de una interfaz basada en archivos html.
 
 ## Requisitos Previos
 
