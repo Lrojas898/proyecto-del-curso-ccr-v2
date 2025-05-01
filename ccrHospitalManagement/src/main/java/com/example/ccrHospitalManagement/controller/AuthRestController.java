@@ -25,10 +25,11 @@ public class AuthRestController {
                     request.getUsername(),
                     request.getPassword()
             );
+
             authenticationManager.authenticate(authToken);
 
             String token = jwtService.generateToken(request.getUsername());
-            System.out.println("Token: " + token); // Debugging line to check the generated token
+
             return ResponseEntity.ok(new LoginResponse(token));
 
         } catch (AuthenticationException e) {
