@@ -42,12 +42,12 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Location> getLocationById(String id) {
+    public Optional<Location> getLocationById(Long id) {
         return locationRepository.findById(id);
     }
 
     @Override
-    public void removeLocationById(String id) {
+    public void removeLocationById(Long id) {
         if (!locationRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar una ubicación que no existe.");
         }
@@ -55,9 +55,6 @@ public class LocationServiceImpl implements LocationService {
     }
 
     private void validateLocation(Location location, boolean isCreate) {
-        if (isCreate && (location.getId() == null || location.getId().isBlank())) {
-            throw new IllegalArgumentException("El ID de la ubicación es obligatorio.");
-        }
 
         if (location.getName() == null || location.getName().trim().length() < 3) {
             throw new IllegalArgumentException("El nombre debe tener al menos 3 caracteres.");

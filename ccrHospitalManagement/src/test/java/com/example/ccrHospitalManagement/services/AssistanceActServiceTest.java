@@ -33,26 +33,26 @@ class AssistanceActServiceTest {
     @BeforeEach
     void setUp() {
         type = new AssistanceActType();
-        type.setId("type1");
+        type.setId(10L); // Cambiado a Long
         type.setName("Consulta");
 
         ClinicalHistory clinicalHistory = new ClinicalHistory();
-        clinicalHistory.setId("history1");
+        clinicalHistory.setId(20L); // Cambiado a Long
 
         User doctor = new User();
-        doctor.setId("doctor1");
+        doctor.setId("123456"); // Cambiado a Long
 
         episode = new AttentionEpisode();
-        episode.setId("ep1");
+        episode.setId(40L); // Cambiado a Long
         episode.setCreationDate(LocalDate.now());
-        episode.setDiagnosis("Diagnóstico");
-        episode.setDescription("Descripción");
+        episode.setDiagnosis("Diagnóstico válido");
+        episode.setDescription("Descripción válida");
         episode.setDoctor(doctor);
         episode.setClinicalHistory(clinicalHistory);
 
         act = new AssistanceAct();
-        act.setId("A1");
-        act.setIssueDate(Date.valueOf(LocalDate.now())); 
+        act.setId(1L); // Cambiado a Long
+        act.setIssueDate(Date.valueOf(LocalDate.now()));
         act.setDescription("Descripción válida de acto asistencial");
         act.setType(type);
         act.setAttentionEpisode(episode);
@@ -62,7 +62,6 @@ class AssistanceActServiceTest {
 
     @Test
     void createAssistanceAct_Valid() {
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
         when(assistanceActRepository.save(act)).thenReturn(act);
 
         AssistanceAct result = assistanceActService.createAssistanceAct(act);
@@ -71,23 +70,8 @@ class AssistanceActServiceTest {
     }
 
     @Test
-    void createAssistanceAct_ExistingId_Throws() {
-        when(assistanceActRepository.existsById("A1")).thenReturn(true);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
-        assertTrue(e.getMessage().contains("Ya existe un acto asistencial"));
-    }
-
-    @Test
-    void createAssistanceAct_NullId_Throws() {
-        act.setId(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
-        assertTrue(e.getMessage().contains("obligatorio"));
-    }
-
-    @Test
     void createAssistanceAct_FutureDate_Throws() {
         act.setIssueDate(Date.valueOf(LocalDate.now().plusDays(1)));
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("no puede estar en el futuro"));
     }
@@ -95,7 +79,6 @@ class AssistanceActServiceTest {
     @Test
     void createAssistanceAct_ShortDescription_Throws() {
         act.setDescription("Corto");
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("al menos 10 caracteres"));
     }
@@ -103,7 +86,6 @@ class AssistanceActServiceTest {
     @Test
     void createAssistanceAct_NullType_Throws() {
         act.setType(null);
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("tipo de acto asistencial"));
     }
@@ -111,7 +93,6 @@ class AssistanceActServiceTest {
     @Test
     void createAssistanceAct_NullEpisode_Throws() {
         act.setAttentionEpisode(null);
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("vinculado a un episodio"));
     }
@@ -119,87 +100,67 @@ class AssistanceActServiceTest {
     @Test
     void createAssistanceAct_NullDate_Throws() {
         act.setIssueDate(null);
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("fecha de emisión"));
     }
 
     @Test
-    void createAssistanceAct_NullIdDirect_Throws() {
-        act.setId(null); // el ID es null
-        Exception e = assertThrows(IllegalArgumentException.class,
-                () -> assistanceActService.createAssistanceAct(act));
-        assertTrue(e.getMessage().contains("ID del acto asistencial es obligatorio"));
-    }
-
-    @Test
     void createAssistanceAct_NullDescription_Throws() {
         act.setDescription(null);
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
-
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("descripción"));
     }
 
-    @Test
-    void createAssistanceAct_BlankId_Throws() {
-        act.setId("   "); 
-
-        Exception e = assertThrows(IllegalArgumentException.class,
-                () -> assistanceActService.createAssistanceAct(act));
-        assertTrue(e.getMessage().toLowerCase().contains("id"));
-    }
-
-
-    // Update
+    // UPDATE
 
     @Test
     void updateAssistanceAct_Valid() {
-        when(assistanceActRepository.existsById("A1")).thenReturn(true);
+        when(assistanceActRepository.existsById(1L)).thenReturn(true);
         when(assistanceActRepository.save(act)).thenReturn(act);
+
         AssistanceAct result = assistanceActService.UpdateAssistanceAct(act);
-        assertEquals("A1", result.getId());
+        assertEquals(1L, result.getId());
         verify(assistanceActRepository).save(act);
     }
 
     @Test
     void updateAssistanceAct_NotFound_Throws() {
-        when(assistanceActRepository.existsById("A1")).thenReturn(false);
+        when(assistanceActRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.UpdateAssistanceAct(act));
         assertTrue(e.getMessage().contains("no existe"));
     }
 
-    // Delete
+    // DELETE
 
     @Test
     void removeAssistanceActById_Valid() {
-        when(assistanceActRepository.existsById("A1")).thenReturn(true);
-        assistanceActService.removeAssistanceActById("A1");
-        verify(assistanceActRepository).deleteById("A1");
+        when(assistanceActRepository.existsById(1L)).thenReturn(true);
+        assistanceActService.removeAssistanceActById(1L);
+        verify(assistanceActRepository).deleteById(1L);
     }
 
     @Test
     void removeAssistanceActById_NotFound_Throws() {
-        when(assistanceActRepository.existsById("NotFound")).thenReturn(false);
+        when(assistanceActRepository.existsById(99L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class,
-                () -> assistanceActService.removeAssistanceActById("NotFound"));
+                () -> assistanceActService.removeAssistanceActById(99L));
         assertTrue(e.getMessage().contains("No se puede eliminar un acto asistencial"));
     }
 
-    // Get
+    // GET
 
     @Test
     void getAssistanceActById_Found() {
-        when(assistanceActRepository.findById("A1")).thenReturn(Optional.of(act));
-        Optional<AssistanceAct> result = assistanceActService.getAssistanceActById("A1");
+        when(assistanceActRepository.findById(1L)).thenReturn(Optional.of(act));
+        Optional<AssistanceAct> result = assistanceActService.getAssistanceActById(1L);
         assertTrue(result.isPresent());
-        assertEquals("A1", result.get().getId());
+        assertEquals(1L, result.get().getId());
     }
 
     @Test
     void getAssistanceActById_NotFound() {
-        when(assistanceActRepository.findById("X")).thenReturn(Optional.empty());
-        Optional<AssistanceAct> result = assistanceActService.getAssistanceActById("X");
+        when(assistanceActRepository.findById(99L)).thenReturn(Optional.empty());
+        Optional<AssistanceAct> result = assistanceActService.getAssistanceActById(99L);
         assertTrue(result.isEmpty());
     }
 
@@ -208,7 +169,7 @@ class AssistanceActServiceTest {
         when(assistanceActRepository.findAll()).thenReturn(List.of(act));
         List<AssistanceAct> result = assistanceActService.getAllAssistanceActs();
         assertEquals(1, result.size());
-        assertEquals("A1", result.get(0).getId());
+        assertEquals(1L, result.get(0).getId());
     }
 
     @Test

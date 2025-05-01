@@ -31,7 +31,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<Role> getRoleById(String id) {
+    public Optional<Role> getRoleById(Long id) {
         return roleRepository.findById(id);
     }
 
@@ -47,7 +47,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void deleteRole(String id) {
+    public void deleteRole(Long id) {
         if (!roleRepository.existsById(id)) {
             throw new IllegalArgumentException("El rol con ID " + id + " no existe.");
         }
@@ -55,9 +55,6 @@ public class RoleServiceImpl implements RoleService {
     }
 
     private void validateRole(Role role, boolean isCreate) {
-        if (isCreate && (role.getId() == null || role.getId().isBlank())) {
-            throw new IllegalArgumentException("El ID del rol es obligatorio.");
-        }
 
         if (role.getName() == null || role.getName().trim().length() < 3) {
             throw new IllegalArgumentException("El nombre del rol debe tener al menos 3 caracteres.");

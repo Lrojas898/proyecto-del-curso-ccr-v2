@@ -42,12 +42,12 @@ public class ExamTypeServiceImpl implements ExamTypeService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ExamType> getExamTypeById(String id) {
+    public Optional<ExamType> getExamTypeById(Long id) {
         return examTypeRepository.findById(id);
     }
 
     @Override
-    public void removeExamTypeById(String id) {
+    public void removeExamTypeById(Long id) {
         if (!examTypeRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un tipo de examen que no existe.");
         }
@@ -55,10 +55,6 @@ public class ExamTypeServiceImpl implements ExamTypeService {
     }
 
     private void validateExamType(ExamType type, boolean isCreate) {
-        if (isCreate && (type.getId() == null || type.getId().isBlank())) {
-            throw new IllegalArgumentException("El ID del tipo de examen es obligatorio.");
-        }
-
         if (type.getName() == null || type.getName().trim().length() < 3) {
             throw new IllegalArgumentException("El nombre del tipo de examen debe tener al menos 3 caracteres.");
         }

@@ -8,7 +8,7 @@ public interface AssistanceActService {
 
     AssistanceAct createAssistanceAct(AssistanceAct assistanceAct);
     List<AssistanceAct> getAllAssistanceActs();
-    Optional<AssistanceAct> getAssistanceActById(String id);
+    Optional<AssistanceAct> getAssistanceActById(Long id);
     AssistanceAct UpdateAssistanceAct(AssistanceAct assistanceAct);
-    void removeAssistanceActById(String id);
+    void removeAssistanceActById(Long id);
 }

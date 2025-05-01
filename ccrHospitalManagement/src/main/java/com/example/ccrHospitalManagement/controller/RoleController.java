@@ -45,7 +45,7 @@ public class RoleController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editRole(@PathVariable("id") String id, Model model) {
+    public String editRole(@PathVariable("id") Long id, Model model) {
         Role role = roleService.getRoleById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + id));
         model.addAttribute("role", role);
@@ -53,7 +53,7 @@ public class RoleController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteRole(@PathVariable("id") String id) {
+    public String deleteRole(@PathVariable("id") Long id) {
         roleService.deleteRole(id);
         return "redirect:/roles";
     }

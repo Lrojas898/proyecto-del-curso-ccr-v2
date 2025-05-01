@@ -16,8 +16,8 @@ import lombok.*;
 public class ClinicalHistory {
 
     @Id
-    @Column(length = 50, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private LocalDate date;
     private LocalTime hour;

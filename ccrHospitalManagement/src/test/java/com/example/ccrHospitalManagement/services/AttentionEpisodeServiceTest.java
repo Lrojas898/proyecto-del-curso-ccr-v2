@@ -11,10 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,16 +31,16 @@ public class AttentionEpisodeServiceTest {
     @BeforeEach
     void setUp() {
         ClinicalHistory history = new ClinicalHistory();
-        history.setId("HIST1");
+        history.setId(1L);
 
         User doctor = new User();
-        doctor.setId("DOC1");
+        doctor.setId("123456");
 
         Appointment appointment = new Appointment();
-        appointment.setId("APP1");
+        appointment.setId(3L);
 
         episode = new AttentionEpisode();
-        episode.setId("EP1");
+        episode.setId(4L);
         episode.setCreationDate(LocalDate.now().minusDays(1));
         episode.setDiagnosis("Diagnóstico válido");
         episode.setDescription("Descripción válida del episodio");
@@ -49,35 +49,20 @@ public class AttentionEpisodeServiceTest {
         episode.setAppointment(appointment);
     }
 
-    //CREATE
+    // CREATE
 
     @Test
     void createAttentionEpisode_Valid() {
-        when(repository.existsById("EP1")).thenReturn(false);
         when(repository.save(episode)).thenReturn(episode);
+
         AttentionEpisode result = service.createAttentionEpisode(episode);
         assertNotNull(result);
         verify(repository).save(episode);
     }
 
     @Test
-    void createAttentionEpisode_ExistingId_Throws() {
-        when(repository.existsById("EP1")).thenReturn(true);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("Ya existe"));
-    }
-
-    @Test
-    void createAttentionEpisode_NullId_Throws() {
-        episode.setId(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("ID del episodio"));
-    }
-
-    @Test
     void createAttentionEpisode_FutureDate_Throws() {
         episode.setCreationDate(LocalDate.now().plusDays(1));
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("no puede ser futura"));
     }
@@ -85,7 +70,6 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_ShortDiagnosis_Throws() {
         episode.setDiagnosis("Corto");
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("al menos 10 caracteres"));
     }
@@ -93,7 +77,6 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_ShortDescription_Throws() {
         episode.setDescription("Desc");
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("al menos 10 caracteres"));
     }
@@ -101,7 +84,6 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_NullDoctor_Throws() {
         episode.setDoctor(null);
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("asignarse un médico"));
     }
@@ -109,7 +91,6 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_NullHistory_Throws() {
         episode.setClinicalHistory(null);
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("historia clínica"));
     }
@@ -117,7 +98,6 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_NullDate_Throws() {
         episode.setCreationDate(null);
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("fecha de creación"));
     }
@@ -125,7 +105,6 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_NullDiagnosis_Throws() {
         episode.setDiagnosis(null);
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("diagnóstico"));
     }
@@ -133,35 +112,25 @@ public class AttentionEpisodeServiceTest {
     @Test
     void createAttentionEpisode_NullDescription_Throws() {
         episode.setDescription(null);
-        when(repository.existsById("EP1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("descripción"));
     }
 
-    @Test
-    void createAttentionEpisode_BlankId_Throws() {
-        episode.setId("   ");  
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("ID del episodio"));
-    }
-
-
-
-
-    //UPDATE
+    // UPDATE
 
     @Test
     void updateAttentionEpisode_Valid() {
-        when(repository.existsById("EP1")).thenReturn(true);
+        when(repository.existsById(4L)).thenReturn(true);
         when(repository.save(episode)).thenReturn(episode);
+
         AttentionEpisode result = service.updateAttentionEpisode(episode);
-        assertEquals("EP1", result.getId());
+        assertEquals(4L, result.getId());
         verify(repository).save(episode);
     }
 
     @Test
     void updateAttentionEpisode_NotFound_Throws() {
-        when(repository.existsById("EP1")).thenReturn(false);
+        when(repository.existsById(4L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.updateAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("no existe"));
     }
@@ -171,46 +140,47 @@ public class AttentionEpisodeServiceTest {
     @Test
     void getAllAttentionEpisodes_ReturnsList() {
         when(repository.findAll()).thenReturn(List.of(episode));
+
         List<AttentionEpisode> result = service.getAllAttentionEpisodes();
         assertEquals(1, result.size());
-        assertEquals("EP1", result.get(0).getId());
+        assertEquals(4L, result.get(0).getId());
     }
 
     @Test
     void getAttentionEpisodeById_Found() {
-        when(repository.findById("EP1")).thenReturn(Optional.of(episode));
-        Optional<AttentionEpisode> result = service.getAttentionEpisodeById("EP1");
+        when(repository.findById(4L)).thenReturn(Optional.of(episode));
+
+        Optional<AttentionEpisode> result = service.getAttentionEpisodeById(4L);
         assertTrue(result.isPresent());
     }
 
     @Test
     void getAttentionEpisodeById_NotFound() {
-        when(repository.findById("EPX")).thenReturn(Optional.empty());
-        Optional<AttentionEpisode> result = service.getAttentionEpisodeById("EPX");
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<AttentionEpisode> result = service.getAttentionEpisodeById(99L);
         assertTrue(result.isEmpty());
     }
 
-    // Delete
+    // DELETE
 
     @Test
     void removeAttentionEpisodeById_Valid() {
-        when(repository.existsById("EP1")).thenReturn(true);
-        service.removeAttentionEpisodeById("EP1");
-        verify(repository).deleteById("EP1");
+        when(repository.existsById(4L)).thenReturn(true);
+
+        service.removeAttentionEpisodeById(4L);
+        verify(repository).deleteById(4L);
     }
 
     @Test
     void removeAttentionEpisodeById_NotFound_Throws() {
-        when(repository.existsById("EPX")).thenReturn(false);
-    
-        Exception e = assertThrows(
-            IllegalArgumentException.class,
-            () -> service.removeAttentionEpisodeById("EPX")
-        );
-    
+        when(repository.existsById(99L)).thenReturn(false);
+
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> service.removeAttentionEpisodeById(99L));
+
         assertEquals("No se puede eliminar un episodio que no existe.", e.getMessage());
-        verify(repository).existsById("EPX");
+        verify(repository, times(1)).existsById(99L);
         verify(repository, never()).deleteById(any());
     }
-    
 }

@@ -35,23 +35,22 @@ class ClinicalHistoryServiceTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setId("U1");
+        user.setId("123456");
 
         history = new ClinicalHistory();
-        history.setId("H1");
+        history.setId(10L);
         history.setDate(LocalDate.now());
         history.setHour(LocalTime.of(10, 0));
         history.setGeneralObservations("Observación válida");
         history.setUser(user);
     }
 
-    //Create
+    // Create
 
     @Test
     void createClinicalHistory_Valid() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
-        when(userRepository.existsById("U1")).thenReturn(true);
-        when(clinicalHistoryRepository.existsByUserId("U1")).thenReturn(false);
+        when(userRepository.existsById("123456")).thenReturn(true);
+        when(clinicalHistoryRepository.existsByUserId("123456")).thenReturn(false);
         when(clinicalHistoryRepository.save(history)).thenReturn(history);
 
         ClinicalHistory result = service.createClinicalHistory(history);
@@ -60,32 +59,8 @@ class ClinicalHistoryServiceTest {
     }
 
     @Test
-    void createClinicalHistory_DuplicateId_Throws() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(true);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
-        assertTrue(e.getMessage().toLowerCase().contains("ya existe"));
-    }
-
-    @Test
-    void createClinicalHistory_NullId_Throws() {
-        history.setId(null);
-        when(clinicalHistoryRepository.existsById(null)).thenReturn(false);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
-        assertTrue(e.getMessage().contains("ID"));
-    }
-
-    @Test
-    void createClinicalHistory_BlankId_Throws() {
-        history.setId("   ");
-        when(clinicalHistoryRepository.existsById("   ")).thenReturn(false);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
-        assertTrue(e.getMessage().contains("ID de la historia clínica"));
-    }
-
-    @Test
     void createClinicalHistory_FutureDate_Throws() {
         history.setDate(LocalDate.now().plusDays(1));
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("fecha"));
     }
@@ -93,7 +68,6 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_NullDate_Throws() {
         history.setDate(null);
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("fecha"));
     }
@@ -101,7 +75,6 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_NullHour_Throws() {
         history.setHour(null);
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("hora"));
     }
@@ -109,7 +82,6 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_ShortObservation_Throws() {
         history.setGeneralObservations("Corto");
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("observaciones"));
     }
@@ -117,7 +89,6 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_NullObservation_Throws() {
         history.setGeneralObservations(null);
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("observaciones"));
     }
@@ -125,7 +96,6 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_OnlySpacesObservation_Throws() {
         history.setGeneralObservations("        ");
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("observaciones"));
     }
@@ -133,91 +103,84 @@ class ClinicalHistoryServiceTest {
     @Test
     void createClinicalHistory_NullUser_Throws() {
         history.setUser(null);
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
-        assertTrue(e.getMessage().contains("usuario"));
-    }
-
-    @Test
-    void createClinicalHistory_UserWithNullId_Throws() {
-        user.setId(null);
-        history.setUser(user);
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("usuario"));
     }
 
     @Test
     void createClinicalHistory_UserNotExists_Throws() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
-        when(userRepository.existsById("U1")).thenReturn(false);
+        when(userRepository.existsById("123456")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("usuario"));
     }
 
     @Test
     void createClinicalHistory_UserAlreadyHasHistory_Throws() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
-        when(userRepository.existsById("U1")).thenReturn(true);
-        when(clinicalHistoryRepository.existsByUserId("U1")).thenReturn(true);
+        when(userRepository.existsById("123456")).thenReturn(true);
+        when(clinicalHistoryRepository.existsByUserId("123456")).thenReturn(true);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createClinicalHistory(history));
         assertTrue(e.getMessage().contains("ya tiene una historia clínica"));
     }
 
-    //Update
+    // Update
 
     @Test
     void updateClinicalHistory_Valid() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(true);
-        when(userRepository.existsById("U1")).thenReturn(true);
+        when(clinicalHistoryRepository.existsById(10L)).thenReturn(true);
+        when(userRepository.existsById("123456")).thenReturn(true);
         when(clinicalHistoryRepository.save(history)).thenReturn(history);
+
         ClinicalHistory result = service.UpdateClinicalHistory(history);
         assertNotNull(result);
     }
 
     @Test
     void updateClinicalHistory_NotExists_Throws() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(false);
+        when(clinicalHistoryRepository.existsById(10L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.UpdateClinicalHistory(history));
         assertTrue(e.getMessage().contains("no existe"));
     }
 
-    //Remove
+    // Remove
 
     @Test
     void removeClinicalHistoryById_Valid() {
-        when(clinicalHistoryRepository.existsById("H1")).thenReturn(true);
-        service.removeClinicalHistoryById("H1");
-        verify(clinicalHistoryRepository).deleteById("H1");
+        when(clinicalHistoryRepository.existsById(10L)).thenReturn(true);
+
+        service.removeClinicalHistoryById(10L);
+        verify(clinicalHistoryRepository).deleteById(10L);
     }
 
     @Test
     void removeClinicalHistoryById_NotFound_Throws() {
-        when(clinicalHistoryRepository.existsById("H2")).thenReturn(false);
+        when(clinicalHistoryRepository.existsById(99L)).thenReturn(false);
 
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.removeClinicalHistoryById("H2"));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.removeClinicalHistoryById(99L));
         assertEquals("No se puede eliminar una historia clínica que no existe.", e.getMessage());
     }
 
+    // Get
 
-    //Get
     @Test
     void getClinicalHistoryById_Found() {
-        when(clinicalHistoryRepository.findById("H1")).thenReturn(Optional.of(history));
-        Optional<ClinicalHistory> result = service.getClinicalHistoryById("H1");
+        when(clinicalHistoryRepository.findById(10L)).thenReturn(Optional.of(history));
+
+        Optional<ClinicalHistory> result = service.getClinicalHistoryById(10L);
         assertTrue(result.isPresent());
     }
 
     @Test
     void getClinicalHistoryById_NotFound() {
-        when(clinicalHistoryRepository.findById("H1")).thenReturn(Optional.empty());
-        Optional<ClinicalHistory> result = service.getClinicalHistoryById("H1");
+        when(clinicalHistoryRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<ClinicalHistory> result = service.getClinicalHistoryById(99L);
         assertTrue(result.isEmpty());
     }
 
     @Test
     void getAllClinicalHistories_ReturnsList() {
         when(clinicalHistoryRepository.findAll()).thenReturn(List.of(history));
+
         List<ClinicalHistory> result = service.getAllClinicalHistories();
         assertEquals(1, result.size());
     }
@@ -225,6 +188,7 @@ class ClinicalHistoryServiceTest {
     @Test
     void getAllClinicalHistories_EmptyList() {
         when(clinicalHistoryRepository.findAll()).thenReturn(Collections.emptyList());
+
         List<ClinicalHistory> result = service.getAllClinicalHistories();
         assertTrue(result.isEmpty());
     }

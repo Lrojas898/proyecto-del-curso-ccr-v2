@@ -30,7 +30,7 @@ public class AssistanceActTypeServiceImpl implements AssistanceActTypeService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<AssistanceActType> getAssistanceActTypeById(String id) {
+    public Optional<AssistanceActType> getAssistanceActTypeById(Long id) {
         return assistanceActTypeRepository.findById(id);
     }
 
@@ -44,7 +44,7 @@ public class AssistanceActTypeServiceImpl implements AssistanceActTypeService {
     }
 
     @Override
-    public void removeAssistanceActTypeById(String id) {
+    public void removeAssistanceActTypeById(Long id) {
         if (!assistanceActTypeRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un tipo que no existe.");
         }
@@ -52,14 +52,6 @@ public class AssistanceActTypeServiceImpl implements AssistanceActTypeService {
     }
 
     private void validateType(AssistanceActType type, boolean isCreate) {
-        if (isCreate) {
-            if (type.getId() == null || type.getId().isBlank()) {
-                throw new IllegalArgumentException("El ID del tipo de acto asistencial es obligatorio.");
-            }
-            if (assistanceActTypeRepository.existsById(type.getId())) {
-                throw new IllegalArgumentException("Ya existe un tipo de acto asistencial con ese ID.");
-            }
-        }
 
         if (type.getName() == null || type.getName().trim().length() < 3) {
             throw new IllegalArgumentException("El nombre del tipo de acto debe tener al menos 3 caracteres.");

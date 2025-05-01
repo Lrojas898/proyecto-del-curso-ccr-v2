@@ -8,7 +8,7 @@ public interface ExamTypeService {
 
     ExamType createExamType(ExamType examType);
     List<ExamType> getAllExamTypes();
-    Optional<ExamType> getExamTypeById(String id);
+    Optional<ExamType> getExamTypeById(Long id);
     ExamType updateExamType(ExamType examType);
-    void removeExamTypeById(String id);
+    void removeExamTypeById(Long id);
 }

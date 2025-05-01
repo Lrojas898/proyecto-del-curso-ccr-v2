@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +37,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        role = new Role("roleId1", "Patient");
+        role = new Role(1L, "Patient");
 
         user = new User();
         user.setId("userId1");
@@ -139,16 +140,16 @@ class UserServiceTest {
 
     @Test
     void testCreateUser_RoleNotFound_Throws() {
-        when(roleRepository.findById("invalid")).thenReturn(Optional.empty());
-        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, List.of("invalid")));
+        when(roleRepository.findById(99L)).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.createUser(user, List.of(99L)));
         assertTrue(e.getMessage().contains("no existe"));
     }
 
     @Test
     void testCreateUser_Valid() {
-        when(roleRepository.findById("roleId1")).thenReturn(Optional.of(role));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
         when(userRepository.save(any(User.class))).thenReturn(user);
-        User created = userService.createUser(user, List.of("roleId1"));
+        User created = userService.createUser(user, List.of(1L));
         assertEquals("testuser", created.getUsername());
     }
 
@@ -167,16 +168,16 @@ class UserServiceTest {
 
     @Test
     void testUpdateUser_RoleNotFound_Throws() {
-        when(roleRepository.findById("bad")).thenReturn(Optional.empty());
-        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, List.of("bad")));
+        when(roleRepository.findById(99L)).thenReturn(Optional.empty());
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUser(user, List.of(99L)));
         assertTrue(e.getMessage().contains("no existe"));
     }
 
     @Test
     void testUpdateUser_Valid() {
-        when(roleRepository.findById("roleId1")).thenReturn(Optional.of(role));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
         when(userRepository.save(any(User.class))).thenReturn(user);
-        User updated = userService.updateUser(user, List.of("roleId1"));
+        User updated = userService.updateUser(user, List.of(1L));
         assertNotNull(updated);
     }
 
@@ -229,8 +230,8 @@ class UserServiceTest {
         user2.setId("U2");
         user2.setUsername("user2");
 
-        Role r1 = new Role("R1", "ADMIN");
-        Role r2 = new Role("R2", "PATIENT");
+        Role r1 = new Role(2L, "ADMIN");
+        Role r2 = new Role(3L, "PATIENT");
 
         when(userRepository.findAll()).thenReturn(List.of(user1, user2));
         when(roleRepository.findAll()).thenReturn(List.of(r1, r2));
@@ -243,7 +244,7 @@ class UserServiceTest {
 
     @Test
     void testGetUserWithRoles_Found() {
-        Role role = new Role("R1", "ADMIN");
+        Role role = new Role(2L, "ADMIN");
         Set<String> roleIds = Set.of("R1");
 
         when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
@@ -264,17 +265,17 @@ class UserServiceTest {
 
     @Test
     void testUpdateUserRoles_Valid() {
-        Role role = new Role("R1", "ADMIN");
+        Role role = new Role(2L, "ADMIN");
         when(userRepository.findById("userId1")).thenReturn(Optional.of(user));
-        when(roleRepository.findAllById(Set.of("R1"))).thenReturn(List.of(role));
-        assertDoesNotThrow(() -> userService.updateUserRoles("userId1", Set.of("R1")));
+        when(roleRepository.findAllById(Set.of(2L))).thenReturn(List.of(role));
+        assertDoesNotThrow(() -> userService.updateUserRoles("userId1", Set.of(2L)));
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     void testUpdateUserRoles_UserNotFound_Throws() {
         when(userRepository.findById("X")).thenReturn(Optional.empty());
-        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUserRoles("X", Set.of("R1")));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> userService.updateUserRoles("X", Set.of(2L)));
         assertTrue(e.getMessage().contains("Usuario no encontrado"));
     }
 }

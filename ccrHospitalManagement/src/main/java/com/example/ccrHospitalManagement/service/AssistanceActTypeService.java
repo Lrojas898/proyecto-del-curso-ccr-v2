@@ -8,7 +8,7 @@ public interface AssistanceActTypeService {
 
     AssistanceActType createAssistanceActType(AssistanceActType type);
     List<AssistanceActType> getAllAssistanceActTypes();
-    Optional<AssistanceActType> getAssistanceActTypeById(String id);
+    Optional<AssistanceActType> getAssistanceActTypeById(Long id);
     AssistanceActType UpdateAssistanceActType(AssistanceActType type);
-    void removeAssistanceActTypeById(String id);
+    void removeAssistanceActTypeById(Long id);
 }

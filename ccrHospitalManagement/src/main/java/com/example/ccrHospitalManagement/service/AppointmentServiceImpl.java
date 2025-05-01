@@ -32,7 +32,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Appointment> getAppointmentById(String id) {
+    public Optional<Appointment> getAppointmentById(Long id) {
         return appointmentRepository.findById(id);
     }
 
@@ -46,7 +46,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void removeAppointmentById(String id) {
+    public void removeAppointmentById(Long id) {
         if (!appointmentRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar una cita que no existe.");
         }
@@ -54,14 +54,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     private void validateAppointment(Appointment appointment, boolean isCreate) {
-        if (isCreate) {
-            if (appointment.getId() == null || appointment.getId().isBlank()) {
-                throw new IllegalArgumentException("El ID de la cita es obligatorio.");
-            }
-            if (appointmentRepository.existsById(appointment.getId())) {
-                throw new IllegalArgumentException("Ya existe una cita con ese ID.");
-            }
-        }
 
         if (appointment.getDate() == null) {
             throw new IllegalArgumentException("La fecha de la cita es obligatoria.");

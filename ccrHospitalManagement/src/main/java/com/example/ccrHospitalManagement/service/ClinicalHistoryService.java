@@ -8,7 +8,7 @@ public interface ClinicalHistoryService {
 
     ClinicalHistory createClinicalHistory(ClinicalHistory history);
     List<ClinicalHistory> getAllClinicalHistories();
-    Optional<ClinicalHistory> getClinicalHistoryById(String id);
+    Optional<ClinicalHistory> getClinicalHistoryById(Long id);
     ClinicalHistory UpdateClinicalHistory(ClinicalHistory history);
-    void removeClinicalHistoryById(String id);
+    void removeClinicalHistoryById(Long id);
 }

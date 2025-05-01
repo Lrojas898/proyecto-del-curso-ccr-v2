@@ -14,8 +14,8 @@ import java.time.LocalDate;
 public class ExamResult {
 
     @Id
-    @Column(length = 50, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private LocalDate resultDate;
 

@@ -8,7 +8,7 @@ public interface AppointmentService {
 
     Appointment createAppointment(Appointment appointment);
     List<Appointment> getAllAppointments();
-    Optional<Appointment> getAppointmentById(String id);
+    Optional<Appointment> getAppointmentById(Long id);
     Appointment UpdateAppointment(Appointment appointment);
-    void removeAppointmentById(String id);
+    void removeAppointmentById(Long id);
 }

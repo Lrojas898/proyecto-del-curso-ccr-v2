@@ -12,8 +12,8 @@ import lombok.*;
 public class AssistanceActType {
 
     @Id
-    @Column(length = 40, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(length = 40, nullable = false)
     private String name;
