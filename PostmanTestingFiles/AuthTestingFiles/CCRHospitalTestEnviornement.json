@@ -1,0 +1,26 @@
+{
+  "id": "ccr-env",
+  "name": "CCRHospitalTestEnvironment",
+  "values": [
+      { "key": "base_url", "value": "http://localhost:8081/g1/ccr/api", "enabled": true },
+
+      { "key": "admin_user", "value": "admin", "enabled": true },
+      { "key": "admin_pass", "value": "123456", "enabled": true },
+
+      { "key": "doctor_user", "value": "doctor1", "enabled": true },
+      { "key": "doctor_pass", "value": "123456", "enabled": true },
+
+      { "key": "paciente_user", "value": "paciente1", "enabled": true },
+      { "key": "paciente_pass", "value": "123456", "enabled": true },
+
+      { "key": "tecnico_user", "value": "tecnico1", "enabled": true },
+      { "key": "tecnico_pass", "value": "123456", "enabled": true },
+
+      { "key": "admin_token", "value": "", "enabled": true },
+      { "key": "doctor_token", "value": "", "enabled": true },
+      { "key": "paciente_token", "value": "", "enabled": true },
+      { "key": "tecnico_token", "value": "", "enabled": true },
+
+      { "key": "delete_target_id", "value": "paciente3-id", "enabled": true }
+  ]
+}

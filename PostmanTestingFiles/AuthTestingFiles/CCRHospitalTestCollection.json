@@ -1,0 +1,205 @@
+{
+    "info": {
+        "name": "CCRHospitalTestCollection",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+
+        {
+            "name": "Login Admin",
+            "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{base_url}}/auth/login",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{ \"username\": \"{{admin_user}}\", \"password\": \"{{admin_pass}}\" }"
+                }
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "let json = pm.response.json();",
+                        "pm.test(\"Login Admin correcto\", () => pm.response.code === 200);",
+                        "pm.environment.set('admin_token', json.token);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Login Doctor",
+            "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{base_url}}/auth/login",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{ \"username\": \"{{doctor_user}}\", \"password\": \"{{doctor_pass}}\" }"
+                }
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "let json = pm.response.json();",
+                        "pm.test(\"Login Doctor correcto\", () => pm.response.code === 200);",
+                        "pm.environment.set('doctor_token', json.token);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Login Paciente",
+            "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{base_url}}/auth/login",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{ \"username\": \"{{paciente_user}}\", \"password\": \"{{paciente_pass}}\" }"
+                }
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "let json = pm.response.json();",
+                        "pm.test(\"Login Paciente correcto\", () => pm.response.code === 200);",
+                        "pm.environment.set('paciente_token', json.token);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Login Tecnico",
+            "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{base_url}}/auth/login",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{ \"username\": \"{{tecnico_user}}\", \"password\": \"{{tecnico_pass}}\" }"
+                }
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "let json = pm.response.json();",
+                        "pm.test(\"Login Tecnico correcto\", () => pm.response.code === 200);",
+                        "pm.environment.set('tecnico_token', json.token);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Get All Users (Admin)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+                ],
+                "url": "{{base_url}}/users"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"Listado de usuarios correcto (admin)\", () => pm.response.code === 200);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Admin DELETE paciente3",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+                ],
+                "url": "{{base_url}}/users/{{delete_target_id}}"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"Admin pudo eliminar paciente3\", () => pm.response.code === 200 || pm.response.code === 204);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Doctor DELETE paciente3",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+                ],
+                "url": "{{base_url}}/users/{{delete_target_id}}"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"Doctor no puede eliminar (403)\", () => pm.response.code === 403);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Paciente DELETE paciente3",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{paciente_token}}" }
+                ],
+                "url": "{{base_url}}/users/{{delete_target_id}}"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"Paciente no puede eliminar (403)\", () => pm.response.code === 403);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+
+        {
+            "name": "Tecnico DELETE paciente3",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{tecnico_token}}" }
+                ],
+                "url": "{{base_url}}/users/{{delete_target_id}}"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"Técnico no puede eliminar (403)\", () => pm.response.code === 403);"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        }
+
+    ]
+}
