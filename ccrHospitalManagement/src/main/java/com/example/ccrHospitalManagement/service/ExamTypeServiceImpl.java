@@ -18,9 +18,6 @@ public class ExamTypeServiceImpl implements ExamTypeService {
 
     @Override
     public ExamType createExamType(ExamType type) {
-        if (examTypeRepository.existsById(type.getId())) {
-            throw new IllegalArgumentException("Ya existe un tipo de examen con ese ID.");
-        }
         validateExamType(type, true);
         return examTypeRepository.save(type);
     }

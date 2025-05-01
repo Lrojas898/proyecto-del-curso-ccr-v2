@@ -39,7 +39,6 @@ public class LocationServiceTest {
 
     @Test
     void registerLocation_Valid() {
-        when(locationRepository.existsById(1L)).thenReturn(false);
         when(locationRepository.save(location)).thenReturn(location);
         Location result = locationService.registerLocation(location);
         assertNotNull(result);
@@ -49,7 +48,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_ShortName_Throws() {
         location.setName("AB");
-        when(locationRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
@@ -57,7 +55,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_ShortAddress_Throws() {
         location.setAddress("123");
-        when(locationRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("al menos 5 caracteres"));
     }
@@ -65,7 +62,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_EmptyDescription_Throws() {
         location.setDescription("  ");
-        when(locationRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("descripción, no puede estar vacía"));
     }
@@ -73,7 +69,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_NullName_Throws() {
         location.setName(null);
-        when(locationRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class,
                 () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("nombre"));
@@ -82,7 +77,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_NullAddress_Throws() {
         location.setAddress(null);
-        when(locationRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class,
                 () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("dirección"));
@@ -91,7 +85,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_DescriptionIsNull_DoesNotThrow() {
         location.setDescription(null);  
-        when(locationRepository.existsById(1L)).thenReturn(false);
         when(locationRepository.save(location)).thenReturn(location);
         Location result = locationService.registerLocation(location);
         assertNotNull(result);

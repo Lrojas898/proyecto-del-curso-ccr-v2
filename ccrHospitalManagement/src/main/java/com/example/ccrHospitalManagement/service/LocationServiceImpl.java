@@ -18,9 +18,6 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public Location registerLocation(Location location) {
-        if (locationRepository.existsById(location.getId())) {
-            throw new IllegalArgumentException("Ya existe una ubicación con ese ID.");
-        }
         validateLocation(location, true);
         return locationRepository.save(location);
     }
