@@ -30,7 +30,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/{userId}/roles")
-    public String updateUserRoles(@PathVariable String userId, @RequestParam("roleIds") Set<String> roleIds) {
+    public String updateUserRoles(@PathVariable String userId, @RequestParam("roleIds") Set<Long> roleIds) {
         userService.updateUserRoles(userId, roleIds);
         return "redirect:/admin/users";
     }

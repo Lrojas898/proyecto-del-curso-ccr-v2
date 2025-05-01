@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AttentionEpisodeRepository extends JpaRepository<AttentionEpisode, String> {
+public interface AttentionEpisodeRepository extends JpaRepository<AttentionEpisode, Long> {
     // La PK de AttentionEpisode es String (id)
 }

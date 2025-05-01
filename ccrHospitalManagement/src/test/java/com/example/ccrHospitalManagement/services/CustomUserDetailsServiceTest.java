@@ -37,7 +37,7 @@ public class CustomUserDetailsServiceTest {
         user.setUsername("testuser");
         user.setPassword("encodedPassword");
         user.setEmail("test@example.com");
-        user.setRoles(Set.of(new Role("ROLE_USER", "User")));
+        user.setRoles(Set.of(new Role(1L, "User")));
     }
 
     @Test

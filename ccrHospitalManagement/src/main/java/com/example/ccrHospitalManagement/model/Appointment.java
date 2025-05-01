@@ -17,8 +17,8 @@ import java.util.Set;
 public class Appointment {
 
     @Id
-    @Column(length = 50, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private LocalDate date;
 

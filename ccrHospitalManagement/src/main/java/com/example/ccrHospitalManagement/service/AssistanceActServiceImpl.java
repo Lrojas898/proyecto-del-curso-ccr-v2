@@ -31,7 +31,7 @@ public class AssistanceActServiceImpl implements AssistanceActService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<AssistanceAct> getAssistanceActById(String id) {
+    public Optional<AssistanceAct> getAssistanceActById(Long id) {
         return assistanceActRepository.findById(id);
     }
 
@@ -45,7 +45,7 @@ public class AssistanceActServiceImpl implements AssistanceActService {
     }
 
     @Override
-    public void removeAssistanceActById(String id) {
+    public void removeAssistanceActById(Long id) {
         if (!assistanceActRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un acto asistencial que no existe.");
         }
@@ -53,14 +53,6 @@ public class AssistanceActServiceImpl implements AssistanceActService {
     }
 
     private void validateAssistanceAct(AssistanceAct act, boolean isCreate) {
-        if (isCreate) {
-            if (act.getId() == null || act.getId().isBlank()) {
-                throw new IllegalArgumentException("El ID del acto asistencial es obligatorio.");
-            }
-            if (assistanceActRepository.existsById(act.getId())) {
-                throw new IllegalArgumentException("Ya existe un acto asistencial con ese ID.");
-            }
-        }
 
         if (act.getIssueDate() == null) {
             throw new IllegalArgumentException("Debe proporcionarse la fecha de emisión del acto.");

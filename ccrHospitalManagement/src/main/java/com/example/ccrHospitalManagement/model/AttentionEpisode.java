@@ -14,8 +14,8 @@ import java.time.LocalDate;
 public class AttentionEpisode {
 
     @Id
-    @Column(length = 30, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private LocalDate creationDate;
 

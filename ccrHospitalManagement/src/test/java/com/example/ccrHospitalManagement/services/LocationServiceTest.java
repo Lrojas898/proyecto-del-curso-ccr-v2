@@ -29,7 +29,7 @@ public class LocationServiceTest {
     @BeforeEach
     void setUp() {
         location = new Location();
-        location.setId("LOC123");
+        location.setId(1L);
         location.setName("Consultorio Norte");
         location.setAddress("Av. Siempre Viva 742");
         location.setDescription("Ubicación para consulta externa");
@@ -39,7 +39,6 @@ public class LocationServiceTest {
 
     @Test
     void registerLocation_Valid() {
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         when(locationRepository.save(location)).thenReturn(location);
         Location result = locationService.registerLocation(location);
         assertNotNull(result);
@@ -47,23 +46,8 @@ public class LocationServiceTest {
     }
 
     @Test
-    void registerLocation_DuplicateId_Throws() {
-        when(locationRepository.existsById("LOC123")).thenReturn(true);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
-        assertTrue(e.getMessage().contains("Ya existe una ubicación"));
-    }
-
-    @Test
-    void registerLocation_NullId_Throws() {
-        location.setId(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
-        assertTrue(e.getMessage().contains("ID de la ubicación"));
-    }
-
-    @Test
     void registerLocation_ShortName_Throws() {
         location.setName("AB");
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("al menos 3 caracteres"));
     }
@@ -71,7 +55,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_ShortAddress_Throws() {
         location.setAddress("123");
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("al menos 5 caracteres"));
     }
@@ -79,24 +62,13 @@ public class LocationServiceTest {
     @Test
     void registerLocation_EmptyDescription_Throws() {
         location.setDescription("  ");
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("descripción, no puede estar vacía"));
     }
 
     @Test
-    void registerLocation_BlankId_Throws() {
-        location.setId("   ");
-        when(locationRepository.existsById("   ")).thenReturn(false);
-        Exception e = assertThrows(IllegalArgumentException.class,
-                () -> locationService.registerLocation(location));
-        assertTrue(e.getMessage().contains("ID de la ubicación"));
-    }
-
-    @Test
     void registerLocation_NullName_Throws() {
         location.setName(null);
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class,
                 () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("nombre"));
@@ -105,7 +77,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_NullAddress_Throws() {
         location.setAddress(null);
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class,
                 () -> locationService.registerLocation(location));
         assertTrue(e.getMessage().contains("dirección"));
@@ -114,7 +85,6 @@ public class LocationServiceTest {
     @Test
     void registerLocation_DescriptionIsNull_DoesNotThrow() {
         location.setDescription(null);  
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
         when(locationRepository.save(location)).thenReturn(location);
         Location result = locationService.registerLocation(location);
         assertNotNull(result);
@@ -125,15 +95,15 @@ public class LocationServiceTest {
 
     @Test
     void updateLocation_Valid() {
-        when(locationRepository.existsById("LOC123")).thenReturn(true);
+        when(locationRepository.existsById(1L)).thenReturn(true);
         when(locationRepository.save(location)).thenReturn(location);
         Location result = locationService.updateLocation(location);
-        assertEquals("LOC123", result.getId());
+        assertEquals(1L, result.getId());
     }
 
     @Test
     void updateLocation_NotFound_Throws() {
-        when(locationRepository.existsById("LOC123")).thenReturn(false);
+        when(locationRepository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.updateLocation(location));
         assertTrue(e.getMessage().contains("no existe"));
     }
@@ -141,7 +111,7 @@ public class LocationServiceTest {
     @Test
     void updateLocation_InvalidAddress_Throws() {
         location.setAddress("xyz");
-        when(locationRepository.existsById("LOC123")).thenReturn(true);
+        when(locationRepository.existsById(1L)).thenReturn(true);
         Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.updateLocation(location));
         assertTrue(e.getMessage().contains("al menos 5 caracteres"));
     }
@@ -157,15 +127,15 @@ public class LocationServiceTest {
 
     @Test
     void getLocationById_Found() {
-        when(locationRepository.findById("LOC123")).thenReturn(Optional.of(location));
-        Optional<Location> result = locationService.getLocationById("LOC123");
+        when(locationRepository.findById(1L)).thenReturn(Optional.of(location));
+        Optional<Location> result = locationService.getLocationById(1L);
         assertTrue(result.isPresent());
     }
 
     @Test
     void getLocationById_NotFound() {
-        when(locationRepository.findById("X")).thenReturn(Optional.empty());
-        Optional<Location> result = locationService.getLocationById("X");
+        when(locationRepository.findById(99L)).thenReturn(Optional.empty());
+        Optional<Location> result = locationService.getLocationById(99L);
         assertTrue(result.isEmpty());
     }
 
@@ -173,15 +143,15 @@ public class LocationServiceTest {
 
     @Test
     void deleteLocation_Valid() {
-        when(locationRepository.existsById("LOC123")).thenReturn(true);
-        assertDoesNotThrow(() -> locationService.removeLocationById("LOC123"));
-        verify(locationRepository).deleteById("LOC123");
+        when(locationRepository.existsById(1L)).thenReturn(true);
+        assertDoesNotThrow(() -> locationService.removeLocationById(1L));
+        verify(locationRepository).deleteById(1L);
     }
 
     @Test
     void deleteLocation_NotFound_Throws() {
-        when(locationRepository.existsById("LOC999")).thenReturn(false);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.removeLocationById("LOC999"));
+        when(locationRepository.existsById(45L)).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> locationService.removeLocationById(45L));
         assertTrue(e.getMessage().toLowerCase().contains("no se puede eliminar"));
     }
 }

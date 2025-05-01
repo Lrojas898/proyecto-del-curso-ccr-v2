@@ -13,8 +13,8 @@ import lombok.*;
 public class AssistanceAct {
 
     @Id
-    @Column(length = 40)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private java.sql.Date issueDate; // issue_date -> issueDate

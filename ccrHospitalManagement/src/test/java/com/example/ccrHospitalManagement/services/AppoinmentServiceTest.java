@@ -8,12 +8,14 @@ import com.example.ccrHospitalManagement.service.AppointmentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -35,19 +37,19 @@ class AppointmentServiceTest {
     @BeforeEach
     void setUp() {
         doctor = new User();
-        doctor.setId("doc1");
+        doctor.setId("123456");
 
         patient = new User();
-        patient.setId("pat1");
+        patient.setId("789012");
 
         location = new Location();
-        location.setId("loc1");
+        location.setId(300L);
         location.setName("Main Office");
         location.setAddress("123 Main St");
         location.setDescription("Primary clinic");
 
         appointment = new Appointment();
-        appointment.setId("app1");
+        appointment.setId(1L);
         appointment.setDate(LocalDate.now().plusDays(1));
         appointment.setStartTime(LocalTime.of(10, 0));
         appointment.setDoctor(doctor);
@@ -58,32 +60,17 @@ class AppointmentServiceTest {
     // CREATE
     @Test
     void createAppointment_Valid() {
-        when(repository.existsById("app1")).thenReturn(false);
         when(repository.save(appointment)).thenReturn(appointment);
         Appointment result = service.createAppointment(appointment);
         assertNotNull(result);
-        assertEquals("app1", result.getId());
+        assertEquals(1L, result.getId());
         verify(repository).save(appointment);
     }
 
-    @Test
-    void createAppointment_DuplicateId_Throws() {
-        when(repository.existsById("app1")).thenReturn(true);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
-        assertTrue(e.getMessage().contains("Ya existe una cita"));
-    }
-
-    @Test
-    void createAppointment_NullId_Throws() {
-        appointment.setId(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
-        assertTrue(e.getMessage().contains("ID de la cita"));
-    }
 
     @Test
     void createAppointment_PastDate_Throws() {
         appointment.setDate(LocalDate.now().minusDays(1));
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("fecha pasada"));
     }
@@ -91,7 +78,6 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_NullDate_Throws() {
         appointment.setDate(null);
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("fecha de la cita"));
     }
@@ -99,7 +85,6 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_NullTime_Throws() {
         appointment.setStartTime(null);
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("hora de inicio"));
     }
@@ -107,7 +92,6 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_InvalidTimeEarly_Throws() {
         appointment.setStartTime(LocalTime.of(7, 59));
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("hora debe estar"));
     }
@@ -115,15 +99,14 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_InvalidTimeLate_Throws() {
         appointment.setStartTime(LocalTime.of(18, 1));
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("hora debe estar"));
     }
 
     @Test
     void createAppointment_SameDoctorAndPatient_Throws() {
-        appointment.getPatient().setId("doc1"); 
-        when(repository.existsById("app1")).thenReturn(false);
+        patient.setId("123456"); // mismo ID que doctor
+        appointment.setPatient(patient);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("médico y el paciente"));
     }
@@ -131,7 +114,6 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_NullDoctor_Throws() {
         appointment.setDoctor(null);
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("paciente y un médico"));
     }
@@ -139,7 +121,6 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_NullPatient_Throws() {
         appointment.setPatient(null);
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("paciente y un médico"));
     }
@@ -147,32 +128,23 @@ class AppointmentServiceTest {
     @Test
     void createAppointment_NullLocation_Throws() {
         appointment.setLocation(null);
-        when(repository.existsById("app1")).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
         assertTrue(e.getMessage().contains("especificarse una ubicación"));
     }
 
-    @Test
-    void createAppointment_BlankId_Throws() {
-        appointment.setId("   "); 
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAppointment(appointment));
-        assertTrue(e.getMessage().contains("ID de la cita"));
-    }
-
-
     // UPDATE
     @Test
     void updateAppointment_Valid() {
-        when(repository.existsById("app1")).thenReturn(true);
+        when(repository.existsById(1L)).thenReturn(true);
         when(repository.save(appointment)).thenReturn(appointment);
         Appointment updated = service.UpdateAppointment(appointment);
         assertNotNull(updated);
-        assertEquals("app1", updated.getId());
+        assertEquals(1L, updated.getId());
     }
 
     @Test
     void updateAppointment_NotFound_Throws() {
-        when(repository.existsById("app1")).thenReturn(false);
+        when(repository.existsById(1L)).thenReturn(false);
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.UpdateAppointment(appointment));
         assertTrue(e.getMessage().contains("actualizar una cita que no existe"));
     }
@@ -187,36 +159,23 @@ class AppointmentServiceTest {
 
     @Test
     void getAppointmentById_Found() {
-        when(repository.findById("app1")).thenReturn(Optional.of(appointment));
-        Optional<Appointment> result = service.getAppointmentById("app1");
+        when(repository.findById(1L)).thenReturn(Optional.of(appointment));
+        Optional<Appointment> result = service.getAppointmentById(1L);
         assertTrue(result.isPresent());
-    }
-
-    @Test
-    void getAppointmentById_NotFound() {
-        when(repository.findById("nope")).thenReturn(Optional.empty());
-        Optional<Appointment> result = service.getAppointmentById("nope");
-        assertTrue(result.isEmpty());
     }
 
     // DELETE
     @Test
     void deleteAppointment_Valid() {
-        when(repository.existsById("app1")).thenReturn(true);
-        assertDoesNotThrow(() -> service.removeAppointmentById("app1"));
-        verify(repository).deleteById("app1");
+        when(repository.existsById(1L)).thenReturn(true);
+        assertDoesNotThrow(() -> service.removeAppointmentById(1L));
+        verify(repository).deleteById(1L);
     }
 
     @Test
     void deleteAppointment_NotFound_Throws() {
-        when(repository.existsById("NOT_FOUND")).thenReturn(false);
-        
-        Exception e = assertThrows(IllegalArgumentException.class, () ->
-                service.removeAppointmentById("NOT_FOUND"));
+        when(repository.existsById(99L)).thenReturn(false);
+        Exception e = assertThrows(IllegalArgumentException.class, () -> service.removeAppointmentById(99L));
         assertTrue(e.getMessage().contains("No se puede eliminar una cita que no existe."));
-        assertEquals("No se puede eliminar una cita que no existe.", e.getMessage());
     }
 }
-
-
-

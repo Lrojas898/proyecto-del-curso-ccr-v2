@@ -21,12 +21,10 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
 
     @Override
     public ClinicalHistory createClinicalHistory(ClinicalHistory history) {
-        if (clinicalHistoryRepository.existsById(history.getId())) {
-            throw new IllegalArgumentException("Ya existe una historia clínica con ese ID.");
-        }
         validateClinicalHistory(history, true);
         return clinicalHistoryRepository.save(history);
     }
+
 
     @Override
     public ClinicalHistory UpdateClinicalHistory(ClinicalHistory history) {
@@ -45,12 +43,12 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ClinicalHistory> getClinicalHistoryById(String id) {
+    public Optional<ClinicalHistory> getClinicalHistoryById(Long id) {
         return clinicalHistoryRepository.findById(id);
     }
 
     @Override
-    public void removeClinicalHistoryById(String id) {
+    public void removeClinicalHistoryById(Long id) {
         if (!clinicalHistoryRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar una historia clínica que no existe.");
         }
@@ -58,9 +56,6 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
     }
 
     private void validateClinicalHistory(ClinicalHistory history, boolean isCreate) {
-        if (isCreate && (history.getId() == null || history.getId().isBlank())) {
-            throw new IllegalArgumentException("El ID de la historia clínica es obligatorio.");
-        }
 
         if (history.getDate() == null || history.getDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha debe ser válida y no puede estar en el futuro.");

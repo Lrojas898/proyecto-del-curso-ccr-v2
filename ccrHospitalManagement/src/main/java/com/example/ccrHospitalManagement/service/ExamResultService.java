@@ -8,7 +8,7 @@ public interface ExamResultService {
 
     ExamResult createExamResult(ExamResult examResult);
     List<ExamResult> getAllExamResults();
-    Optional<ExamResult> getExamResultById(String id);
+    Optional<ExamResult> getExamResultById(Long id);
     ExamResult updateExamResult(ExamResult result);
-    void removeExamResultById(String id);
+    void removeExamResultById(Long id);
 }

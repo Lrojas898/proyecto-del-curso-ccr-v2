@@ -31,7 +31,7 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<AttentionEpisode> getAttentionEpisodeById(String id) {
+    public Optional<AttentionEpisode> getAttentionEpisodeById(Long id) {
         return episodeRepository.findById(id);
     }
 
@@ -45,7 +45,7 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     }
 
     @Override
-    public void removeAttentionEpisodeById(String id) {
+    public void removeAttentionEpisodeById(Long id) {
         if (!episodeRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un episodio que no existe.");
         }
@@ -53,14 +53,6 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     }
 
     private void validateEpisode(AttentionEpisode episode, boolean isCreate) {
-        if (isCreate) {
-            if (episode.getId() == null || episode.getId().isBlank()) {
-                throw new IllegalArgumentException("El ID del episodio de atención es obligatorio.");
-            }
-            if (episodeRepository.existsById(episode.getId())) {
-                throw new IllegalArgumentException("Ya existe un episodio de atención con ese ID.");
-            }
-        }
 
         if (episode.getCreationDate() == null) {
             throw new IllegalArgumentException("Debe establecerse la fecha de creación.");

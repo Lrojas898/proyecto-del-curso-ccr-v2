@@ -67,7 +67,7 @@ public class UserServiceImpl implements  UserService{
     }
 
     @Transactional
-    public User createUser(User user, List<String> roleIds) {
+    public User createUser(User user, List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) {
             throw new IllegalArgumentException("El usuario debe tener al menos un rol asignado.");
         }
@@ -92,7 +92,7 @@ public class UserServiceImpl implements  UserService{
     }
 
     @Transactional
-    public User updateUser(User user, List<String> roleIds) {
+    public User updateUser(User user, List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) {
             throw new IllegalArgumentException("El usuario debe tener al menos un rol asignado.");
         }
@@ -146,7 +146,7 @@ public class UserServiceImpl implements  UserService{
     }
 
     @Transactional
-    public void updateUserRoles(String userId, Set<String> roleIds) {
+    public void updateUserRoles(String userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 

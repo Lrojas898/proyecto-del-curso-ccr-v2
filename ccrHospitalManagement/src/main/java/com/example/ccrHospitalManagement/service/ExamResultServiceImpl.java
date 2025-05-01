@@ -19,9 +19,6 @@ public class ExamResultServiceImpl implements ExamResultService {
 
     @Override
     public ExamResult createExamResult(ExamResult result) {
-        if (examResultRepository.existsById(result.getId())) {
-            throw new IllegalArgumentException("Ya existe un resultado con ese ID.");
-        }
         validateExamResult(result, true);
         return examResultRepository.save(result);
     }
@@ -43,12 +40,12 @@ public class ExamResultServiceImpl implements ExamResultService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ExamResult> getExamResultById(String id) {
+    public Optional<ExamResult> getExamResultById(Long id) {
         return examResultRepository.findById(id);
     }
 
     @Override
-    public void removeExamResultById(String id) {
+    public void removeExamResultById(Long id) {
         if (!examResultRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un resultado que no existe.");
         }
@@ -56,9 +53,6 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     private void validateExamResult(ExamResult result, boolean isCreate) {
-        if (isCreate && (result.getId() == null || result.getId().isBlank())) {
-            throw new IllegalArgumentException("El ID del resultado de examen es obligatorio.");
-        }
 
         if (result.getResultDate() == null || result.getResultDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha del resultado es inválida o futura.");

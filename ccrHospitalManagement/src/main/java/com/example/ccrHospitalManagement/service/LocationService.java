@@ -8,7 +8,7 @@ public interface LocationService {
 
     Location registerLocation(Location location);
     List<Location> getAllLocations();
-    Optional<Location> getLocationById(String id);
+    Optional<Location> getLocationById(Long id);
     Location updateLocation(Location location);
-    void removeLocationById(String id);
+    void removeLocationById(Long id);
 }
