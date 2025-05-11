@@ -41,7 +41,7 @@ public class DataInitializer {
             prepaidRepository.saveAll(List.of(pm1, pm2));
 
             // Roles
-            List<String> roleNames = List.of("admin", "doctor", "paciente", "técnico de laboratorio", "asistente de doctor", "med-asis");
+            List<String> roleNames = List.of("admin", "doctor", "paciente", "tec-lab", "asistente de doctor", "med-asis");
             for (String roleName : roleNames) {
                 roleRepository.findByName(roleName)
                     .orElseGet(() -> roleRepository.save(new Role(null, roleName)));
@@ -52,6 +52,8 @@ public class DataInitializer {
             createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Médico", "Hombre", eps1, pm2, "Medicina Interna", "doctor");
             createUserIfNotExists("paciente1", "123456", "paciente1@gmail.com", "Laura", "Pérez", "Mujer", eps2, pm1, null, "paciente");
             createUserIfNotExists("asistente1", "123456", "asistente1@hospital.com", "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "med-asis");
+            createUserIfNotExists("tecnico1", "tecnico1", "asistente1@hospital.com", "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "tec-lab");
+            
 
             // Ubicación
             Location location = createLocationIfNotExists("Consultorio General 101", "Av. Siempre Viva 742", "Ubicación en el ala norte del hospital");

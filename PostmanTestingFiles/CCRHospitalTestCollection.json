@@ -1,7 +1,7 @@
 {
   "info": {
-    "_postman_id": "5e10ff6e-ffcc-4df4-aa9c-12c27829b123",
-    "name": "CCRHospitalTestCollection",
+    "_postman_id": "754ebc34-a848-414f-b3a8-b488d8f683b1",
+    "name": "CCRHospitalTestCollection - v3",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "44658492"
   },
@@ -167,6 +167,339 @@
       "response": []
     },
     {
+      "name": "Login Asistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let json = pm.response.json();",
+              "pm.test(\"Login Asistente correcto\", () => pm.response.code === 200);",
+              "pm.environment.set('asistente_token', json.token);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"username\": \"{{asistente_user}}\", \"password\": \"{{asistente_pass}}\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear AttentionEpisode (Doctor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Fixed Content-Type and response handling",
+              "let text = pm.response.text();",
+              "pm.environment.set(\"attention_episode_id\", text); // Assuming the response is the ID",
+              "pm.test(\"AttentionEpisode creado con éxito\", () => pm.response.code === 200);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"creationDate\": \"2024-12-01\",\n  \"diagnosis\": \"Dolor de cabeza persistente\",\n  \"description\": \"El paciente refiere dolor desde hace 3 días.\",\n  \"clinicalHistoryId\": \"{{clinical_history_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/attention-episodes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "attention-episodes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Clinical History (Doctor/Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Historia clínica creada correctamente\", () => pm.response.code === 200);",
+              "let response = pm.response.json();",
+              "pm.environment.set(\"clinical_history_id\", response.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"date\": \"2024-05-11\",\n  \"hour\": \"10:30:00\",\n  \"generalObservations\": \"Paciente con historial de hipertensión.\",\n  \"userId\": \"id_usuario_valido\",\n  \"attentionEpisodes\": []\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/clinical-histories",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "clinical-histories"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create EPS (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"EPS creada correctamente\", () => pm.response.code === 200);",
+              "pm.environment.set(\"eps_nit\", pm.response.json().nit);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"nit\": \"EPS999\", \"name\": \"NuevaEPS Test\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/eps",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Prepaid Medicine (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Medicina prepagada creada correctamente\", () => pm.response.code === 200);",
+              "pm.environment.set(\"prepaid_nit\", pm.response.json().nit);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"nit\": \"PM999\", \"name\": \"Nueva Medicina Test\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Assistance Act Type (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"AssistanceActType creado correctamente\", () => pm.response.code === 200);",
+              "pm.environment.set(\"assistance_act_type_id\", pm.response.json().id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Emergencia Ambulatoria\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/assistance-act-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "assistance-act-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Exam Type (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ExamType creado correctamente\", () => pm.response.code === 200);",
+              "pm.environment.set(\"exam_type_id\", pm.response.json().id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Examen de Sangre\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/exam-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exam-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Doctor no puede crear EPS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"nit\": \"EPS_FORBIDDEN\", \"name\": \"EPS No Permitida\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/eps",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Doctor no puede crear EPS (403)\", () => pm.response.code === 403);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
       "name": "Get All Users (Admin)",
       "event": [
         {
@@ -198,6 +531,899 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Listar AttentionEpisodes (Doctor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Listado de episodios recibido\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/attention-episodes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "attention-episodes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener AttentionEpisode por ID (Doctor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Detalle del episodio recibido\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/attention-episodes/{{attention_episode_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "attention-episodes",
+            "{{attention_episode_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Clinical Histories (Admin/Doctor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Lista recibida correctamente\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/clinical-histories",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "clinical-histories"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Clinical History by ID (Paciente/Admin/Doctor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Historia clínica recibida o acceso denegado apropiadamente\", () => {",
+              "    pm.expect([200, 403]).to.include(pm.response.code);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{paciente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/clinical-histories/{{clinical_history_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "clinical-histories",
+            "{{clinical_history_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All EPS",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Listado de EPS obtenido\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/eps",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All EPS - Doctor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"EPS accesible por doctor\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/eps",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All EPS - Paciente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"EPS accesible por paciente\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{paciente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/eps",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get EPS by NIT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"EPS encontrada\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/eps/{{eps_nit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps",
+            "{{eps_nit}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Prepaid Medicines",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Listado de medicina prepagada obtenido\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Prepaid Medicines - Asistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Prepaid Medicines accesible por asistente\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{asistente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Prepaid Medicine by NIT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Medicina prepagada encontrada\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines/{{prepaid_nit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines",
+            "{{prepaid_nit}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Assistance Act Types",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Listado de AssistanceActTypes obtenido\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/assistance-act-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "assistance-act-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Assistance Act Types - Paciente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Assistance Act Types accesible por paciente\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{paciente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/assistance-act-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "assistance-act-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Exam Types",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Listado de ExamTypes obtenido\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/exam-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exam-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Exam Types - Doctor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Exam Types accesible por doctor\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/exam-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exam-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Actualizar AttentionEpisode (Doctor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Episodio actualizado\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{attention_episode_id}},\n  \"creationDate\": \"2024-12-01\",\n  \"diagnosis\": \"Actualizado: migraña intensa\",\n  \"description\": \"El paciente ahora reporta mareos.\",\n  \"clinicalHistoryId\": \"{{clinical_history_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/attention-episodes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "attention-episodes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Clinical History (Doctor/Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Historia clínica actualizada correctamente\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{clinical_history_id}},\n  \"date\": \"2024-05-11\",\n  \"hour\": \"11:00:00\",\n  \"generalObservations\": \"Observaciones actualizadas.\",\n  \"userId\": \"{{patient_id}}\",\n  \"attentionEpisodes\": []\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/clinical-histories",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "clinical-histories"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update EPS (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"EPS actualizada correctamente\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"nit\": \"{{eps_nit}}\", \"name\": \"EPS Actualizada\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/eps",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Prepaid Medicine (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Medicina prepagada actualizada\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"nit\": \"{{prepaid_nit}}\", \"name\": \"Medicina Actualizada\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Assistance Act Type (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"AssistanceActType actualizado\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"id\": {{assistance_act_type_id}}, \"name\": \"Emergencia Hospitalaria\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/assistance-act-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "assistance-act-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Exam Type (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ExamType actualizado\", () => pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"id\": {{exam_type_id}}, \"name\": \"Examen de Orina\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/exam-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exam-types"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Asistente no puede actualizar Assistance Act Type",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{asistente_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"id\": {{assistance_act_type_id}}, \"name\": \"Cambio Ilegal\" }"
+        },
+        "url": {
+          "raw": "{{base_url}}/assistance-act-types",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "assistance-act-types"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Asistente no puede actualizar (403)\", () => pm.response.code === 403);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Modificar Cita - Asistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Cita modificada correctamente\", () => pm.response.code === 200);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{asistente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=MODIFIED",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "appointments",
+            "{{appointment_id}}",
+            "status"
+          ],
+          "query": [
+            {
+              "key": "newStatus",
+              "value": "MODIFIED"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Cancelar Cita - Paciente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Cita cancelada por paciente\", () => pm.response.code === 200);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{paciente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=CANCELLED_BY_PATIENT",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "appointments",
+            "{{appointment_id}}",
+            "status"
+          ],
+          "query": [
+            {
+              "key": "newStatus",
+              "value": "CANCELLED_BY_PATIENT"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Rechazar Cita - Doctor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Cita rechazada por doctor\", () => pm.response.code === 200);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=DENIED",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "appointments",
+            "{{appointment_id}}",
+            "status"
+          ],
+          "query": [
+            {
+              "key": "newStatus",
+              "value": "DENIED"
+            }
+          ]
+        }
+      }
     },
     {
       "name": "Admin DELETE paciente3",
@@ -336,160 +1562,6 @@
       "response": []
     },
     {
-      "name": "Crear AttentionEpisode (Doctor)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "// Fixed Content-Type and response handling",
-              "let text = pm.response.text();",
-              "pm.environment.set(\"attention_episode_id\", text); // Assuming the response is the ID",
-              "pm.test(\"AttentionEpisode creado con éxito\", () => pm.response.code === 200);",
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{doctor_token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"creationDate\": \"2024-12-01\",\n  \"diagnosis\": \"Dolor de cabeza persistente\",\n  \"description\": \"El paciente refiere dolor desde hace 3 días.\",\n  \"clinicalHistoryId\": \"{{clinical_history_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/attention-episodes",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "attention-episodes"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Listar AttentionEpisodes (Doctor)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Listado de episodios recibido\", () => pm.response.code === 200);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{doctor_token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/attention-episodes",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "attention-episodes"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Obtener AttentionEpisode por ID (Doctor)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Detalle del episodio recibido\", () => pm.response.code === 200);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{doctor_token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/attention-episodes/{{attention_episode_id}}",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "attention-episodes",
-            "{{attention_episode_id}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Actualizar AttentionEpisode (Doctor)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Episodio actualizado\", () => pm.response.code === 200);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{doctor_token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"id\": {{attention_episode_id}},\n  \"creationDate\": \"2024-12-01\",\n  \"diagnosis\": \"Actualizado: migraña intensa\",\n  \"description\": \"El paciente ahora reporta mareos.\",\n  \"clinicalHistoryId\": \"{{clinical_history_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/attention-episodes",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "attention-episodes"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "Eliminar AttentionEpisode (Admin)",
       "event": [
         {
@@ -524,177 +1596,15 @@
       "response": []
     },
     {
-      "name": "Crear Cita - Paciente",
+      "name": "Delete Clinical History (Admin)",
       "event": [
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
-              "let data = pm.response.json();",
-              "pm.test(\"Cita creada correctamente\", () => pm.response.code === 200);",
-              "pm.environment.set(\"appointment_id\", data.id);"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{paciente_token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"date\": \"2025-05-20\", \"startTime\": \"10:00\", \"description\": \"Cita de control general\", \"locationId\": 1, \"patientId\": \"{{patient_id}}\", \"doctorId\": \"{{doctor_id}}\"}"
-        },
-        "url": {
-          "raw": "{{base_url}}/appointments",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "appointments"
-          ]
-        }
-      }
-    },
-    {
-      "name": "Actualizar Estado - Doctor",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Cita aprobada por el doctor\", () => pm.response.code === 200);"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{doctor_token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=APPROVED_BY_DOCTOR",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "appointments",
-            "{{appointment_id}}",
-            "status"
-          ],
-          "query": [
-            {
-              "key": "newStatus",
-              "value": "APPROVED_BY_DOCTOR"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Actualizar Estado - Asistente",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Cita aprobada por asistente\", () => pm.response.code === 200);"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{asistente_token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=APPROVED_BY_ASSISTANT",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "appointments",
-            "{{appointment_id}}",
-            "status"
-          ],
-          "query": [
-            {
-              "key": "newStatus",
-              "value": "APPROVED_BY_ASSISTANT"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Confirmar Cita - Paciente",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Cita confirmada por paciente\", () => pm.response.code === 200);"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{paciente_token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=CONFIRMED_BY_PATIENT",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "appointments",
-            "{{appointment_id}}",
-            "status"
-          ],
-          "query": [
-            {
-              "key": "newStatus",
-              "value": "CONFIRMED_BY_PATIENT"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Eliminar Cita - Admin",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Cita eliminada correctamente por admin\", () => pm.response.code === 204 || pm.response.code === 200);"
-            ]
+              "pm.test(\"Historia clínica eliminada\", () => pm.response.code === 204 || pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -707,16 +1617,215 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/appointments/{{appointment_id}}",
+          "raw": "{{base_url}}/clinical-histories/{{clinical_history_id}}",
           "host": [
             "{{base_url}}"
           ],
           "path": [
-            "appointments",
-            "{{appointment_id}}"
+            "clinical-histories",
+            "{{clinical_history_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete EPS (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"EPS eliminada correctamente\", () => pm.response.code === 204 || pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/eps/{{eps_nit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "eps",
+            "{{eps_nit}}"
           ]
         }
       }
+    },
+    {
+      "name": "Delete Prepaid Medicine (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Medicina prepagada eliminada\", () => pm.response.code === 204 || pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines/{{prepaid_nit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines",
+            "{{prepaid_nit}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Assistance Act Type (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"AssistanceActType eliminado\", () => pm.response.code === 204 || pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/assistance-act-types/{{assistance_act_type_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "assistance-act-types",
+            "{{assistance_act_type_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Exam Type (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ExamType eliminado\", () => pm.response.code === 204 || pm.response.code === 200);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/exam-types/{{exam_type_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exam-types",
+            "{{exam_type_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Paciente no puede eliminar Prepaid Medicine",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{paciente_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/prepaid-medicines/{{prepaid_nit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "prepaid-medicines",
+            "{{prepaid_nit}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Paciente no puede eliminar (403)\", () => pm.response.code === 403);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Técnico no puede eliminar Exam Type",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tecnico_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/exam-types/{{exam_type_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exam-types",
+            "{{exam_type_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Técnico no puede eliminar Exam Type (403)\", () => pm.response.code === 403);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
     }
   ]
 }
