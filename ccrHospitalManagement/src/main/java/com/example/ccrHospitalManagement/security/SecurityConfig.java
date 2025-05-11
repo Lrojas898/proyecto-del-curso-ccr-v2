@@ -39,22 +39,23 @@ public class SecurityConfig {
         return provider;
     }
 
-    
-    @Bean
-    @Order(1)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-            .securityMatcher("/api/**")
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
-    }
+@Bean
+@Order(1)
+public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+    return http
+        .securityMatcher("/api/**") 
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
+}
+
+
 
     
     @Bean
@@ -63,8 +64,8 @@ public class SecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/", "/login", "/register", "/css/", "/js/").permitAll()
+                .requestMatchers("/admin/").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

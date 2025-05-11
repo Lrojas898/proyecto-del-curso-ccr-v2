@@ -1,0 +1,177 @@
+{
+  "info": {
+    "_postman_id": "ccr-hospital-test-collection",
+    "name": "CCRHospitalTestCollection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"username\": \"{{admin_user}}\", \"password\": \"{{admin_pass}}\" }"
+        },
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "let jsonData = pm.response.json();",
+            "pm.environment.set(\"admin_token\", jsonData.token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login Doctor",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"username\": \"{{doctor_user}}\", \"password\": \"{{doctor_pass}}\" }"
+        },
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "let jsonData = pm.response.json();",
+            "pm.environment.set(\"doctor_token\", jsonData.token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login Paciente",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"username\": \"{{paciente_user}}\", \"password\": \"{{paciente_pass}}\" }"
+        },
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "let jsonData = pm.response.json();",
+            "pm.environment.set(\"paciente_token\", jsonData.token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login Asistente",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"username\": \"asistente1\", \"password\": \"123456\" }"
+        },
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "let jsonData = pm.response.json();",
+            "pm.environment.set(\"asistente_token\", jsonData.token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Crear Cita - Paciente",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{paciente_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"date\": \"2025-05-20\",\n  \"startTime\": \"10:00\",\n  \"description\": \"Cita de control general\",\n  \"locationId\": 1,\n  \"patientId\": \"paciente1-id\",\n  \"doctorId\": \"doctor1-id\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/appointments",
+          "host": ["{{base_url}}"],
+          "path": ["appointments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "let data = pm.response.json();",
+            "pm.environment.set(\"appointment_id\", data.id);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Actualizar Estado - Doctor",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{doctor_token}}" }],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=APPROVED_BY_DOCTOR",
+          "host": ["{{base_url}}"],
+          "path": ["appointments", "{{appointment_id}}", "status"],
+          "query": [{ "key": "newStatus", "value": "APPROVED_BY_DOCTOR" }]
+        }
+      }
+    },
+    {
+      "name": "Actualizar Estado - Asistente",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{asistente_token}}" }],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=APPROVED_BY_ASSISTANT",
+          "host": ["{{base_url}}"],
+          "path": ["appointments", "{{appointment_id}}", "status"],
+          "query": [{ "key": "newStatus", "value": "APPROVED_BY_ASSISTANT" }]
+        }
+      }
+    },
+    {
+      "name": "Confirmar Cita - Paciente",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{paciente_token}}" }],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}/status?newStatus=CONFIRMED_BY_PATIENT",
+          "host": ["{{base_url}}"],
+          "path": ["appointments", "{{appointment_id}}", "status"],
+          "query": [{ "key": "newStatus", "value": "CONFIRMED_BY_PATIENT" }]
+        }
+      }
+    },
+    {
+      "name": "Eliminar Cita - Admin",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+        "url": {
+          "raw": "{{base_url}}/appointments/{{appointment_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["appointments", "{{appointment_id}}"]
+        }
+      }
+    }
+  ]
+}
