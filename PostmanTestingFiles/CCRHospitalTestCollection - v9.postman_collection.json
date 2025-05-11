@@ -2700,7 +2700,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"Created successfully\", function () {",
-							"    pm.response.to.have.status(200);",
+							"    pm.response.to.have.status(201);",
 							"    var jsonData = pm.response.json();",
 							"    pm.environment.set(\"location_id\", jsonData.id);",
 							"});"

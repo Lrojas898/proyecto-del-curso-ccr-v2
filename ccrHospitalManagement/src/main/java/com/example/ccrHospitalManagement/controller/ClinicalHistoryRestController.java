@@ -1,7 +1,6 @@
 package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.ClinicalHistoryDTO;
-import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapper;
 import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapperDecorator;
 import com.example.ccrHospitalManagement.service.ClinicalHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -23,41 +22,73 @@ public class ClinicalHistoryRestController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
-    public List<ClinicalHistoryDTO> getAll() {
-        return service.getAllClinicalHistories().stream().map(mapper::toDto).toList();
+    public ResponseEntity<List<ClinicalHistoryDTO>> getAll() {
+        try {
+            List<ClinicalHistoryDTO> list = service.getAllClinicalHistories()
+                    .stream()
+                    .map(mapper::toDto)
+                    .toList();
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE')")
     public ResponseEntity<ClinicalHistoryDTO> getById(@PathVariable Long id, Authentication authentication) {
-        return service.getClinicalHistoryById(id)
-                .filter(history -> {
-                    if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PACIENTE"))) {
-                        return history.getUser().getUsername().equals(authentication.getName());
-                    }
-                    return true;
-                })
-                .map(mapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+        try {
+            return service.getClinicalHistoryById(id)
+                    .filter(history -> {
+                        if (authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_PACIENTE"))) {
+                            return history.getUser().getUsername().equals(authentication.getName());
+                        }
+                        return true;
+                    })
+                    .map(mapper::toDto)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
-    public ClinicalHistoryDTO create(@RequestBody ClinicalHistoryDTO dto) {
-        return mapper.toDto(service.createClinicalHistory(mapper.toEntity(dto)));
+    public ResponseEntity<ClinicalHistoryDTO> create(@RequestBody ClinicalHistoryDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(mapper.toDto(service.createClinicalHistory(mapper.toEntity(dto))));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
-    public ClinicalHistoryDTO update(@RequestBody ClinicalHistoryDTO dto) {
-        return mapper.toDto(service.UpdateClinicalHistory(mapper.toEntity(dto)));
+    public ResponseEntity<ClinicalHistoryDTO> update(@RequestBody ClinicalHistoryDTO dto) {
+        try {
+            return ResponseEntity.ok(mapper.toDto(service.UpdateClinicalHistory(mapper.toEntity(dto))));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Long id) {
-        service.removeClinicalHistoryById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        try {
+            service.removeClinicalHistoryById(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

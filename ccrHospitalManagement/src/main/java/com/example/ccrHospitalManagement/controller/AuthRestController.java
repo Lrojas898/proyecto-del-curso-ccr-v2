@@ -4,6 +4,7 @@ import com.example.ccrHospitalManagement.dto.LoginRequest;
 import com.example.ccrHospitalManagement.dto.LoginResponse;
 import com.example.ccrHospitalManagement.security.JWTService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,11 +30,12 @@ public class AuthRestController {
             authenticationManager.authenticate(authToken);
 
             String token = jwtService.generateToken(request.getUsername());
-
             return ResponseEntity.ok(new LoginResponse(token));
 
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body("Credenciales inválidas");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al procesar la solicitud");
         }
     }
 }
