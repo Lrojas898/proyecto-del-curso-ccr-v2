@@ -35,8 +35,8 @@ public class DataInitializer {
             prepaidRepository.saveAll(List.of(pm1, pm2));
 
             List<String> roleNames = List.of(
-                    "admin", "doctor", "paciente",
-                    "técnico de laboratorio", "asistente de doctor", "med-asis"
+                "admin", "doctor", "paciente",
+                "técnico de laboratorio", "asistente de doctor", "med-asis"
             );
             for (String roleName : roleNames) {
                 if (roleRepository.findByName(roleName).isEmpty()) {
@@ -45,9 +45,9 @@ public class DataInitializer {
             }
 
             createUserIfNotExists(
-                    "123456", "admin", "123456", "admin@hospital.com",
-                    "Admin", "Principal", "Hombre", eps1, pm1,
-                    "Administración", "admin"
+                "123456", "admin", "123456", "admin@hospital.com",
+                "Admin", "Principal", "Hombre", eps1, pm1,
+                "Administración", "admin"
             );
 
             createUserIfNotExists("doctor1-id", "doctor1", "123456", "doc1@hospital.com",
@@ -72,6 +72,10 @@ public class DataInitializer {
                     "Valentina", "Ríos", "Mujer", eps1, pm2, "Análisis Clínico", "técnico de laboratorio");
 
             // ✅ Nuevo usuario con rol "med-asis"
+            createUserIfNotExists("asistente1-id", "asistente1", "123456", "asistente1@hospital.com",
+                    "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "med-asis");
+
+
             createUserIfNotExists("asistente1-id", "asistente1", "123456", "asistente1@hospital.com",
                     "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "med-asis");
         };
