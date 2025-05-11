@@ -2,6 +2,7 @@ package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.ClinicalHistoryDTO;
 import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapper;
+import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapperDecorator;
 import com.example.ccrHospitalManagement.service.ClinicalHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ import java.util.List;
 public class ClinicalHistoryRestController {
 
     private final ClinicalHistoryService service;
-    private final ClinicalHistoryMapper mapper;
+    private final ClinicalHistoryMapperDecorator mapper;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")

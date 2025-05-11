@@ -66,7 +66,7 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
         if (hasRole(currentUser, "ADMIN") || hasRole(currentUser, "DOCTOR")) {
             return episodeRepository.findAll();
         } else if (hasRole(currentUser, "PACIENTE")) {
-            return episodeRepository.findByClinicalHistory_PatientId(currentUser.getId());
+            return episodeRepository.findByClinicalHistory_User_Id(currentUser.getId());
         }
         return List.of();
     }

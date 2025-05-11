@@ -10,6 +10,8 @@ import java.util.List;
 public interface AttentionEpisodeRepository extends JpaRepository<AttentionEpisode, Long> {
     // La PK de AttentionEpisode es String (id)
     // En AttentionEpisodeRepository.java
-    List<AttentionEpisode> findByClinicalHistory_PatientId(String patientId);
+
+    List<AttentionEpisode> findByClinicalHistory_User_Id(String userId);
+
 
 }
