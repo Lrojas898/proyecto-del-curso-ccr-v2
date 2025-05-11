@@ -34,7 +34,7 @@ public class AppointmentRestController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE')")
     public AppointmentDTO create(@RequestBody AppointmentDTO dto) {
         return mapper.toDto(service.createAppointment(mapper.toEntity(dto)));
     }
@@ -46,7 +46,7 @@ public class AppointmentRestController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public void delete(@PathVariable Long id) {
         service.removeAppointmentById(id);
     }

@@ -36,7 +36,7 @@ public class DataInitializer {
 
             List<String> roleNames = List.of(
                     "admin", "doctor", "paciente",
-                    "técnico de laboratorio", "asistente de doctor"
+                    "técnico de laboratorio", "asistente de doctor", "med-asis"
             );
             for (String roleName : roleNames) {
                 if (roleRepository.findByName(roleName).isEmpty()) {
@@ -70,10 +70,16 @@ public class DataInitializer {
                     "Miguel", "Torres", "Hombre", eps2, pm1, "Radiología", "técnico de laboratorio");
             createUserIfNotExists("tecnico3-id", "tecnico3", "123456", "tecnico3@gmail.com",
                     "Valentina", "Ríos", "Mujer", eps1, pm2, "Análisis Clínico", "técnico de laboratorio");
+
+            // ✅ Nuevo usuario con rol "med-asis"
+            createUserIfNotExists("asistente1-id", "asistente1", "123456", "asistente1@hospital.com",
+                    "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "med-asis");
         };
     }
 
-    private void createUserIfNotExists(String id, String username, String rawPassword, String email,String firstName, String lastName, String sex,EPS eps, PrepaidMedicine prepaid, String speciality, String roleName) {
+    private void createUserIfNotExists(String id, String username, String rawPassword, String email,
+                                       String firstName, String lastName, String sex,
+                                       EPS eps, PrepaidMedicine prepaid, String speciality, String roleName) {
 
         if (userRepository.existsByUsername(username)) return;
 
@@ -81,7 +87,7 @@ public class DataInitializer {
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + roleName));
 
         User user = new User();
-        user.setId(id); 
+        user.setId(id);
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setEmail(email);
@@ -98,5 +104,4 @@ public class DataInitializer {
 
         userRepository.save(user);
     }
-
 }

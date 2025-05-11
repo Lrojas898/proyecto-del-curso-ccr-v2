@@ -4,6 +4,7 @@ package com.example.ccrHospitalManagement.model;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.*;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,5 +29,9 @@ public class ClinicalHistory {
     @OneToOne
     @JoinColumn(name = "myuser_id", nullable = false, unique = true)
     private User user;
+
+    @OneToMany(mappedBy = "clinicalHistory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AttentionEpisode> attentionEpisodes = new ArrayList<>();
+
 }
 

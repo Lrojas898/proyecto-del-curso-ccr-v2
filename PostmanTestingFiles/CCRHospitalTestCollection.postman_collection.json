@@ -1,0 +1,527 @@
+{
+	"info": {
+		"_postman_id": "5e10ff6e-ffcc-4df4-aa9c-12c27829b123",
+		"name": "CCRHospitalTestCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44658492"
+	},
+	"item": [
+		{
+			"name": "Login Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.test(\"Login Admin correcto\", () => pm.response.code === 200);",
+							"pm.environment.set('admin_token', json.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"{{admin_user}}\", \"password\": \"{{admin_pass}}\" }"
+				},
+				"url": {
+					"raw": "{{base_url}}/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Doctor",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.test(\"Login Doctor correcto\", () => pm.response.code === 200);",
+							"pm.environment.set('doctor_token', json.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"{{doctor_user}}\", \"password\": \"{{doctor_pass}}\" }"
+				},
+				"url": {
+					"raw": "{{base_url}}/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Paciente",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.test(\"Login Paciente correcto\", () => pm.response.code === 200);",
+							"pm.environment.set('paciente_token', json.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"{{paciente_user}}\", \"password\": \"{{paciente_pass}}\" }"
+				},
+				"url": {
+					"raw": "{{base_url}}/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Tecnico",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.test(\"Login Tecnico correcto\", () => pm.response.code === 200);",
+							"pm.environment.set('tecnico_token', json.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"{{tecnico_user}}\", \"password\": \"{{tecnico_pass}}\" }"
+				},
+				"url": {
+					"raw": "{{base_url}}/auth/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Users (Admin)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Listado de usuarios correcto (admin)\", () => pm.response.code === 200);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Admin DELETE paciente3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Admin pudo eliminar paciente3\", () => pm.response.code === 200 || pm.response.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/{{delete_target_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{delete_target_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Doctor DELETE paciente3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Doctor no puede eliminar (403)\", () => pm.response.code === 403);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{doctor_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/{{delete_target_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{delete_target_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Paciente DELETE paciente3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Paciente no puede eliminar (403)\", () => pm.response.code === 403);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{paciente_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/{{delete_target_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{delete_target_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tecnico DELETE paciente3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Técnico no puede eliminar (403)\", () => pm.response.code === 403);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{tecnico_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/{{delete_target_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{delete_target_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear AttentionEpisode (Doctor)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Fixed Content-Type and response handling",
+							"let text = pm.response.text();",
+							"pm.environment.set(\"attention_episode_id\", text); // Assuming the response is the ID",
+							"pm.test(\"AttentionEpisode creado con éxito\", () => pm.response.code === 200);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{doctor_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"creationDate\": \"2024-12-01\",\n  \"diagnosis\": \"Dolor de cabeza persistente\",\n  \"description\": \"El paciente refiere dolor desde hace 3 días.\",\n  \"clinicalHistoryId\": \"{{clinical_history_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/attention-episodes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"attention-episodes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar AttentionEpisodes (Doctor)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Listado de episodios recibido\", () => pm.response.code === 200);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{doctor_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/attention-episodes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"attention-episodes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener AttentionEpisode por ID (Doctor)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Detalle del episodio recibido\", () => pm.response.code === 200);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{doctor_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/attention-episodes/{{attention_episode_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"attention-episodes",
+						"{{attention_episode_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Actualizar AttentionEpisode (Doctor)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Episodio actualizado\", () => pm.response.code === 200);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{doctor_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": {{attention_episode_id}},\n  \"creationDate\": \"2024-12-01\",\n  \"diagnosis\": \"Actualizado: migraña intensa\",\n  \"description\": \"El paciente ahora reporta mareos.\",\n  \"clinicalHistoryId\": \"{{clinical_history_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/attention-episodes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"attention-episodes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar AttentionEpisode (Admin)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Episodio eliminado (204)\", () => pm.response.code === 204);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/attention-episodes/{{attention_episode_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"attention-episodes",
+						"{{attention_episode_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

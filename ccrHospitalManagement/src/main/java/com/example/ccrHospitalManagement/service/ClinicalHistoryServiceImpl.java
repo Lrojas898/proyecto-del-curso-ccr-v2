@@ -41,8 +41,10 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         return clinicalHistoryRepository.findAll();
     }
 
-    @Override
+
+
     @Transactional(readOnly = true)
+    @Override
     public Optional<ClinicalHistory> getClinicalHistoryById(Long id) {
         return clinicalHistoryRepository.findById(id);
     }
