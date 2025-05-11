@@ -25,6 +25,7 @@ public class DataInitializer {
     private final LocationRepository locationRepository;
     private final AppointmentRepository appointmentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ExamTypeRepository examTypeRepository;
 
     @Bean
     public CommandLineRunner initData() {
@@ -41,10 +42,10 @@ public class DataInitializer {
             prepaidRepository.saveAll(List.of(pm1, pm2));
 
             // Roles
-            List<String> roleNames = List.of("admin", "doctor", "paciente", "técnico de laboratorio", "asistente de doctor", "med-asis");
+            List<String> roleNames = List.of("admin", "doctor", "paciente", "LABTECH", "asistente de doctor", "med-asis");
             for (String roleName : roleNames) {
                 roleRepository.findByName(roleName)
-                    .orElseGet(() -> roleRepository.save(new Role(null, roleName)));
+                        .orElseGet(() -> roleRepository.save(new Role(null, roleName)));
             }
 
             // Usuarios
@@ -52,12 +53,25 @@ public class DataInitializer {
             createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Médico", "Hombre", eps1, pm2, "Medicina Interna", "doctor");
             createUserIfNotExists("paciente1", "123456", "paciente1@gmail.com", "Laura", "Pérez", "Mujer", eps2, pm1, null, "paciente");
             createUserIfNotExists("asistente1", "123456", "asistente1@hospital.com", "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "med-asis");
+            createUserIfNotExists("tecnico1", "123456", "tecnico1@hospital.com", "María", "tecnica", "Mujer", eps1, pm1, "tecnica de lab", "LABTECH");
 
             // Ubicación
             Location location = createLocationIfNotExists("Consultorio General 101", "Av. Siempre Viva 742", "Ubicación en el ala norte del hospital");
 
             // Cita de prueba
             createAppointmentIfNotExists("paciente1", "doctor1", location, "Control médico general");
+            // exam type
+            if (examTypeRepository.count() == 0) {
+                List<ExamType> types = List.of(
+                        new ExamType(null, "Hemograma"),
+                        new ExamType(null, "Química sanguínea"),
+                        new ExamType(null, "Perfil lipídico"),
+                        new ExamType(null, "Orina"),
+                        new ExamType(null, "PCR")
+                );
+                examTypeRepository.saveAll(types);
+                System.out.println("Tipos de examen inicializados.");
+            }
         };
     }
 
@@ -73,7 +87,7 @@ public class DataInitializer {
         Role role = roleOpt.get();
 
         User user = new User();
-        user.setId(username); 
+        user.setId(username);
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setEmail(email);
@@ -93,15 +107,15 @@ public class DataInitializer {
 
     private Location createLocationIfNotExists(String name, String address, String description) {
         return locationRepository.findAll().stream()
-            .filter(loc -> loc.getName().equalsIgnoreCase(name))
-            .findFirst()
-            .orElseGet(() -> {
-                Location location = new Location();
-                location.setName(name);
-                location.setAddress(address);
-                location.setDescription(description);
-                return locationRepository.save(location);
-            });
+                .filter(loc -> loc.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseGet(() -> {
+                    Location location = new Location();
+                    location.setName(name);
+                    location.setAddress(address);
+                    location.setDescription(description);
+                    return locationRepository.save(location);
+                });
     }
 
     private void createAppointmentIfNotExists(String patientUsername, String doctorUsername, Location location, String description) {
@@ -114,9 +128,9 @@ public class DataInitializer {
         User doctor = doctorOpt.get();
 
         boolean exists = appointmentRepository.findAll().stream()
-            .anyMatch(app -> app.getPatient().getId().equals(patient.getId())
-                && app.getDoctor().getId().equals(doctor.getId())
-                && app.getDate().equals(LocalDate.now().plusDays(2)));
+                .anyMatch(app -> app.getPatient().getId().equals(patient.getId())
+                        && app.getDoctor().getId().equals(doctor.getId())
+                        && app.getDate().equals(LocalDate.now().plusDays(2)));
 
         if (exists) return;
 

@@ -3,10 +3,7 @@ package com.example.ccrHospitalManagement.service;
 import com.example.ccrHospitalManagement.dto.RoleDTO;
 import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
 import com.example.ccrHospitalManagement.dto.UserRoleDTO;
-import com.example.ccrHospitalManagement.model.EPS;
-import com.example.ccrHospitalManagement.model.PrepaidMedicine;
-import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.model.User;
+import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +30,8 @@ public class UserServiceImpl implements  UserService{
     private final PasswordEncoder passwordEncoder;
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
+    private final AppointmentRepository appointmentRepository;
+
 
     @Override
     @Transactional
@@ -108,13 +107,24 @@ public class UserServiceImpl implements  UserService{
 
     @Transactional
     public void deleteUser(String id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            userRepository.deleteById(id);
-        } else {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("Usuario no encontrado");
         }
+
+        User user = userOpt.get();
+
+        // Eliminar citas donde sea paciente
+        List<Appointment> asPatient = appointmentRepository.findByPatientId(user.getId());
+        appointmentRepository.deleteAll(asPatient);
+
+        // Eliminar citas donde sea doctor (si aplica)
+        List<Appointment> asDoctor = appointmentRepository.findByDoctorId(user.getId());
+        appointmentRepository.deleteAll(asDoctor);
+
+        userRepository.deleteById(id);
     }
+
 
     public List<UserRoleDTO> getAllUsersWithRoles() {
         List<User> users = userRepository.findAll();

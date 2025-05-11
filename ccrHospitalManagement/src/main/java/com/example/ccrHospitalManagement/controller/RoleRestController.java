@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class RoleRestController {
 
     private final RoleService service;
@@ -32,19 +33,16 @@ public class RoleRestController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public RoleDTO create(@RequestBody RoleDTO dto) {
         return mapper.toDto(service.createRole(mapper.toEntity(dto)));
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public RoleDTO update(@RequestBody RoleDTO dto) {
         return mapper.toDto(service.updateRole(mapper.toEntity(dto)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {
         service.deleteRole(id);
     }
