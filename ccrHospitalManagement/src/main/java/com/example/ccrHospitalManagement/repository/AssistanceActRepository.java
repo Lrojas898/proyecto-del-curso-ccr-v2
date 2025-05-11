@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AssistanceActRepository extends JpaRepository<AssistanceAct, Long> {
-    // La PK de AssistanceAct es String (id)
+    
 }
