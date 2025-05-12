@@ -18,12 +18,22 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public Role createRole(Role role) {
-        if (roleRepository.existsById(role.getId())) {
-            throw new IllegalArgumentException("Ya existe un rol con ese ID.");
+        if (role.getId() != null) {
+            throw new IllegalArgumentException("No se debe proporcionar un ID al crear un rol.");
         }
-        validateRole(role, true);
+
+        if (role.getName() == null || role.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del rol es obligatorio.");
+        }
+
+        roleRepository.findByName(role.getName())
+                .ifPresent(existing -> {
+                    throw new IllegalArgumentException("Ya existe un rol con ese nombre.");
+                });
+
         return roleRepository.save(role);
     }
+
 
     @Override
     public List<Role> getAllRoles() {

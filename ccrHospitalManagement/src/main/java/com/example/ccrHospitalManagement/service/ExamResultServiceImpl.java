@@ -3,6 +3,8 @@ package com.example.ccrHospitalManagement.service;
 import com.example.ccrHospitalManagement.model.ExamResult;
 import com.example.ccrHospitalManagement.repository.ExamResultRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +20,30 @@ public class ExamResultServiceImpl implements ExamResultService {
     private final ExamResultRepository examResultRepository;
 
     @Override
-    public ExamResult createExamResult(ExamResult result) {
+    public ExamResult createExamResult(ExamResult result, Authentication auth) {
+        // Validación: solo técnicos pueden crear
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_LABTECH"))) {
+            throw new IllegalArgumentException("Solo un técnico de laboratorio puede crear un resultado de examen.");
+        }
+
         validateExamResult(result, true);
         return examResultRepository.save(result);
     }
 
     @Override
-    public ExamResult updateExamResult(ExamResult result) {
+    public ExamResult updateExamResult(ExamResult result, Authentication auth) {
         if (!examResultRepository.existsById(result.getId())) {
             throw new IllegalArgumentException("El resultado de examen no existe.");
         }
+
+        // Validación: solo el ADMIN puede modificar
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            throw new IllegalArgumentException("Solo el administrador puede modificar un resultado de examen.");
+        }
+
         validateExamResult(result, false);
         return examResultRepository.save(result);
     }
-
     @Override
     @Transactional(readOnly = true)
     public List<ExamResult> getAllExamResults() {
