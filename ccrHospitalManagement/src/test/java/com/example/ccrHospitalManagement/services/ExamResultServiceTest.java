@@ -1,4 +1,3 @@
-
 package com.example.ccrHospitalManagement.services;
 
 import com.example.ccrHospitalManagement.model.*;
@@ -61,7 +60,7 @@ public class ExamResultServiceTest {
         // authTech con rol de técnico
         authTech = new Authentication() {
             @Override public Collection<? extends GrantedAuthority> getAuthorities() {
-                return java.util.Collections.singletonList(new SimpleGrantedAuthority("ROLE_TÉCNICO DE LABORATORIO"));
+                return List.of(new SimpleGrantedAuthority("ROLE_LABTECH"));
             }
             @Override public Object getCredentials() { return null; }
             @Override public Object getDetails() { return null; }
@@ -74,7 +73,7 @@ public class ExamResultServiceTest {
         // authAdmin con rol de admin
         authAdmin = new Authentication() {
             @Override public Collection<? extends GrantedAuthority> getAuthorities() {
-                return java.util.Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
             }
             @Override public Object getCredentials() { return null; }
             @Override public Object getDetails() { return null; }
@@ -86,12 +85,9 @@ public class ExamResultServiceTest {
     }
 
 
-    // CREATE
-
     @Test
     void createExamResult_Valid() {
         when(examResultRepository.save(result)).thenReturn(result);
-
         ExamResult created = examResultService.createExamResult(result, authTech);
         assertNotNull(created);
         verify(examResultRepository).save(result);
@@ -170,13 +166,10 @@ public class ExamResultServiceTest {
         assertTrue(e.getMessage().contains("descripción"));
     }
 
-    // UPDATE
-
     @Test
     void updateExamResult_Valid() {
         when(examResultRepository.existsById(1L)).thenReturn(true);
         when(examResultRepository.save(result)).thenReturn(result);
-
         ExamResult updated = examResultService.updateExamResult(result, authAdmin);
         assertEquals(1L, updated.getId());
     }
@@ -195,12 +188,9 @@ public class ExamResultServiceTest {
         assertTrue(e.getMessage().contains("administrador"));
     }
 
-    // GET
-
     @Test
     void getAllExamResults_ReturnsList() {
         when(examResultRepository.findAll()).thenReturn(List.of(result));
-
         List<ExamResult> list = examResultService.getAllExamResults();
         assertEquals(1, list.size());
     }
@@ -208,7 +198,6 @@ public class ExamResultServiceTest {
     @Test
     void getExamResultById_Found() {
         when(examResultRepository.findById(1L)).thenReturn(Optional.of(result));
-
         Optional<ExamResult> res = examResultService.getExamResultById(1L);
         assertTrue(res.isPresent());
     }
@@ -216,17 +205,13 @@ public class ExamResultServiceTest {
     @Test
     void getExamResultById_NotFound() {
         when(examResultRepository.findById(99L)).thenReturn(Optional.empty());
-
         Optional<ExamResult> res = examResultService.getExamResultById(99L);
         assertTrue(res.isEmpty());
     }
 
-    // DELETE
-
     @Test
     void deleteExamResult_Valid() {
         when(examResultRepository.existsById(1L)).thenReturn(true);
-
         assertDoesNotThrow(() -> examResultService.removeExamResultById(1L));
         verify(examResultRepository).deleteById(1L);
     }
@@ -234,9 +219,7 @@ public class ExamResultServiceTest {
     @Test
     void deleteExamResult_NotFound_Throws() {
         when(examResultRepository.existsById(99L)).thenReturn(false);
-
-        Exception e = assertThrows(IllegalArgumentException.class,
-                () -> examResultService.removeExamResultById(99L));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.removeExamResultById(99L));
         assertEquals("No se puede eliminar un resultado que no existe.", e.getMessage());
     }
 }
