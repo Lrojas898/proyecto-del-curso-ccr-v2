@@ -12,8 +12,8 @@ import lombok.*;
 public class Location {
 
     @Id
-    @Column(length = 50, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(length = 50, nullable = false)
     private String name;
@@ -21,7 +21,5 @@ public class Location {
     @Column(length = 50, nullable = false)
     private String address;
 
-    @Lob
-    @Column(columnDefinition = "text")
     private String description;
 }

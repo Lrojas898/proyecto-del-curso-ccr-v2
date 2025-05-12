@@ -1,11 +1,10 @@
 package com.example.ccrHospitalManagement.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "APPOINTMENT")
@@ -15,27 +14,31 @@ import java.util.Set;
 public class Appointment {
 
     @Id
-    @Column(length = 50, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private java.sql.Date date;
+    private LocalDate date;
+    private LocalTime startTime;
 
-    private java.sql.Date startTime; // start_time -> startTime
-
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Relación con Location
     @ManyToOne
     @JoinColumn(name = "LOCATION_id", nullable = false)
     private Location location;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "USER_id_PATIENT", nullable = false)
     private User patient;
 
     @ManyToOne
-    @JoinColumn(name = "professional_id", nullable = false)
-    private User professional;
+    @JoinColumn(name = "USER_id_DOCTOR", nullable = false)
+    private User doctor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppointmentStatus status = AppointmentStatus.PENDING;
+
+
 
 }

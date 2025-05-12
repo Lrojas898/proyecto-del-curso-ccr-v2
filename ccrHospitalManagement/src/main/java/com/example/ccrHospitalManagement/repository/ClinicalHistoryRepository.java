@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ClinicalHistoryRepository extends JpaRepository<ClinicalHistory, String> {
-    // La PK de ClinicalHistory es String (id)
+public interface ClinicalHistoryRepository extends JpaRepository<ClinicalHistory, Long> {
+    boolean existsByUserId(String userId);
 }

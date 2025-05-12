@@ -1,7 +1,6 @@
 package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.service.PermissionService;
 import com.example.ccrHospitalManagement.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,8 +16,6 @@ import java.util.List;
 public class RoleController {
 
     private final RoleService roleService;
-    private final PermissionService permissionService; // Inyecta el servicio de permisos
-
     @GetMapping
     public String listRoles(Model model) {
         List<Role> roles = roleService.getAllRoles();
@@ -29,39 +26,34 @@ public class RoleController {
     @GetMapping("/new")
     public String showRoleForm(Model model) {
         model.addAttribute("role", new Role());
-        // Cargar la lista de permisos disponibles
-        model.addAttribute("allPermissions", permissionService.getAllPermissions());
         return "role/form";
     }
 
     @PostMapping("/save")
     public String saveRole(@ModelAttribute("role") Role role,
-                           @RequestParam("permissionIds") List<String> permissionIds,
                            BindingResult bindingResult,
                            Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("allPermissions", permissionService.getAllPermissions());
             return "role/form";
         }
         if (roleService.getRoleById(role.getId()).isPresent()) {
-            roleService.updateRole(role, permissionIds);
+            roleService.updateRole(role);
         } else {
-            roleService.createRole(role, permissionIds);
+            roleService.createRole(role);
         }
         return "redirect:/roles";
     }
 
     @GetMapping("/edit/{id}")
-    public String editRole(@PathVariable("id") String id, Model model) {
+    public String editRole(@PathVariable("id") Long id, Model model) {
         Role role = roleService.getRoleById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + id));
         model.addAttribute("role", role);
-        model.addAttribute("allPermissions", permissionService.getAllPermissions());
         return "role/form";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteRole(@PathVariable("id") String id) {
+    public String deleteRole(@PathVariable("id") Long id) {
         roleService.deleteRole(id);
         return "redirect:/roles";
     }

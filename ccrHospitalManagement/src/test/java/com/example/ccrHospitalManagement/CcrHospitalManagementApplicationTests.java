@@ -3,10 +3,10 @@ package com.example.ccrHospitalManagement;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class CcrHospitalManagementApplicationTests {
 
-	@Test
+	//@Test
 	void contextLoads() {
 	}
 

@@ -1,0 +1,157 @@
+package com.example.ccrHospitalManagement.service;
+
+import com.example.ccrHospitalManagement.model.Appointment;
+import com.example.ccrHospitalManagement.model.AppointmentStatus;
+import com.example.ccrHospitalManagement.repository.AppointmentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class AppointmentServiceImpl implements AppointmentService {
+
+    private final AppointmentRepository appointmentRepository;
+
+    @Override
+    public Appointment createAppointment(Appointment appointment) {
+        validateAppointment(appointment, true);
+        appointment.setStatus(AppointmentStatus.PENDING);
+        return appointmentRepository.save(appointment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Appointment> getAppointmentById(Long id) {
+        return appointmentRepository.findById(id);
+    }
+
+    @Override
+    public Appointment UpdateAppointment(Appointment appointment) {
+        if (!appointmentRepository.existsById(appointment.getId())) {
+            throw new IllegalArgumentException("No se puede actualizar una cita que no existe.");
+        }
+        validateAppointment(appointment, false);
+        return appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public void removeAppointmentById(Long id) {
+        if (!appointmentRepository.existsById(id)) {
+            throw new IllegalArgumentException("No se puede eliminar una cita que no existe.");
+        }
+        appointmentRepository.deleteById(id);
+    }
+
+    public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, String requesterRole) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+
+        switch (newStatus) {
+            case APPROVED_BY_DOCTOR -> {
+                if (!requesterRole.equals("ROLE_DOCTOR"))
+                    throw new IllegalArgumentException("Solo el médico puede aprobar como doctor.");
+                appointment.setStatus(AppointmentStatus.APPROVED_BY_DOCTOR);
+                updateFullyApprovedIfNeeded(appointment);
+            }
+            case APPROVED_BY_ASSISTANT -> {
+                if (!requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR"))
+                    throw new IllegalArgumentException("Solo el asistente puede aprobar como asistente.");
+                appointment.setStatus(AppointmentStatus.APPROVED_BY_ASSISTANT);
+                updateFullyApprovedIfNeeded(appointment);
+            }
+            case MODIFIED -> {
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR")))
+                    throw new IllegalArgumentException("Solo el médico o asistente pueden modificar.");
+                appointment.setStatus(AppointmentStatus.MODIFIED);
+            }
+            case CONFIRMED_BY_PATIENT -> {
+                if (!requesterRole.equals("ROLE_PACIENTE"))
+                    throw new IllegalArgumentException("Solo el paciente puede confirmar la cita.");
+                appointment.setStatus(AppointmentStatus.CONFIRMED_BY_PATIENT);
+            }
+            case CANCELLED_BY_PATIENT -> {
+                if (!requesterRole.equals("ROLE_PACIENTE"))
+                    throw new IllegalArgumentException("Solo el paciente puede cancelar la cita.");
+                appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
+            }
+            case DENIED -> {
+                if (!(requesterRole.equals("ROLE_DOCTOR") ||
+                      requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR") ||
+                      requesterRole.equals("ROLE_PACIENTE"))) {
+                    throw new IllegalArgumentException("No autorizado para denegar la cita.");
+                }
+                appointment.setStatus(AppointmentStatus.DENIED);
+            }
+            default -> throw new IllegalArgumentException("Transición de estado no válida.");
+        }
+
+        return appointmentRepository.save(appointment);
+    }
+
+    private void updateFullyApprovedIfNeeded(Appointment appointment) {
+        AppointmentStatus current = appointment.getStatus();
+
+        boolean approvedByDoctor = current == AppointmentStatus.APPROVED_BY_DOCTOR ||
+                (current == AppointmentStatus.APPROVED_BY_ASSISTANT && appointmentPreviouslyApprovedByDoctor(appointment));
+        boolean approvedByAssistant = current == AppointmentStatus.APPROVED_BY_ASSISTANT ||
+                (current == AppointmentStatus.APPROVED_BY_DOCTOR && appointmentPreviouslyApprovedByAssistant(appointment));
+
+        if (approvedByDoctor && approvedByAssistant) {
+            appointment.setStatus(AppointmentStatus.FULLY_APPROVED);
+        }
+    }
+
+    private boolean appointmentPreviouslyApprovedByDoctor(Appointment appointment) {
+        return appointmentRepository.findById(appointment.getId())
+                .map(a -> a.getStatus() == AppointmentStatus.APPROVED_BY_DOCTOR || a.getStatus() == AppointmentStatus.FULLY_APPROVED)
+                .orElse(false);
+    }
+
+    private boolean appointmentPreviouslyApprovedByAssistant(Appointment appointment) {
+        return appointmentRepository.findById(appointment.getId())
+                .map(a -> a.getStatus() == AppointmentStatus.APPROVED_BY_ASSISTANT || a.getStatus() == AppointmentStatus.FULLY_APPROVED)
+                .orElse(false);
+    }
+
+    private void validateAppointment(Appointment appointment, boolean isCreate) {
+        if (appointment.getDate() == null) {
+            throw new IllegalArgumentException("La fecha de la cita es obligatoria.");
+        }
+        if (appointment.getDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La cita no puede agendarse en una fecha pasada.");
+        }
+
+        if (appointment.getStartTime() == null) {
+            throw new IllegalArgumentException("La hora de inicio es obligatoria.");
+        }
+        if (appointment.getStartTime().isBefore(LocalTime.of(8, 0)) ||
+            appointment.getStartTime().isAfter(LocalTime.of(18, 0))) {
+            throw new IllegalArgumentException("La hora debe estar entre las 08:00 y las 18:00.");
+        }
+
+        if (appointment.getDoctor() == null || appointment.getPatient() == null) {
+            throw new IllegalArgumentException("Debe asignarse un paciente y un médico.");
+        }
+
+        if (appointment.getDoctor().getId().equals(appointment.getPatient().getId())) {
+            throw new IllegalArgumentException("El médico y el paciente deben ser diferentes.");
+        }
+
+        if (appointment.getLocation() == null) {
+            throw new IllegalArgumentException("Debe especificarse una ubicación.");
+        }
+    }
+}

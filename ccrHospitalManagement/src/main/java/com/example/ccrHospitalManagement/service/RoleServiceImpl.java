@@ -1,40 +1,39 @@
 package com.example.ccrHospitalManagement.service;
 
-import com.example.ccrHospitalManagement.model.Permission;
 import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.repository.PermissionRepository;
 import com.example.ccrHospitalManagement.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
 
     @Override
     @Transactional
-    public Role createRole(Role role, List<String> permissionIds) {
-        if (permissionIds == null || permissionIds.isEmpty()) {
-            throw new IllegalArgumentException("El rol debe tener al menos un permiso asignado.");
+    public Role createRole(Role role) {
+        if (role.getId() != null) {
+            throw new IllegalArgumentException("No se debe proporcionar un ID al crear un rol.");
         }
 
-        List<Permission> permissions = permissionIds.stream()
-                .map(id -> permissionRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Permiso con ID " + id + " no existe")))
-                .collect(Collectors.toList());
+        if (role.getName() == null || role.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del rol es obligatorio.");
+        }
 
-        role.setPermissions(new HashSet<>(permissions));
+        roleRepository.findByName(role.getName())
+                .ifPresent(existing -> {
+                    throw new IllegalArgumentException("Ya existe un rol con ese nombre.");
+                });
+
         return roleRepository.save(role);
     }
+
 
     @Override
     public List<Role> getAllRoles() {
@@ -42,29 +41,33 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<Role> getRoleById(String id) {
+    public Optional<Role> getRoleById(Long id) {
         return roleRepository.findById(id);
     }
 
     @Override
     @Transactional
-    public Role updateRole(Role role, List<String> permissionIds) {
-        if (permissionIds == null || permissionIds.isEmpty()) {
-            throw new IllegalArgumentException("El rol debe tener al menos un permiso asignado.");
+    public Role updateRole(Role role) {
+        if (!roleRepository.existsById(role.getId())) {
+            throw new IllegalArgumentException("El rol con ID " + role.getId() + " no existe.");
         }
-
-        List<Permission> permissions = permissionIds.stream()
-                .map(id -> permissionRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Permiso con ID " + id + " no existe")))
-                .collect(Collectors.toList());
-
-        role.setPermissions(new HashSet<>(permissions));
+        validateRole(role, false);
         return roleRepository.save(role);
     }
 
     @Override
     @Transactional
-    public void deleteRole(String id) {
+    public void deleteRole(Long id) {
+        if (!roleRepository.existsById(id)) {
+            throw new IllegalArgumentException("El rol con ID " + id + " no existe.");
+        }
         roleRepository.deleteById(id);
+    }
+
+    private void validateRole(Role role, boolean isCreate) {
+
+        if (role.getName() == null || role.getName().trim().length() < 3) {
+            throw new IllegalArgumentException("El nombre del rol debe tener al menos 3 caracteres.");
+        }
     }
 }

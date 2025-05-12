@@ -2,6 +2,9 @@ package com.example.ccrHospitalManagement.model;
 
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,16 +17,21 @@ import lombok.*;
 public class ClinicalHistory {
 
     @Id
-    @Column(length = 50, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable = false)
-    private java.sql.Date date; // "date"
+    private LocalDate date;
+    private LocalTime hour;
 
-    @Column(name = "general_observations", nullable = false)
+    @Column(name = "general_observations", columnDefinition = "TEXT", nullable = false)
     private String generalObservations;
 
     @OneToOne
-    @JoinColumn(name = "myuser_id", nullable = false)  // Relación 1 a 1 con User (como paciente)
-    private User user;  // Un paciente tendrá una sola historia clínica
+    @JoinColumn(name = "myuser_id", nullable = false, unique = true)
+    private User user;
+
+    @OneToMany(mappedBy = "clinicalHistory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AttentionEpisode> attentionEpisodes = new ArrayList<>();
+
 }
+

@@ -1,11 +1,9 @@
 package com.example.ccrHospitalManagement.services;
 
-import com.example.ccrHospitalManagement.model.Permission;
 import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.repository.PermissionRepository;
 import com.example.ccrHospitalManagement.repository.RoleRepository;
-import com.example.ccrHospitalManagement.service.RoleService;
 import com.example.ccrHospitalManagement.service.RoleServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,287 +11,173 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RoleServiceTest {
-    //Cargamos una simulación de la capa repository
+
     @Mock
     private RoleRepository roleRepository;
-    @Mock
-    private PermissionRepository permissionRepository;
-    //Inyectamos el mock a RoleService teniendo en cuenta la dependencia que tiene
+
     @InjectMocks
     private RoleServiceImpl roleService;
 
-    // insercion
+    private Role role;
+
+    @BeforeEach
+    void setUp() {
+        role = new Role();
+        role.setId(1L);
+        role.setName("Admin");
+    }
+
+    // CREATE
     @Test
-    void createRole_WhenCalled_ReturnsRole(){
-// Arrange
-        Role roleToCreate = new Role();
-        roleToCreate.setId("ADMIN");
-        roleToCreate.setName("admin");
+    void createRole_WhenValid_ReturnsRole() {
+        when(roleRepository.existsById(role.getId())).thenReturn(false);
+        when(roleRepository.save(role)).thenReturn(role);
 
-        List<String> permissionIds = Arrays.asList("READ", "WRITE");
+        Role result = roleService.createRole(role);
 
-        // Mockear los permisos existentes
-        Permission permRead = new Permission();
-        permRead.setId("READ");
-        permRead.setName("Read Permission");
-
-        Permission permWrite = new Permission();
-        permWrite.setId("WRITE");
-        permWrite.setName("Write Permission");
-
-        when(permissionRepository.findById("READ")).thenReturn(Optional.of(permRead));
-        when(permissionRepository.findById("WRITE")).thenReturn(Optional.of(permWrite));
-
-        when(roleRepository.save(roleToCreate)).thenReturn(roleToCreate);
-
-        // Act
-        Role result = roleService.createRole(roleToCreate, permissionIds);
-
-        // Assert
         assertNotNull(result);
-        assertEquals("ADMIN", result.getId());
-        assertEquals("admin", result.getName());
-        verify(permissionRepository, times(1)).findById("READ");
-        verify(permissionRepository, times(1)).findById("WRITE");
-        verify(roleRepository, times(1)).save(roleToCreate);
-    }
-    @Test
-    void createRole_WhenPermissionIdsIsNull_ThrowsIllegalArgumentException() {
-        // Arrange
-        Role roleToCreate = new Role();
-        roleToCreate.setId("ROLE_ADMIN");
-        roleToCreate.setName("Admin");
-
-        //act
-        IllegalArgumentException e = assertThrows(
-                IllegalArgumentException.class,
-                () -> roleService.createRole(roleToCreate,
-                        null)
-        );
-        assertEquals("El rol debe tener al menos un permiso asignado.", e.getMessage());
-        verify(roleRepository, never()).save(roleToCreate);
-    }
-    @Test
-    void createRole_WhenPermissionIdsIsEmpty_ThrowsIllegalArgumentException() {
-        // Arrange
-        Role roleToCreate = new Role();
-        roleToCreate.setId("ROLE_ADMIN");
-        roleToCreate.setName("Admin");
-        List<String> emptyPermissionIds = Arrays.asList();
-
-        //act
-        IllegalArgumentException e = assertThrows(
-                IllegalArgumentException.class,
-                () -> roleService.createRole(roleToCreate, emptyPermissionIds)
-        );
-        assertEquals("El rol debe tener al menos un permiso asignado.", e.getMessage());
-        verify(roleRepository, never()).save(roleToCreate);
+        assertEquals(1L, result.getId());
+        assertEquals("Admin", result.getName());
+        verify(roleRepository, times(1)).save(role);
     }
 
     @Test
-    void createRole_WhenPermissionDoesNotExist_ThrowsIllegalArgumentException() {
-        // Arrange
-        Role roleToCreate = new Role();
-        roleToCreate.setId("ROLE_TEST");
-        roleToCreate.setName("Test Role");
+    void createRole_WhenIdExists_ThrowsException() {
+        when(roleRepository.existsById(role.getId())).thenReturn(true);
 
-        List<String> permissionIds = Arrays.asList("PERM_READ", "PERM_NONEXISTENT");
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.createRole(role));
 
-        Permission permRead = new Permission("PERM_READ", "Read", "Read access");
-        when(permissionRepository.findById("PERM_READ")).thenReturn(Optional.of(permRead));
-        when(permissionRepository.findById("PERM_NONEXISTENT")).thenReturn(Optional.empty());
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> roleService.createRole(roleToCreate, permissionIds)
-        );
-
-        // Assert
-        assertEquals("Permiso con ID PERM_NONEXISTENT no existe", exception.getMessage());
-        verify(permissionRepository, times(1)).findById("PERM_READ");
-        verify(permissionRepository, times(1)).findById("PERM_NONEXISTENT");
-        verify(roleRepository, never()).save(any(Role.class));
+        assertEquals("Ya existe un rol con ese ID.", e.getMessage());
+        verify(roleRepository, never()).save(role);
     }
 
-    // consulta
     @Test
-    void getAllRoles_WhenCalled_ReturnsAllRoles(){
-        //arrange
+    void createRole_WhenNameInvalid_ThrowsException() {
+        role.setName("Ad");
+        when(roleRepository.existsById(role.getId())).thenReturn(false);
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.createRole(role));
+
+        assertEquals("El nombre del rol debe tener al menos 3 caracteres.", e.getMessage());
+    }
+    
+    
+
+    @Test
+    void createRole_WhenNameIsNull_ThrowsException() {
+        role.setName(null);
+        when(roleRepository.existsById(1L)).thenReturn(false);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.createRole(role));
+        assertEquals("El nombre del rol debe tener al menos 3 caracteres.", e.getMessage());
+    }
+    
+    //Update
+
+    @Test
+    void updateRole_WhenValid_ReturnsUpdated() {
+        when(roleRepository.existsById(role.getId())).thenReturn(true);
+        when(roleRepository.save(role)).thenReturn(role);
+
+        Role result = roleService.updateRole(role);
+
+        assertEquals(1L, result.getId());
+        verify(roleRepository).save(role);
+    }
+
+    @Test
+    void updateRole_WhenNotExists_ThrowsException() {
+        when(roleRepository.existsById(role.getId())).thenReturn(false);
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.updateRole(role));
+
+        assertEquals("El rol con ID 1 no existe.", e.getMessage());
+        verify(roleRepository, never()).save(role);
+    }
+
+    @Test
+    void updateRole_WhenNameInvalid_ThrowsException() {
+        role.setName("A");
+        when(roleRepository.existsById(role.getId())).thenReturn(true);
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.updateRole(role));
+
+        assertEquals("El nombre del rol debe tener al menos 3 caracteres.", e.getMessage());
+    }
+
+    //remove
+
+    @Test
+    void deleteRole_WhenExists_DeletesRole() {
+        when(roleRepository.existsById(1L)).thenReturn(true);
+
+        roleService.deleteRole(1L);
+
+        verify(roleRepository).deleteById(1L);
+    }
+
+    @Test
+    void deleteRole_WhenNotExists_ThrowsException() {
+        when(roleRepository.existsById(99L)).thenReturn(false);
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.deleteRole(99L));
+
+        assertEquals("El rol con ID 99 no existe.", e.getMessage());
+    }
+
+    //get
+    
+    @Test
+    void getAllRoles_WhenCalled_ReturnsAllRoles() {
         Role role1 = new Role();
-        role1.setId("ROLE_ADMIN");
+        role1.setId(1L);
         role1.setName("Admin");
 
         Role role2 = new Role();
-        role2.setId("ROLE_USER");
+        role2.setId(2L);
         role2.setName("User");
 
         List<Role> roles = Arrays.asList(role1, role2);
         when(roleRepository.findAll()).thenReturn(roles);
 
-        // Act
         List<Role> result = roleService.getAllRoles();
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("ROLE_ADMIN", result.get(0).getId());
-        assertEquals("ROLE_USER", result.get(1).getId());
         verify(roleRepository, times(1)).findAll();
     }
-    // consulta by id
+
     @Test
-    void getRoleById_WhenRoleExists_ReturnsRole(){
-        //arrange
-        String roleId = "ROLE_ADMIN";
-        Role role = new Role();
-        role.setId(roleId);
-        role.setName("Admin");
+    void getRoleById_WhenExists_ReturnsRole() {
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
 
-        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+        Optional<Role> result = roleService.getRoleById(1L);
 
-        // Act
-        Optional<Role> result = roleService.getRoleById(roleId);
-
-        // Assert
         assertTrue(result.isPresent());
-        assertEquals("ROLE_ADMIN", result.get().getId());
         assertEquals("Admin", result.get().getName());
-        verify(roleRepository, times(1)).findById(roleId);
     }
+
     @Test
-    void getRoleById_WhenRoleDoesNotExist_ReturnsEmptyOptional(){
-        // Arrange
-        String roleId = "ROLE_NONEXISTENT";
-        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
+    void getRoleById_WhenNotExists_ReturnsEmpty() {
+        when(roleRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<Role> result = roleService.getRoleById(roleId);
+        Optional<Role> result = roleService.getRoleById(99L);
 
-        // Assert
         assertFalse(result.isPresent());
-        verify(roleRepository, times(1)).findById(roleId);
-    }
-    //actualizacion
-    @Test
-    void updateRole_WhenValidInput_ReturnsUpdatedRole(){
-        // Arrange
-        Role roleToUpdate = new Role();
-        roleToUpdate.setId("ROLE_ADMIN");
-        roleToUpdate.setName("Updated Admin");
-
-        List<String> permissionIds = Arrays.asList("PERM_READ", "PERM_UPDATE");
-
-        // Mockear los permisos existentes
-        Permission permRead = new Permission();
-        permRead.setId("PERM_READ");
-        permRead.setName("Read Permission");
-
-        Permission permUpdate = new Permission();
-        permUpdate.setId("PERM_UPDATE");
-        permUpdate.setName("Update Permission");
-
-        when(permissionRepository.findById("PERM_READ")).thenReturn(Optional.of(permRead));
-        when(permissionRepository.findById("PERM_UPDATE")).thenReturn(Optional.of(permUpdate));
-
-        // Mockear el guardado del rol
-        when(roleRepository.save(roleToUpdate)).thenReturn(roleToUpdate);
-
-        // Act
-        Role result = roleService.updateRole(roleToUpdate, permissionIds);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("ROLE_ADMIN", result.getId());
-        assertEquals("Updated Admin", result.getName());
-        verify(permissionRepository, times(1)).findById("PERM_READ");
-        verify(permissionRepository, times(1)).findById("PERM_UPDATE");
-        verify(roleRepository, times(1)).save(roleToUpdate);
-    }
-    @Test
-    void updateRole_WhenPermissionIdsIsEmpty_ThrowsIllegalArgumentException() {
-        // Arrange
-        Role roleToUpdate = new Role();
-        roleToUpdate.setId("ROLE_ADMIN");
-        List<String> emptyPermissionIds = Arrays.asList();
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> roleService.updateRole(roleToUpdate, emptyPermissionIds)
-        );
-        assertEquals("El rol debe tener al menos un permiso asignado.", exception.getMessage());
-        verify(roleRepository, never()).save(any(Role.class));
-        verify(permissionRepository, never()).findById(anyString()); // Aseguramos que no se consulta PermissionRepository
     }
 
-
-    @Test
-    void updateRole_WhenPermissionIdsIsNull_ThrowsIllegalArgumentException() {
-        // Arrange
-        Role roleToUpdate = new Role();
-        roleToUpdate.setId("ROLE_ADMIN");
-        roleToUpdate.setName("Admin");
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> roleService.updateRole(roleToUpdate, null)
-        );
-
-        // Assert
-        assertEquals("El rol debe tener al menos un permiso asignado.", exception.getMessage());
-        verify(permissionRepository, never()).findById(anyString());
-        verify(roleRepository, never()).save(any(Role.class));
-    }
-
-    @Test
-    void updateRole_WhenPermissionIdDoesNotExist_ThrowsIllegalArgumentException() {
-        // Arrange
-        Role roleToUpdate = new Role();
-        roleToUpdate.setId("ROLE_ADMIN");
-        roleToUpdate.setName("Admin");
-
-        List<String> permissionIds = Arrays.asList("PERM_READ", "PERM_NONEXISTENT");
-
-        Permission permRead = new Permission("PERM_READ", "Read", "Read access");
-        when(permissionRepository.findById("PERM_READ")).thenReturn(Optional.of(permRead));
-        when(permissionRepository.findById("PERM_NONEXISTENT")).thenReturn(Optional.empty());
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> roleService.updateRole(roleToUpdate, permissionIds)
-        );
-
-        // Assert
-        assertEquals("Permiso con ID PERM_NONEXISTENT no existe", exception.getMessage());
-        verify(permissionRepository, times(1)).findById("PERM_READ");
-        verify(permissionRepository, times(1)).findById("PERM_NONEXISTENT");
-        verify(roleRepository, never()).save(any(Role.class));
-    }
-
-    // borrado
-    @Test
-    void deleteRole_WhenCalled_DeletesRole() {
-        // Arrange
-        String roleId = "ROLE_ADMIN";
-        doNothing().when(roleRepository).deleteById(roleId);
-
-        // Act
-        roleService.deleteRole(roleId);
-
-        // Assert
-        verify(roleRepository, times(1)).deleteById(roleId);
-        verify(permissionRepository, never()).findById(anyString()); // Aseguramos que no se consulta PermissionRepository
-    }
 }
