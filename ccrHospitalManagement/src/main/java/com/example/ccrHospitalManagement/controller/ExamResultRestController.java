@@ -9,9 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "Resultados de Exámenes", description = "Operaciones para gestionar resultados de exámenes médicos")
 @RestController
 @RequestMapping("/api/exam-results")
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class ExamResultRestController {
     private final ExamResultService service;
     private final ExamResultMapperDecorator mapper;
 
+    @Operation(summary = "Obtener todos los resultados de exámenes")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','LABTECH')")
     public ResponseEntity<List<ExamResultDTO>> getAll() {
@@ -33,6 +37,7 @@ public class ExamResultRestController {
         }
     }
 
+    @Operation(summary = "Obtener un resultado de examen por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','LABTECH','PACIENTE')")
     public ResponseEntity<ExamResultDTO> getById(@PathVariable Long id, Authentication auth) {
@@ -52,6 +57,7 @@ public class ExamResultRestController {
         }
     }
 
+    @Operation(summary = "Crear un nuevo resultado de examen")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','LABTECH')")
     public ResponseEntity<ExamResultDTO> create(@RequestBody ExamResultDTO dto, Authentication auth) {
@@ -65,6 +71,8 @@ public class ExamResultRestController {
         }
     }
 
+
+    @Operation(summary = "Actualizar un resultado de examen")
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ExamResultDTO> update(@RequestBody ExamResultDTO dto, Authentication auth) {
@@ -77,6 +85,7 @@ public class ExamResultRestController {
         }
     }
 
+    @Operation(summary = "Eliminar un resultado de examen por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

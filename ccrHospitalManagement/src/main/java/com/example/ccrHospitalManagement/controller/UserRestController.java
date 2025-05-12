@@ -8,10 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name = "Usuarios", description = "Operaciones CRUD para la gestión de usuarios del sistema")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class UserRestController {
 
     private final UserServiceImpl userService;
 
+    @Operation(summary = "Registrar un nuevo usuario")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
@@ -30,6 +34,7 @@ public class UserRestController {
         }
     }
 
+    @Operation(summary = "Obtener un usuario por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PACIENTE')")
     public ResponseEntity<?> getUserById(@PathVariable String id) {
@@ -42,6 +47,7 @@ public class UserRestController {
         }
     }
 
+    @Operation(summary = "Actualizar un usuario")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable String id) {

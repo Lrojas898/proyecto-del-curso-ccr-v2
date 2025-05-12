@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "AssistanceActType", description = "Operaciones para tipos de actos asistenciales")
 @RestController
 @RequestMapping("/api/assistance-act-types")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class AssistanceActTypeRestController {
     private final AssistanceActTypeService service;
     private final AssistanceActTypeMapper mapper;
 
+    @Operation(summary = "Obtener todos los tipos de actos asistenciales")
     @GetMapping
     public ResponseEntity<List<AssistanceActTypeDTO>> getAll() {
         try {
@@ -32,6 +36,7 @@ public class AssistanceActTypeRestController {
         }
     }
 
+    @Operation(summary = "Obtener un tipo de acto asistencial por su ID")
     @GetMapping("/{id}")
     public ResponseEntity<AssistanceActTypeDTO> getById(@PathVariable Long id) {
         try {
@@ -44,6 +49,7 @@ public class AssistanceActTypeRestController {
         }
     }
 
+    @Operation(summary = "Crear un nuevo tipo de acto asistencial")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AssistanceActTypeDTO> create(@RequestBody AssistanceActTypeDTO dto) {
@@ -57,6 +63,7 @@ public class AssistanceActTypeRestController {
         }
     }
 
+    @Operation(summary = "Actualizar un tipo de acto asistencial")
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AssistanceActTypeDTO> update(@RequestBody AssistanceActTypeDTO dto) {
@@ -69,6 +76,7 @@ public class AssistanceActTypeRestController {
         }
     }
 
+    @Operation(summary = "Eliminar un tipo de acto asistencial por su ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

@@ -10,9 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 import java.util.List;
 
+@Tag(name = "Appointment", description = "Operaciones relacionadas con citas médicas")
 @RestController
 @RequestMapping("/api/appointments")
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class AppointmentRestController {
     private final AppointmentService service;
     private final AppointmentMapper mapper;
 
+    @Operation(summary = "Obtener todas las citas médicas")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
     public ResponseEntity<List<AppointmentDTO>> getAll() {
@@ -35,6 +40,7 @@ public class AppointmentRestController {
         }
     }
 
+    @Operation(summary = "Obtener una cita médica por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
     public ResponseEntity<AppointmentDTO> getById(@PathVariable Long id) {
@@ -48,6 +54,7 @@ public class AppointmentRestController {
         }
     }
 
+    @Operation(summary = "Crear una nueva cita médica")
     @PostMapping
     @PreAuthorize("hasRole('PACIENTE')")
     public ResponseEntity<AppointmentDTO> create(@RequestBody AppointmentDTO dto) {
@@ -62,6 +69,7 @@ public class AppointmentRestController {
         }
     }
 
+    @Operation(summary = "Actualizar una cita médica")
     @PutMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
     public ResponseEntity<AppointmentDTO> update(@RequestBody AppointmentDTO dto) {
@@ -74,6 +82,7 @@ public class AppointmentRestController {
         }
     }
 
+    @Operation(summary = "Actualizar el estado de una cita médica")
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE','PACIENTE')")
     public ResponseEntity<AppointmentDTO> updateStatus(
@@ -98,6 +107,7 @@ public class AppointmentRestController {
         }
     }
 
+    @Operation(summary = "Eliminar una cita médica por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

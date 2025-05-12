@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "Medicina Prepagada", description = "CRUD para entidades de medicina prepagada")
 @RestController
 @RequestMapping("/api/prepaid-medicines")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class PrepaidMedicineRestController {
     private final PrepaidMedicineService service;
     private final PrepaidMedicineMapper mapper;
 
+    @Operation(summary = "Obtener todas las medicinas prepagadas")
     @GetMapping
     public ResponseEntity<List<PrepaidMedicineDTO>> getAll() {
         try {
@@ -31,6 +35,7 @@ public class PrepaidMedicineRestController {
         }
     }
 
+    @Operation(summary = "Obtener medicina prepagada por ID")
     @GetMapping("/{id}")
     public ResponseEntity<PrepaidMedicineDTO> getById(@PathVariable String id) {
         try {
@@ -43,6 +48,7 @@ public class PrepaidMedicineRestController {
         }
     }
 
+    @Operation(summary = "Crear una nueva medicina prepagada")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PrepaidMedicineDTO> create(@RequestBody PrepaidMedicineDTO dto) {
@@ -56,6 +62,7 @@ public class PrepaidMedicineRestController {
         }
     }
 
+    @Operation(summary = "Actualizar una medicina prepagada")
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PrepaidMedicineDTO> update(@RequestBody PrepaidMedicineDTO dto) {
@@ -68,6 +75,7 @@ public class PrepaidMedicineRestController {
         }
     }
 
+    @Operation(summary = "Eliminar una medicina prepagada por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable String id) {
