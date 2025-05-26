@@ -1,24 +1,33 @@
 package com.example.ccrHospitalManagement.service;
 
-import com.example.ccrHospitalManagement.dto.RoleDTO;
-import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
-import com.example.ccrHospitalManagement.dto.UserRoleDTO;
-import com.example.ccrHospitalManagement.model.*;
-import com.example.ccrHospitalManagement.repository.*;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import com.example.ccrHospitalManagement.dto.UserDTO;
-
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.hibernate.Hibernate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.ccrHospitalManagement.dto.RoleDTO;
+import com.example.ccrHospitalManagement.dto.UserDTO;
+import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
+import com.example.ccrHospitalManagement.dto.UserRoleDTO;
+import com.example.ccrHospitalManagement.model.Appointment;
+import com.example.ccrHospitalManagement.model.EPS;
+import com.example.ccrHospitalManagement.model.PrepaidMedicine;
+import com.example.ccrHospitalManagement.model.Role;
+import com.example.ccrHospitalManagement.model.User;
+import com.example.ccrHospitalManagement.repository.AppointmentRepository;
+import com.example.ccrHospitalManagement.repository.EPSRepository;
+import com.example.ccrHospitalManagement.repository.PrepaidMedicineRepository;
+import com.example.ccrHospitalManagement.repository.RoleRepository;
+import com.example.ccrHospitalManagement.repository.UserRepository;
+import com.example.ccrHospitalManagement.repository.UserRoleRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -176,6 +185,14 @@ public class UserServiceImpl implements  UserService{
         dto.setEmail(user.getEmail());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
+        // Convertir roles a lista de Strings (nombres)
+        dto.setRoles(
+            user.getRoles()
+                .stream()
+                .map(role -> role.getName())  // o getRoleName() según tu entidad
+                .collect(Collectors.toList())
+        );
         return dto;
     }
+
 }
