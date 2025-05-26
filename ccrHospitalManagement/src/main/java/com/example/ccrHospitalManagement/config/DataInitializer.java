@@ -42,17 +42,17 @@ public class DataInitializer {
             prepaidRepository.saveAll(List.of(pm1, pm2));
 
             // Roles
-            List<String> roleNames = List.of("admin", "doctor", "paciente", "LABTECH", "asistente de doctor", "med-asis");
+            List<String> roleNames = List.of("ADMIN", "DOCTOR","PACIENTE","ASISTENTE","LABTECH");
             for (String roleName : roleNames) {
                 roleRepository.findByName(roleName)
                         .orElseGet(() -> roleRepository.save(new Role(null, roleName)));
             }
 
             // Usuarios
-            createUserIfNotExists("admin", "123456", "admin@hospital.com", "Admin", "Principal", "Hombre", eps1, pm1, "Administración", "admin");
-            createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Médico", "Hombre", eps1, pm2, "Medicina Interna", "doctor");
-            createUserIfNotExists("paciente1", "123456", "paciente1@gmail.com", "Laura", "Pérez", "Mujer", eps2, pm1, null, "paciente");
-            createUserIfNotExists("asistente1", "123456", "asistente1@hospital.com", "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "med-asis");
+            createUserIfNotExists("admin", "123456", "admin@hospital.com", "Admin", "Principal", "Hombre", eps1, pm1, "Administración", "ADMIN");
+            createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Médico", "Hombre", eps1, pm2, "Medicina Interna", "DOCTOR");
+            createUserIfNotExists("paciente1", "123456", "paciente1@gmail.com", "Laura", "Pérez", "Mujer", eps2, pm1, null, "PACIENTE");
+            createUserIfNotExists("asistente1", "123456", "asistente1@hospital.com", "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "LABTECH");
             createUserIfNotExists("tecnico1", "123456", "tecnico1@hospital.com", "María", "tecnica", "Mujer", eps1, pm1, "tecnica de lab", "LABTECH");
 
             // Ubicación
