@@ -48,13 +48,13 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .securityMatcher("/api/**") // ✅ Corregido: sin duplicar context-path
+            .securityMatcher("/api/**") 
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/auth/login",         // ✅ Corregido
+                    "/api/auth/login",        
                     "/api/auth/register",
                     "/api/eps",
                     "/api/prepaid-medicines"
@@ -75,7 +75,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); 
+        config.setAllowedOrigins(List.of("http://localhost:5173")); 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
         config.setExposedHeaders(List.of("Authorization"));
