@@ -3,10 +3,13 @@ package com.example.ccrHospitalManagement.controller;
 import com.example.ccrHospitalManagement.dto.LoginRequest;
 import com.example.ccrHospitalManagement.dto.LoginResponse;
 import com.example.ccrHospitalManagement.dto.UserDTO;
+import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
 import com.example.ccrHospitalManagement.mapper.UserMapper;
 import com.example.ccrHospitalManagement.model.User;
 import com.example.ccrHospitalManagement.repository.UserRepository;
 import com.example.ccrHospitalManagement.security.JWTService;
+import com.example.ccrHospitalManagement.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +28,10 @@ public class AuthRestController {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final UserRepository userRepository;
-    private final UserMapper userMapper;  // ✅ nuevo
+    private final UserMapper userMapper;
+    private final UserService userService;
 
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
@@ -45,19 +50,31 @@ public class AuthRestController {
         }
     }
 
+    
+   
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDto dto) {
+        try {
+            userService.saveUser(dto);
+            return ResponseEntity.ok("Usuario registrado exitosamente.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(401).body("No autenticado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
         }
 
         User user = userRepository.findByUsername(userDetails.getUsername());
-
         if (user == null) {
-            return ResponseEntity.status(404).body("Usuario no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
         }
 
-        UserDTO userDTO = userMapper.toDto(user); 
+        UserDTO userDTO = userMapper.toDto(user);
         return ResponseEntity.ok(userDTO);
     }
 }
