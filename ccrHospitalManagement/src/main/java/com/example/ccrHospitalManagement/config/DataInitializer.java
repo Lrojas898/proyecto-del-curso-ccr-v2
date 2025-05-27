@@ -27,53 +27,80 @@ public class DataInitializer {
     private final PasswordEncoder passwordEncoder;
     private final ExamTypeRepository examTypeRepository;
 
-    @Bean
-    public CommandLineRunner initData() {
-        return args -> {
+  @Bean
+public CommandLineRunner initData() {
+    return args -> {
 
-            // EPS
-            EPS eps1 = new EPS("EPS001", "Sanitas");
-            EPS eps2 = new EPS("EPS002", "Sura");
-            epsRepository.saveAll(List.of(eps1, eps2));
+        // === EPS ===
+        EPS eps1 = new EPS("EPS001", "Sanitas");
+        EPS eps2 = new EPS("EPS002", "Sura");
+        EPS eps3 = new EPS("EPS003", "Nueva EPS");
+        epsRepository.saveAll(List.of(eps1, eps2, eps3));
 
-            // Medicina Prepagada
-            PrepaidMedicine pm1 = new PrepaidMedicine("PM001", "Coomeva");
-            PrepaidMedicine pm2 = new PrepaidMedicine("PM002", "Colsanitas");
-            prepaidRepository.saveAll(List.of(pm1, pm2));
+        // === Medicina Prepagada ===
+        PrepaidMedicine pm1 = new PrepaidMedicine("PM001", "Coomeva");
+        PrepaidMedicine pm2 = new PrepaidMedicine("PM002", "Colsanitas");
+        PrepaidMedicine pm3 = new PrepaidMedicine("PM003", "Aliansalud");
+        prepaidRepository.saveAll(List.of(pm1, pm2, pm3));
 
-            // Roles
-            List<String> roleNames = List.of("ADMIN", "DOCTOR","PACIENTE","ASISTENTE","LABTECH");
-            for (String roleName : roleNames) {
-                roleRepository.findByName(roleName)
-                        .orElseGet(() -> roleRepository.save(new Role(null, roleName)));
-            }
+        // === Roles ===
+        List<String> roleNames = List.of("ADMIN", "DOCTOR", "PACIENTE", "ASISTENTE", "LABTECH");
+        for (String roleName : roleNames) {
+            roleRepository.findByName(roleName)
+                    .orElseGet(() -> roleRepository.save(new Role(null, roleName)));
+        }
 
-            // Usuarios
-            createUserIfNotExists("admin", "123456", "admin@hospital.com", "Admin", "Principal", "Hombre", eps1, pm1, "Administración", "ADMIN");
-            createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Médico", "Hombre", eps1, pm2, "Medicina Interna", "DOCTOR");
-            createUserIfNotExists("paciente1", "123456", "paciente1@gmail.com", "Laura", "Pérez", "Mujer", eps2, pm1, null, "PACIENTE");
-            createUserIfNotExists("asistente1", "123456", "asistente1@hospital.com", "María", "Asistente", "Mujer", eps1, pm1, "Asistencia Médica", "LABTECH");
-            createUserIfNotExists("tecnico1", "123456", "tecnico1@hospital.com", "María", "tecnica", "Mujer", eps1, pm1, "tecnica de lab", "LABTECH");
+        // === Ubicaciones ===
+        Location loc1 = createLocationIfNotExists("Consultorio 101", "Ala Norte", "Medicina General");
+        Location loc2 = createLocationIfNotExists("Consultorio 202", "Ala Sur", "Pediatría");
+        Location loc3 = createLocationIfNotExists("Laboratorio Central", "Sótano", "Toma de muestras");
+        Location loc4 = createLocationIfNotExists("Unidad de Imagenología", "Piso 2", "Exámenes especiales");
 
-            // Ubicación
-            Location location = createLocationIfNotExists("Consultorio General 101", "Av. Siempre Viva 742", "Ubicación en el ala norte del hospital");
+        // === Tipos de Examen ===
+        if (examTypeRepository.count() == 0) {
+            examTypeRepository.saveAll(List.of(
+                    new ExamType(null, "Hemograma"),
+                    new ExamType(null, "Química sanguínea"),
+                    new ExamType(null, "Perfil lipídico"),
+                    new ExamType(null, "Orina general"),
+                    new ExamType(null, "PCR COVID"),
+                    new ExamType(null, "Ecografía"),
+                    new ExamType(null, "Rayos X"),
+                    new ExamType(null, "Resonancia magnética")
+            ));
+        }
 
-            // Cita de prueba
-            createAppointmentIfNotExists("paciente1", "doctor1", location, "Control médico general");
-            // exam type
-            if (examTypeRepository.count() == 0) {
-                List<ExamType> types = List.of(
-                        new ExamType(null, "Hemograma"),
-                        new ExamType(null, "Química sanguínea"),
-                        new ExamType(null, "Perfil lipídico"),
-                        new ExamType(null, "Orina"),
-                        new ExamType(null, "PCR")
-                );
-                examTypeRepository.saveAll(types);
-                System.out.println("Tipos de examen inicializados.");
-            }
-        };
-    }
+        // === Usuarios ===
+        // DOCTORES
+        createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Gómez", "Hombre", eps1, pm1, "Medicina Interna", "DOCTOR");
+        createUserIfNotExists("doctor2", "123456", "doc2@hospital.com", "Ana", "Ruiz", "Mujer", eps2, pm2, "Pediatría", "DOCTOR");
+        createUserIfNotExists("doctor3", "123456", "doc3@hospital.com", "Luis", "Martínez", "Hombre", eps3, pm3, "Dermatología", "DOCTOR");
+
+        // PACIENTES
+        createUserIfNotExists("paciente1", "123456", "pac1@gmail.com", "Laura", "Pérez", "Mujer", eps1, pm2, null, "PACIENTE");
+        createUserIfNotExists("paciente2", "123456", "pac2@gmail.com", "Miguel", "Torres", "Hombre", eps2, pm1, null, "PACIENTE");
+        createUserIfNotExists("paciente3", "123456", "pac3@gmail.com", "Sofía", "Rodríguez", "Mujer", eps3, pm3, null, "PACIENTE");
+
+        // ASISTENTES
+        createUserIfNotExists("asistente1", "123456", "asis1@hospital.com", "María", "Ramírez", "Mujer", eps1, pm1, "Asistencia Médica", "ASISTENTE");
+        createUserIfNotExists("asistente2", "123456", "asis2@hospital.com", "Pedro", "Sánchez", "Hombre", eps2, pm2, "Asistencia Clínica", "ASISTENTE");
+
+        // TÉCNICOS
+        createUserIfNotExists("labtech1", "123456", "lab1@hospital.com", "Camila", "Morales", "Mujer", eps1, pm1, "Laboratorio", "LABTECH");
+        createUserIfNotExists("labtech2", "123456", "lab2@hospital.com", "Andrés", "Fernández", "Hombre", eps3, pm3, "Bioquímica", "LABTECH");
+
+        // ADMIN
+        createUserIfNotExists("admin", "123456", "admin@hospital.com", "Admin", "Principal", "Otro", eps1, pm1, "Administración", "ADMIN");
+
+        // === Crear citas de prueba para cada paciente con doctor1 ===
+        for (int i = 1; i <= 3; i++) {
+            String pacienteUsername = "paciente" + i;
+            createAppointmentIfNotExists(pacienteUsername, "doctor1", loc1, "Consulta general del paciente " + i);
+        }
+
+    };
+}
+
 
     private void createUserIfNotExists(String username, String rawPassword, String email,
                                        String firstName, String lastName, String sex,
