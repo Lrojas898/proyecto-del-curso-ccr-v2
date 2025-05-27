@@ -1,5 +1,7 @@
 package com.example.ccrHospitalManagement.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,7 @@ import com.example.ccrHospitalManagement.dto.UserDTO;
 import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
 import com.example.ccrHospitalManagement.dto.UserRoleDTO;
 import com.example.ccrHospitalManagement.model.Appointment;
+import com.example.ccrHospitalManagement.model.ClinicalHistory;
 import com.example.ccrHospitalManagement.model.EPS;
 import com.example.ccrHospitalManagement.model.PrepaidMedicine;
 import com.example.ccrHospitalManagement.model.Role;
@@ -40,39 +43,54 @@ public class UserServiceImpl implements  UserService{
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
     private final AppointmentRepository appointmentRepository;
+    private final ClinicalHistoryService clinicalHistoryService;
 
 
-    @Override
-    @Transactional
-    public void saveUser(UserRegistrationDto dto) {
-        if (userRepository.existsById(dto.getId())) {
-            throw new IllegalArgumentException("El ID ya existe.");
-        }
-        if (userRepository.existsByUsername(dto.getUsername())) {
-            throw new IllegalArgumentException("El nombre de usuario ya está en uso.");
-        }
-
-        EPS eps = epsRepository.findById(dto.getEpsNit())
-                .orElseThrow(() -> new IllegalArgumentException("EPS no encontrada"));
-        PrepaidMedicine prepaid = prepaidRepository.findById(dto.getPrepaidMedicineNit())
-                .orElseThrow(() -> new IllegalArgumentException("Medicina prepagada no encontrada"));
-
-        User user = new User();
-        user.setId(dto.getId());
-        user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setEmail(dto.getEmail());
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
-        user.setAddress(dto.getAddress());
-        user.setPhone(dto.getPhone());
-        user.setSex(dto.getSex());
-        user.setDateOfBirth(dto.getDateOfBirth()); 
-        user.setEps(eps);
-        user.setPrepaidMedicine(prepaid);
-
-        userRepository.save(user);
+@Override
+@Transactional
+public void saveUser(UserRegistrationDto dto) {
+    if (userRepository.existsById(dto.getId())) {
+        throw new IllegalArgumentException("El ID ya existe.");
     }
+    if (userRepository.existsByUsername(dto.getUsername())) {
+        throw new IllegalArgumentException("El nombre de usuario ya está en uso.");
+    }
+
+    EPS eps = epsRepository.findById(dto.getEpsNit())
+            .orElseThrow(() -> new IllegalArgumentException("EPS no encontrada"));
+    PrepaidMedicine prepaid = prepaidRepository.findById(dto.getPrepaidMedicineNit())
+            .orElseThrow(() -> new IllegalArgumentException("Medicina prepagada no encontrada"));
+
+    Role defaultRole = roleRepository.findByName("PACIENTE")
+            .orElseThrow(() -> new IllegalArgumentException("Rol por defecto 'PACIENTE' no encontrado"));
+
+    User user = new User();
+    user.setId(dto.getId());
+    user.setUsername(dto.getUsername());
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+    user.setEmail(dto.getEmail());
+    user.setFirstName(dto.getFirstName());
+    user.setLastName(dto.getLastName());
+    user.setAddress(dto.getAddress());
+    user.setPhone(dto.getPhone());
+    user.setSex(dto.getSex());
+    user.setDateOfBirth(dto.getDateOfBirth());
+    user.setEps(eps);
+    user.setPrepaidMedicine(prepaid);
+    user.setRoles(Set.of(defaultRole));
+
+    userRepository.save(user);
+
+    if (defaultRole.getName().equals("PACIENTE")) {
+        ClinicalHistory history = new ClinicalHistory();
+        history.setDate(LocalDate.now());
+        history.setHour(LocalTime.now());
+        history.setGeneralObservations("Historia clínica creada automáticamente al registrar al paciente.");
+        history.setUser(user);
+        clinicalHistoryService.createClinicalHistory(history);
+    }
+}
+
 
     @Transactional
     public User createUser(User user, List<Long> roleIds) {
