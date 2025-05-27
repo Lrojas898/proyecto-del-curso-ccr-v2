@@ -25,6 +25,9 @@ public interface AppointmentService {
 
     List<Appointment> getAppointmentsByPatientId(String patientId);
      Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest request, String username);
+
+     long countAllAppointments();
+
 }
 
 

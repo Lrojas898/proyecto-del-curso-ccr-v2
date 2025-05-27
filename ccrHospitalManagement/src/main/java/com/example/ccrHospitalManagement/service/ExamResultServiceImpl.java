@@ -57,6 +57,12 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     @Override
+    public long countAllExamResults() {
+        return examResultRepository.count();
+    }
+
+
+    @Override
     public void removeExamResultById(Long id) {
         if (!examResultRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un resultado que no existe.");

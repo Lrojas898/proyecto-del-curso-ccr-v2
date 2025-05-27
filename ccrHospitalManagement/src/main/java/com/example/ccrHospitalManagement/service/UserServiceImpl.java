@@ -196,6 +196,11 @@ public class UserServiceImpl implements UserService {
             .filter(user -> user.getRoles().stream()
                     .anyMatch(role -> role.getName().equalsIgnoreCase(roleName)))
             .toList();
-}
+    }
+
+    public long countUsers() {
+        return userRepository.count(); // Asumiendo que usas JpaRepository<User, String>
+    }
+
 
 }

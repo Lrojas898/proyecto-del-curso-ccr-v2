@@ -163,6 +163,11 @@ public List<Appointment> getAppointmentsByPatientId(String patientId) {
 }
 
 
+@Override
+public long countAllAppointments() {
+    return appointmentRepository.count();
+}
+
 
 @Override
 @Transactional

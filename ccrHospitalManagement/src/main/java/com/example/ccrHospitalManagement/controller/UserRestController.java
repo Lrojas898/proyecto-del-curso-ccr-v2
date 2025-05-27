@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/users")
@@ -112,6 +113,18 @@ public ResponseEntity<List<UserDTO>> getAllDoctors() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
+
+@GetMapping("/count")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> getUsersCount() {
+    try {
+        long count = userService.countUsers(); // Método que debes implementar en UserServiceImpl
+        return ResponseEntity.ok(Collections.singletonMap("count", count));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener el conteo de usuarios");
+    }
+}
+
 
 
 

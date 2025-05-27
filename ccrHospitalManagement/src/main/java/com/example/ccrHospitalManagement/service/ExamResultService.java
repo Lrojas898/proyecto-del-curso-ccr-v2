@@ -17,4 +17,7 @@ public interface ExamResultService {
     Optional<ExamResult> getExamResultById(Long id);
 
     void removeExamResultById(Long id);
+
+    long countAllExamResults();
+
 }
