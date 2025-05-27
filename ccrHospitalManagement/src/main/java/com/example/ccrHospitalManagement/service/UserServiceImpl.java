@@ -2,10 +2,7 @@ package com.example.ccrHospitalManagement.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.hibernate.Hibernate;
@@ -17,24 +14,15 @@ import com.example.ccrHospitalManagement.dto.RoleDTO;
 import com.example.ccrHospitalManagement.dto.UserDTO;
 import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
 import com.example.ccrHospitalManagement.dto.UserRoleDTO;
-import com.example.ccrHospitalManagement.model.Appointment;
-import com.example.ccrHospitalManagement.model.ClinicalHistory;
-import com.example.ccrHospitalManagement.model.EPS;
-import com.example.ccrHospitalManagement.model.PrepaidMedicine;
-import com.example.ccrHospitalManagement.model.Role;
-import com.example.ccrHospitalManagement.model.User;
-import com.example.ccrHospitalManagement.repository.AppointmentRepository;
-import com.example.ccrHospitalManagement.repository.EPSRepository;
-import com.example.ccrHospitalManagement.repository.PrepaidMedicineRepository;
-import com.example.ccrHospitalManagement.repository.RoleRepository;
-import com.example.ccrHospitalManagement.repository.UserRepository;
-import com.example.ccrHospitalManagement.repository.UserRoleRepository;
+import com.example.ccrHospitalManagement.mapper.UserMapper;
+import com.example.ccrHospitalManagement.model.*;
+import com.example.ccrHospitalManagement.repository.*;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements  UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final EPSRepository epsRepository;
@@ -44,53 +32,52 @@ public class UserServiceImpl implements  UserService{
     private final RoleRepository roleRepository;
     private final AppointmentRepository appointmentRepository;
     private final ClinicalHistoryService clinicalHistoryService;
+    private final UserMapper userMapper;
 
+    @Override
+    @Transactional
+    public void saveUser(UserRegistrationDto dto) {
+        if (userRepository.existsById(dto.getId())) {
+            throw new IllegalArgumentException("El ID ya existe.");
+        }
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new IllegalArgumentException("El nombre de usuario ya está en uso.");
+        }
 
-@Override
-@Transactional
-public void saveUser(UserRegistrationDto dto) {
-    if (userRepository.existsById(dto.getId())) {
-        throw new IllegalArgumentException("El ID ya existe.");
+        EPS eps = epsRepository.findById(dto.getEpsNit())
+                .orElseThrow(() -> new IllegalArgumentException("EPS no encontrada"));
+        PrepaidMedicine prepaid = prepaidRepository.findById(dto.getPrepaidMedicineNit())
+                .orElseThrow(() -> new IllegalArgumentException("Medicina prepagada no encontrada"));
+
+        Role defaultRole = roleRepository.findByName("PACIENTE")
+                .orElseThrow(() -> new IllegalArgumentException("Rol por defecto 'PACIENTE' no encontrado"));
+
+        User user = new User();
+        user.setId(dto.getId());
+        user.setUsername(dto.getUsername());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setEmail(dto.getEmail());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setAddress(dto.getAddress());
+        user.setPhone(dto.getPhone());
+        user.setSex(dto.getSex());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setEps(eps);
+        user.setPrepaidMedicine(prepaid);
+        user.setRoles(Set.of(defaultRole));
+
+        userRepository.save(user);
+
+        if (defaultRole.getName().equals("PACIENTE")) {
+            ClinicalHistory history = new ClinicalHistory();
+            history.setDate(LocalDate.now());
+            history.setHour(LocalTime.now());
+            history.setGeneralObservations("Historia clínica creada automáticamente al registrar al paciente.");
+            history.setUser(user);
+            clinicalHistoryService.createClinicalHistory(history);
+        }
     }
-    if (userRepository.existsByUsername(dto.getUsername())) {
-        throw new IllegalArgumentException("El nombre de usuario ya está en uso.");
-    }
-
-    EPS eps = epsRepository.findById(dto.getEpsNit())
-            .orElseThrow(() -> new IllegalArgumentException("EPS no encontrada"));
-    PrepaidMedicine prepaid = prepaidRepository.findById(dto.getPrepaidMedicineNit())
-            .orElseThrow(() -> new IllegalArgumentException("Medicina prepagada no encontrada"));
-
-    Role defaultRole = roleRepository.findByName("PACIENTE")
-            .orElseThrow(() -> new IllegalArgumentException("Rol por defecto 'PACIENTE' no encontrado"));
-
-    User user = new User();
-    user.setId(dto.getId());
-    user.setUsername(dto.getUsername());
-    user.setPassword(passwordEncoder.encode(dto.getPassword()));
-    user.setEmail(dto.getEmail());
-    user.setFirstName(dto.getFirstName());
-    user.setLastName(dto.getLastName());
-    user.setAddress(dto.getAddress());
-    user.setPhone(dto.getPhone());
-    user.setSex(dto.getSex());
-    user.setDateOfBirth(dto.getDateOfBirth());
-    user.setEps(eps);
-    user.setPrepaidMedicine(prepaid);
-    user.setRoles(Set.of(defaultRole));
-
-    userRepository.save(user);
-
-    if (defaultRole.getName().equals("PACIENTE")) {
-        ClinicalHistory history = new ClinicalHistory();
-        history.setDate(LocalDate.now());
-        history.setHour(LocalTime.now());
-        history.setGeneralObservations("Historia clínica creada automáticamente al registrar al paciente.");
-        history.setUser(user);
-        clinicalHistoryService.createClinicalHistory(history);
-    }
-}
-
 
     @Transactional
     public User createUser(User user, List<Long> roleIds) {
@@ -109,12 +96,16 @@ public void saveUser(UserRegistrationDto dto) {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        return Optional.of(userRepository.findByUsername(username));
     }
 
     @Transactional
@@ -132,6 +123,13 @@ public void saveUser(UserRegistrationDto dto) {
         return userRepository.save(user);
     }
 
+
+    @Transactional
+    public User updateUser(User user) {
+        return userRepository.save(user);
+        
+    }
+
     @Transactional
     public void deleteUser(String id) {
         Optional<User> userOpt = userRepository.findById(id);
@@ -141,17 +139,14 @@ public void saveUser(UserRegistrationDto dto) {
 
         User user = userOpt.get();
 
-        // Eliminar citas donde sea paciente
         List<Appointment> asPatient = appointmentRepository.findByPatientId(user.getId());
         appointmentRepository.deleteAll(asPatient);
 
-        // Eliminar citas donde sea doctor (si aplica)
         List<Appointment> asDoctor = appointmentRepository.findByDoctorId(user.getId());
         appointmentRepository.deleteAll(asDoctor);
 
         userRepository.deleteById(id);
     }
-
 
     public List<UserRoleDTO> getAllUsersWithRoles() {
         List<User> users = userRepository.findAll();
@@ -195,22 +190,4 @@ public void saveUser(UserRegistrationDto dto) {
 
         userRepository.save(user);
     }
-
-    private UserDTO convertToDTO(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        // Convertir roles a lista de Strings (nombres)
-        dto.setRoles(
-            user.getRoles()
-                .stream()
-                .map(role -> role.getName())  // o getRoleName() según tu entidad
-                .collect(Collectors.toList())
-        );
-        return dto;
-    }
-
 }

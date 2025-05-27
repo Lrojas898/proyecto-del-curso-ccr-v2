@@ -86,4 +86,9 @@ public class ExamResultServiceImpl implements ExamResultService {
             throw new IllegalArgumentException("El paciente y el técnico no pueden ser la misma persona.");
         }
     }
+
+    public List<ExamResult> getExamResultsByUsername(String username) {
+    return examResultRepository.findByPatient_Username(username);
+}
+
 }
