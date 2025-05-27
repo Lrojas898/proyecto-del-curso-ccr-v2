@@ -190,4 +190,12 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
     }
+
+    public List<User> getUsersByRole(String roleName) {
+    return userRepository.findAll().stream()
+            .filter(user -> user.getRoles().stream()
+                    .anyMatch(role -> role.getName().equalsIgnoreCase(roleName)))
+            .toList();
+}
+
 }

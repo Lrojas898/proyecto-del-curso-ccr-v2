@@ -99,6 +99,19 @@ public class UserRestController {
     }
 }
 
+@GetMapping("/doctors")
+@PreAuthorize("hasAnyRole('ADMIN', 'PACIENTE', 'ASISTENTE')")
+public ResponseEntity<List<UserDTO>> getAllDoctors() {
+    try {
+        List<User> doctors = userService.getUsersByRole("DOCTOR");
+        List<UserDTO> doctorDTOs = doctors.stream()
+                .map(userMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(doctorDTOs);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
 
 
 
