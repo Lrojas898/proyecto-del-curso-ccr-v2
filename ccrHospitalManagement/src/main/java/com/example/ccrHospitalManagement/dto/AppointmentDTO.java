@@ -18,4 +18,9 @@ public class AppointmentDTO {
 
     private AppointmentStatus status;
 
+    private UserDTO patient;
+    private UserDTO doctor;
+    private LocationDTO location;
+
+
 }

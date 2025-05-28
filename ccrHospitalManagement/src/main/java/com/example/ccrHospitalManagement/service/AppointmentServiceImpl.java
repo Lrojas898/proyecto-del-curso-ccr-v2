@@ -189,4 +189,33 @@ public Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest
     return appointmentRepository.save(appointment);
 }
 
+    @Override
+    @Transactional
+    public List<Appointment> getAppointmentsByDoctorId(String doctorId) {
+        return appointmentRepository.findByDoctorId(doctorId);
+    }
+
+    @Override
+    @Transactional
+    public Appointment rescheduleByDoctor(Long appointmentId, LocalDate newDate, LocalTime newTime, String reason) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada con ID: " + appointmentId));
+
+        // Actualizar fecha y hora
+        appointment.setDate(newDate);
+        appointment.setStartTime(newTime);
+
+        // Anexar nota de reprogramación si hay razón
+        if (reason != null && !reason.trim().isEmpty()) {
+            String updatedDescription = appointment.getDescription() != null
+                    ? appointment.getDescription() + "\n(Reprogramada por el doctor: " + reason + ")"
+                    : "(Reprogramada por el doctor: " + reason + ")";
+            appointment.setDescription(updatedDescription);
+        }
+
+        return appointmentRepository.save(appointment);
+    }
+
+
+
 }

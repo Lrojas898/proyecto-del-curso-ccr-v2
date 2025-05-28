@@ -5,6 +5,8 @@ import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,11 @@ public interface AppointmentService {
      Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest request, String username);
 
      long countAllAppointments();
+
+    List<Appointment> getAppointmentsByDoctorId(String doctorId);
+
+    Appointment rescheduleByDoctor(Long appointmentId, LocalDate newDate, LocalTime newTime, String reason);
+
 
 }
 

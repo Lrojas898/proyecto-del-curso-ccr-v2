@@ -1,6 +1,7 @@
 package com.example.ccrHospitalManagement.mapper;
 
 import com.example.ccrHospitalManagement.dto.AppointmentDTO;
+import com.example.ccrHospitalManagement.dto.LocationDTO;
 import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.repository.LocationRepository;
 import com.example.ccrHospitalManagement.repository.UserRepository;
@@ -13,6 +14,7 @@ public class AppointmentMapper {
 
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final UserMapper userMapper;
 
     public AppointmentDTO toDto(Appointment entity) {
         AppointmentDTO dto = new AppointmentDTO();
@@ -24,6 +26,18 @@ public class AppointmentMapper {
         dto.setPatientId(entity.getPatient().getId());
         dto.setDoctorId(entity.getDoctor().getId());
         dto.setStatus(entity.getStatus());
+        dto.setPatient(userMapper.toDto(entity.getPatient()));
+        dto.setDoctor(userMapper.toDto(entity.getDoctor()));
+
+        LocationDTO locationDTO = new LocationDTO();
+        locationDTO.setId(entity.getLocation().getId());
+        locationDTO.setName(entity.getLocation().getName());
+        locationDTO.setAddress(entity.getLocation().getAddress());
+        locationDTO.setDescription(entity.getLocation().getDescription());
+        dto.setLocation(locationDTO);
+
+
+
         return dto;
     }
 

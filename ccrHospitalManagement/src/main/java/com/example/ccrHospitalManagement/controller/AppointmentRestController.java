@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Collections;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -81,16 +82,18 @@ public class AppointmentRestController {
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE','PACIENTE')")
     public ResponseEntity<AppointmentDTO> updateStatus(
             @PathVariable Long id,
-            @RequestParam AppointmentStatus newStatus,
+            @RequestBody Map<String, String> body,
             Authentication authentication) {
 
-        String requesterRole = authentication.getAuthorities()
-                .stream()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .findFirst()
-                .orElse("UNKNOWN");
-
         try {
+            String statusStr = body.get("status");
+            AppointmentStatus newStatus = AppointmentStatus.valueOf(statusStr);
+            String requesterRole = authentication.getAuthorities()
+                    .stream()
+                    .map(a -> a.getAuthority().replace("ROLE_", ""))
+                    .findFirst()
+                    .orElse("UNKNOWN");
+
             return ResponseEntity.ok(
                     mapper.toDto(service.updateAppointmentStatus(id, newStatus, requesterRole))
             );
@@ -100,6 +103,7 @@ public class AppointmentRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -157,10 +161,34 @@ public ResponseEntity<?> getTotalAppointmentsCount() {
     }
 }
 
+    @GetMapping("/doctor/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
+    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByDoctorId(@PathVariable String id) {
+        try {
+            List<AppointmentDTO> appointments = service
+                    .getAppointmentsByDoctorId(id)
+                    .stream()
+                    .map(mapper::toDto)
+                    .toList();
+            return ResponseEntity.ok(appointments);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
-
-
-
-
+    @PutMapping("/{id}/reschedule")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<AppointmentDTO> rescheduleAppointment(
+            @PathVariable Long id,
+            @RequestBody RescheduleRequest request) {
+        try {
+            Appointment updated = service.rescheduleByDoctor(id, request.getNewDate(), request.getNewTime(), request.getReason());
+            return ResponseEntity.ok(mapper.toDto(updated));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }
