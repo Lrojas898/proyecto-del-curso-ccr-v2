@@ -1,7 +1,9 @@
 package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.AppointmentDTO;
+import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.mapper.AppointmentMapper;
+import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
 import com.example.ccrHospitalManagement.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -110,4 +113,54 @@ public class AppointmentRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/patient/{id}")
+@PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
+public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPatientId(@PathVariable String id) {
+    try {
+        List<AppointmentDTO> appointments = service
+                .getAppointmentsByPatientId(id)
+                .stream()
+                .map(mapper::toDto)
+                .toList();
+        return ResponseEntity.ok(appointments);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+@PostMapping("/{id}/reschedule-request")
+@PreAuthorize("hasRole('PACIENTE')")
+public ResponseEntity<AppointmentDTO> requestReschedule(
+        @PathVariable Long id,
+        @RequestBody RescheduleRequest request,
+        Authentication auth) {
+    try {
+        Appointment updated = service.handleRescheduleRequest(id, request, auth.getName());
+        return ResponseEntity.ok(mapper.toDto(updated));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().build();
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+@GetMapping("/count")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> getTotalAppointmentsCount() {
+    try {
+        long count = service.countAllAppointments();
+        return ResponseEntity.ok(Collections.singletonMap("count", count));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error al obtener el conteo total de citas");
+    }
+}
+
+
+
+
+
+
+
 }

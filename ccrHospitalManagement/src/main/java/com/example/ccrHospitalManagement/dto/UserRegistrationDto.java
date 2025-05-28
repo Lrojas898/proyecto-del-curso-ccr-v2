@@ -4,7 +4,11 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.sql.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 @Data
@@ -39,11 +43,11 @@ public class UserRegistrationDto {
     private String phone;
 
     @NotBlank
-    @Pattern(regexp = "Hombre|Mujer", message = "El sexo debe ser 'Hombre' o 'Mujer'")
+    @Pattern(regexp = "Hombre|Mujer|Otro", message = "El sexo debe ser 'Hombre', 'Mujer' o 'Otro'")
     private String sex;
 
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd") 
     @NotNull(message = "La fecha de nacimiento es obligatoria")
     private LocalDate dateOfBirth;
 

@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/exam-results")
@@ -89,4 +90,32 @@ public class ExamResultRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/me")
+@PreAuthorize("hasRole('PACIENTE')")
+public ResponseEntity<List<ExamResultDTO>> getMyResults(Authentication auth) {
+    try {
+        List<ExamResultDTO> myResults = service.getAllExamResults().stream()
+                .filter(result -> result.getPatient().getUsername().equals(auth.getName()))
+                .map(mapper::toDto)
+                .toList();
+        return ResponseEntity.ok(myResults);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+@GetMapping("/count")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> getTotalExamResultsCount() {
+    try {
+        long count = service.countAllExamResults();
+        return ResponseEntity.ok(Collections.singletonMap("count", count));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al obtener el conteo total de exámenes");
+    }
+}
+
+
 }

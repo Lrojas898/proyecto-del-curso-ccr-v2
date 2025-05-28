@@ -5,13 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,26 +18,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JWTServiceImpl implements JWTService {
 
-    private String secretKey;
+    private static final String SECRET_KEY = "zVn48xT6M9KcFhPqL3RgTyUeWqYtRnFkAjZr6fVqMxSwTkOmUdBtNsGaQvWuEzRp";
+
     private final CustomUserDetailsServiceImpl userDetailsService;
 
-    @PostConstruct
-    public void init() {
-        this.secretKey = generateSecretKey();
-    }
-
-    private String generateSecretKey() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey key = keyGen.generateKey();
-            return Base64.getEncoder().encodeToString(key.getEncoded());
-        } catch (Exception e) {
-            throw new RuntimeException("Error generando la clave secreta para JWT", e);
-        }
-    }
-
     private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

@@ -1,5 +1,6 @@
 package com.example.ccrHospitalManagement.service;
 
+import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
 import com.example.ccrHospitalManagement.repository.AppointmentRepository;
@@ -154,4 +155,38 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalArgumentException("Debe especificarse una ubicación.");
         }
     }
+
+@Override
+@Transactional
+public List<Appointment> getAppointmentsByPatientId(String patientId) {
+    return appointmentRepository.findByPatientId(patientId);
+}
+
+
+@Override
+public long countAllAppointments() {
+    return appointmentRepository.count();
+}
+
+
+@Override
+@Transactional
+public Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest request, String username) {
+    Appointment appointment = appointmentRepository.findById(appointmentId)
+            .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+
+    if (!appointment.getPatient().getUsername().equals(username)) {
+        throw new IllegalArgumentException("No autorizado para reprogramar esta cita.");
+    }
+
+    appointment.setDate(request.getNewDate());
+    appointment.setStartTime(request.getNewTime());
+
+    String originalDescription = appointment.getDescription() != null ? appointment.getDescription() : "";
+    appointment.setDescription(originalDescription + " (Reprogramación solicitada: " + request.getReason() + ")");
+    appointment.setStatus(AppointmentStatus.MODIFIED);
+
+    return appointmentRepository.save(appointment);
+}
+
 }

@@ -25,7 +25,6 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         return clinicalHistoryRepository.save(history);
     }
 
-
     @Override
     public ClinicalHistory UpdateClinicalHistory(ClinicalHistory history) {
         if (!clinicalHistoryRepository.existsById(history.getId())) {
@@ -41,10 +40,8 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         return clinicalHistoryRepository.findAll();
     }
 
-
-
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public Optional<ClinicalHistory> getClinicalHistoryById(Long id) {
         return clinicalHistoryRepository.findById(id);
     }
@@ -57,8 +54,12 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         clinicalHistoryRepository.deleteById(id);
     }
 
-    private void validateClinicalHistory(ClinicalHistory history, boolean isCreate) {
+    @Transactional(readOnly = true)
+    public Optional<ClinicalHistory> getClinicalHistoryByUsername(String username) {
+        return clinicalHistoryRepository.findByUser_Username(username);
+    }
 
+    private void validateClinicalHistory(ClinicalHistory history, boolean isCreate) {
         if (history.getDate() == null || history.getDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha debe ser válida y no puede estar en el futuro.");
         }

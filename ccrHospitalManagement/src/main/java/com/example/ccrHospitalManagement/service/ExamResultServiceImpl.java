@@ -57,6 +57,12 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     @Override
+    public long countAllExamResults() {
+        return examResultRepository.count();
+    }
+
+
+    @Override
     public void removeExamResultById(Long id) {
         if (!examResultRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar un resultado que no existe.");
@@ -86,4 +92,9 @@ public class ExamResultServiceImpl implements ExamResultService {
             throw new IllegalArgumentException("El paciente y el técnico no pueden ser la misma persona.");
         }
     }
+
+    public List<ExamResult> getExamResultsByUsername(String username) {
+    return examResultRepository.findByPatient_Username(username);
+}
+
 }
