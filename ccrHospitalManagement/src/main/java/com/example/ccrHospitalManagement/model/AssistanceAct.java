@@ -23,13 +23,13 @@ public class AssistanceAct {
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 
-    // Relación con AttentionEpisode
-    @ManyToOne
-    @JoinColumn(name = "ATTENTION_EPISODE_Id", nullable = false)
-    private AttentionEpisode attentionEpisode;
-
     // Relación con AssistanceActType
     @ManyToOne
     @JoinColumn(name = "ASSISTANCE_ACT_TYPE_id", nullable = false)
     private AssistanceActType type;
+
+    @ManyToOne
+    @JoinColumn(name = "attention_episode_id")
+    private AttentionEpisode attentionEpisode;
+
 }

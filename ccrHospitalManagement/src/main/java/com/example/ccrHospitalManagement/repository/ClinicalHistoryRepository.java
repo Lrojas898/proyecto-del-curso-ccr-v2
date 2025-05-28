@@ -12,6 +12,9 @@ public interface ClinicalHistoryRepository extends JpaRepository<ClinicalHistory
     boolean existsByUserId(String userId);
     Optional<ClinicalHistory> findByUser_Username(String username);
 
+    Optional<ClinicalHistory> findByUser_Id(String userId);
+
+
 
 
 

@@ -1,6 +1,8 @@
 package com.example.ccrHospitalManagement.service;
 
+import com.example.ccrHospitalManagement.model.AttentionEpisode;
 import com.example.ccrHospitalManagement.model.ClinicalHistory;
+import com.example.ccrHospitalManagement.repository.AttentionEpisodeRepository;
 import com.example.ccrHospitalManagement.repository.ClinicalHistoryRepository;
 import com.example.ccrHospitalManagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
 
     private final ClinicalHistoryRepository clinicalHistoryRepository;
     private final UserRepository userRepository;
+    private final AttentionEpisodeRepository attentionEpisodeRepository;
 
     @Override
     public ClinicalHistory createClinicalHistory(ClinicalHistory history) {
@@ -79,5 +82,15 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         if (isCreate && clinicalHistoryRepository.existsByUserId(history.getUser().getId())) {
             throw new IllegalArgumentException("El usuario ya tiene una historia clínica registrada.");
         }
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ClinicalHistory> getClinicalHistoryByUserId(String userId) {
+        return clinicalHistoryRepository.findByUser_Id(userId);
+    }
+
+    @Override
+    public AttentionEpisode saveEpisode(AttentionEpisode episode) {
+        return attentionEpisodeRepository.save(episode);
     }
 }

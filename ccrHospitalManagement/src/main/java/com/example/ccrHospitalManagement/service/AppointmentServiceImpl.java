@@ -3,6 +3,7 @@ package com.example.ccrHospitalManagement.service;
 import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
+import com.example.ccrHospitalManagement.model.User;
 import com.example.ccrHospitalManagement.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -216,6 +217,9 @@ public Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest
         return appointmentRepository.save(appointment);
     }
 
-
+    @Override
+    public List<User> getPatientsByDoctorId(String doctorId) {
+        return appointmentRepository.findDistinctPatientsByDoctorId(doctorId);
+    }
 
 }

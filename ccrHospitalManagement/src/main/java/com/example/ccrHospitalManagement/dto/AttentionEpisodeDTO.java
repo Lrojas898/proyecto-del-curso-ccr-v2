@@ -2,6 +2,7 @@ package com.example.ccrHospitalManagement.dto;
 
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class AttentionEpisodeDTO {
@@ -12,4 +13,6 @@ public class AttentionEpisodeDTO {
     private Long clinicalHistoryId;
     private String doctorId;
     private Long appointmentId;
+
+    private List<AssistanceActDTO> assistanceActs;
 }

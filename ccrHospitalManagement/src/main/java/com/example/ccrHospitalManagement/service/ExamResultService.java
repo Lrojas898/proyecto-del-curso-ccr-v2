@@ -20,4 +20,6 @@ public interface ExamResultService {
 
     long countAllExamResults();
 
+    List<ExamResult> getExamResultsByUsername(String username);
+
 }

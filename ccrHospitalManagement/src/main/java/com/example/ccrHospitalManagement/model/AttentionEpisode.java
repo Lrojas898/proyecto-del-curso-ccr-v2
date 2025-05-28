@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "ATTENTION_EPISODE")
@@ -36,4 +37,8 @@ public class AttentionEpisode {
     @OneToOne
     @JoinColumn(name = "APPOINTMENT_id")
     private Appointment appointment;
+
+    @OneToMany(mappedBy = "attentionEpisode", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AssistanceAct> assistanceActs;
+
 }
