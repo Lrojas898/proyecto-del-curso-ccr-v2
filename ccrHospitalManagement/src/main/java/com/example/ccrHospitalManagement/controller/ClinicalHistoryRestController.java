@@ -2,6 +2,7 @@ package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.ClinicalHistoryDTO;
 import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapperDecorator;
+import com.example.ccrHospitalManagement.model.ClinicalHistory;
 import com.example.ccrHospitalManagement.service.ClinicalHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clinical-histories")
@@ -56,28 +58,27 @@ public class ClinicalHistoryRestController {
     }
 
     @GetMapping("/me")
-@PreAuthorize("hasRole('PACIENTE')")
-public ResponseEntity<?> getMyHistory(Authentication auth) {
-    try {
-        String username = auth.getName();
+    @PreAuthorize("hasRole('PACIENTE')")
+    public ResponseEntity<?> getMyHistory(Authentication auth) {
+        try {
+            String username = auth.getName();
 
-        var historyOpt = service.getAllClinicalHistories().stream()
-                .filter(h -> h.getUser().getUsername().equals(username))
-                .findFirst();
+            Optional<ClinicalHistory> optional = service.getByUsername(username);
 
-        if (historyOpt.isPresent()) {
-            ClinicalHistoryDTO dto = mapper.toDto(historyOpt.get());
-            return ResponseEntity.ok(dto);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No se encontró historia clínica para el usuario autenticado");
+            if (optional.isPresent()) {
+                ClinicalHistoryDTO dto = mapper.toDto(optional.get());
+                return ResponseEntity.ok(dto);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No se encontró historia clínica para el usuario autenticado");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al recuperar la historia clínica del paciente");
         }
-
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error al recuperar la historia clínica del paciente");
     }
-}
+
+
 
 
     @PostMapping

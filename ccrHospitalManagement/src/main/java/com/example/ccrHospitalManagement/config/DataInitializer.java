@@ -26,8 +26,10 @@ public class DataInitializer {
     private final AppointmentRepository appointmentRepository;
     private final PasswordEncoder passwordEncoder;
     private final ExamTypeRepository examTypeRepository;
+    private final ClinicalHistoryRepository clinicalHistoryRepository;
 
-  @Bean
+
+    @Bean
 public CommandLineRunner initData() {
     return args -> {
 
@@ -129,7 +131,18 @@ public CommandLineRunner initData() {
         user.setPrepaidMedicine(prepaid);
         user.setRoles(Set.of(role));
 
+
         userRepository.save(user);
+
+        if (role.getName().equals("PACIENTE")) {
+            ClinicalHistory history = new ClinicalHistory();
+            history.setDate(LocalDate.now());
+            history.setHour(LocalTime.now());
+            history.setGeneralObservations("Historia clínica generada automáticamente desde DataInitializer.");
+            history.setUser(user);
+            clinicalHistoryRepository.save(history); // inyecta ClinicalHistoryRepository también
+        }
+
     }
 
     private Location createLocationIfNotExists(String name, String address, String description) {

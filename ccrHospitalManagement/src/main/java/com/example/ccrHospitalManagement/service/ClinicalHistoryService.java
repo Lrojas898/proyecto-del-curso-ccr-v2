@@ -23,4 +23,5 @@ public interface ClinicalHistoryService {
 
     AttentionEpisode saveEpisode(AttentionEpisode episode);
 
+    Optional<ClinicalHistory> getByUsername(String username);
 }

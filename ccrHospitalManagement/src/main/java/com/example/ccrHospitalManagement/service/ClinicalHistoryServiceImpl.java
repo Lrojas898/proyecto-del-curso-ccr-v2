@@ -93,4 +93,9 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
     public AttentionEpisode saveEpisode(AttentionEpisode episode) {
         return attentionEpisodeRepository.save(episode);
     }
+
+    public Optional<ClinicalHistory> getByUsername(String username) {
+        return clinicalHistoryRepository.findByUser_Username(username);
+    }
+
 }
