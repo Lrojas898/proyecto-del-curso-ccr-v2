@@ -129,33 +129,41 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     private void validateAppointment(Appointment appointment, boolean isCreate) {
-        if (appointment.getDate() == null) {
-            throw new IllegalArgumentException("La fecha de la cita es obligatoria.");
-        }
-        if (appointment.getDate().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("La cita no puede agendarse en una fecha pasada.");
-        }
-
-        if (appointment.getStartTime() == null) {
-            throw new IllegalArgumentException("La hora de inicio es obligatoria.");
-        }
-        if (appointment.getStartTime().isBefore(LocalTime.of(8, 0)) ||
-            appointment.getStartTime().isAfter(LocalTime.of(18, 0))) {
-            throw new IllegalArgumentException("La hora debe estar entre las 08:00 y las 18:00.");
-        }
-
-        if (appointment.getDoctor() == null || appointment.getPatient() == null) {
-            throw new IllegalArgumentException("Debe asignarse un paciente y un médico.");
-        }
-
-        if (appointment.getDoctor().getId().equals(appointment.getPatient().getId())) {
-            throw new IllegalArgumentException("El médico y el paciente deben ser diferentes.");
-        }
-
-        if (appointment.getLocation() == null) {
-            throw new IllegalArgumentException("Debe especificarse una ubicación.");
-        }
+    if (appointment.getDate() == null) {
+        throw new IllegalArgumentException("La fecha de la cita es obligatoria.");
     }
+    if (appointment.getDate().isBefore(LocalDate.now())) {
+        throw new IllegalArgumentException("La cita no puede agendarse en una fecha pasada.");
+    }
+
+    if (appointment.getStartTime() == null) {
+        throw new IllegalArgumentException("La hora de inicio es obligatoria.");
+    }
+    if (appointment.getStartTime().isBefore(LocalTime.of(8, 0)) ||
+        appointment.getStartTime().isAfter(LocalTime.of(18, 0))) {
+        throw new IllegalArgumentException("La hora debe estar entre las 08:00 y las 18:00.");
+    }
+
+    if (appointment.getDoctor() == null || appointment.getPatient() == null) {
+        throw new IllegalArgumentException("Debe asignarse un paciente y un médico.");
+    }
+
+    if (appointment.getDoctor().getId().equals(appointment.getPatient().getId())) {
+        throw new IllegalArgumentException("El médico y el paciente deben ser diferentes.");
+    }
+
+    if (appointment.getLocation() == null) {
+        throw new IllegalArgumentException("Debe especificarse una ubicación.");
+    }
+
+    if (isCreate && appointmentRepository.existsByDoctorIdAndDateAndStartTime(
+            appointment.getDoctor().getId(),
+            appointment.getDate(),
+            appointment.getStartTime())) {
+        throw new IllegalArgumentException("El doctor ya tiene una cita programada en esa fecha y hora.");
+    }
+}
+
 
 @Override
 @Transactional

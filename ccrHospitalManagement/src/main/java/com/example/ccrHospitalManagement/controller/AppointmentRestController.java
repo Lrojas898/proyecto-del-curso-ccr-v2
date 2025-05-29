@@ -62,7 +62,7 @@ public class AppointmentRestController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(mapper.toDto(service.createAppointment(mapper.toEntity(dto))));
         } catch (IllegalArgumentException e) {
-            System.err.println("❌ Error de argumento: " + e.getMessage());
+            System.err.println(" Error de argumento: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             e.printStackTrace();
