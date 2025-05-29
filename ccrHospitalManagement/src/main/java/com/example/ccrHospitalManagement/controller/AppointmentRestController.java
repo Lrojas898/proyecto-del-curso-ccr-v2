@@ -56,15 +56,20 @@ public class AppointmentRestController {
     @PreAuthorize("hasRole('PACIENTE')")
     public ResponseEntity<AppointmentDTO> create(@RequestBody AppointmentDTO dto) {
         try {
-            System.out.println("Creating appointment: " + dto);
+            System.out.println("📥 Appointment DTO recibido:");
+            System.out.println(dto);
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(mapper.toDto(service.createAppointment(mapper.toEntity(dto))));
         } catch (IllegalArgumentException e) {
+            System.err.println("❌ Error de argumento: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     @PutMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
