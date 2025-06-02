@@ -73,9 +73,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         AppointmentStatus currentStatus = appointment.getStatus();
 
-        // 1. Validar estados inmutables
+        // 1. Estados inmutables
         if (currentStatus == AppointmentStatus.FULLY_APPROVED &&
-                !(newStatus == AppointmentStatus.CANCELLED_BY_PATIENT && requesterRole.equals("ROLE_PATIENT"))) {
+                !(newStatus == AppointmentStatus.CANCELLED_BY_PATIENT && requesterRole.equals("ROLE_PACIENTE"))) {
             throw new IllegalStateException("No se puede modificar una cita totalmente aprobada. Solo puede ser cancelada por el paciente.");
         }
 
@@ -83,50 +83,82 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalStateException("No se puede modificar una cita cancelada o denegada.");
         }
 
-        // 2. Lógica de transición
+        // 2. Transiciones válidas por rol y estado actual
         switch (newStatus) {
             case APPROVED_BY_DOCTOR -> {
                 if (!requesterRole.equals("ROLE_DOCTOR"))
                     throw new IllegalArgumentException("Solo el médico puede aprobar como doctor.");
+
+                if (currentStatus != AppointmentStatus.PENDING &&
+                        currentStatus != AppointmentStatus.PROPOSED_BY_PATIENT &&
+                        currentStatus != AppointmentStatus.MODIFIED)
+                    throw new IllegalStateException("No se puede aprobar esta cita en su estado actual.");
+
                 appointment.setStatus(AppointmentStatus.APPROVED_BY_DOCTOR);
                 updateFullyApprovedIfNeeded(appointment);
             }
+
             case APPROVED_BY_ASSISTANT -> {
-                if (!requesterRole.equals("ROLE_ASSISTANT"))
+                if (!requesterRole.equals("ROLE_ASISTENTE"))
                     throw new IllegalArgumentException("Solo el asistente puede aprobar como asistente.");
+
+                if (currentStatus != AppointmentStatus.PENDING &&
+                        currentStatus != AppointmentStatus.PROPOSED_BY_PATIENT &&
+                        currentStatus != AppointmentStatus.MODIFIED)
+                    throw new IllegalStateException("No se puede aprobar esta cita en su estado actual.");
+
                 appointment.setStatus(AppointmentStatus.APPROVED_BY_ASSISTANT);
                 updateFullyApprovedIfNeeded(appointment);
             }
+
             case PROPOSED_BY_DOCTOR -> {
-                if (!requesterRole.equals("ROLE_DOCTOR") && !requesterRole.equals("ROLE_ASSISTANT"))
+                if (!requesterRole.equals("ROLE_DOCTOR") && !requesterRole.equals("ROLE_ASISTENTE"))
                     throw new IllegalArgumentException("Solo el médico o asistente pueden proponer cambios.");
+
                 appointment.setStatus(AppointmentStatus.PROPOSED_BY_DOCTOR);
             }
+
             case PROPOSED_BY_PATIENT -> {
-                if (!requesterRole.equals("ROLE_PATIENT"))
+                if (!requesterRole.equals("ROLE_PACIENTE"))
                     throw new IllegalArgumentException("Solo el paciente puede proponer cambios.");
-                appointment.setStatus(AppointmentStatus.PROPOSED_BY_PATIENT);
+
+                if (currentStatus == AppointmentStatus.APPROVED_BY_DOCTOR || currentStatus == AppointmentStatus.MODIFIED) {
+                    appointment.setStatus(AppointmentStatus.PROPOSED_BY_PATIENT);
+                } else {
+                    throw new IllegalStateException("No se puede proponer cambios desde este estado.");
+                }
             }
+
             case CONFIRMED_BY_PATIENT -> {
-                if (!requesterRole.equals("ROLE_PATIENT"))
+                if (!requesterRole.equals("ROLE_PACIENTE"))
                     throw new IllegalArgumentException("Solo el paciente puede confirmar cambios.");
+
+                if (currentStatus != AppointmentStatus.PROPOSED_BY_DOCTOR)
+                    throw new IllegalStateException("Solo se pueden confirmar cambios propuestos por el doctor.");
+
                 appointment.setStatus(AppointmentStatus.CONFIRMED_BY_PATIENT);
             }
+
             case CANCELLED_BY_PATIENT -> {
-                if (!requesterRole.equals("ROLE_PATIENT"))
+                if (!requesterRole.equals("ROLE_PACIENTE"))
                     throw new IllegalArgumentException("Solo el paciente puede cancelar.");
+
                 appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
             }
+
             case DENIED -> {
-                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASSISTANT") || requesterRole.equals("ROLE_PATIENT")))
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE") || requesterRole.equals("ROLE_PACIENTE")))
                     throw new IllegalArgumentException("No autorizado para denegar la cita.");
                 appointment.setStatus(AppointmentStatus.DENIED);
             }
+
             case MODIFIED -> {
-                if (!requesterRole.equals("ROLE_DOCTOR") && !requesterRole.equals("ROLE_ASSISTANT"))
+                if (!requesterRole.equals("ROLE_DOCTOR") && !requesterRole.equals("ROLE_ASISTENTE"))
                     throw new IllegalArgumentException("Solo el médico o asistente pueden marcar como modificada.");
+
                 appointment.setStatus(AppointmentStatus.MODIFIED);
             }
+
             default -> throw new IllegalArgumentException("Transición de estado no válida.");
         }
 
@@ -135,24 +167,31 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 
 
+
+
+
     private void updateFullyApprovedIfNeeded(Appointment appointment) {
-        AppointmentStatus current = appointment.getStatus();
+        boolean doctorApproved = appointment.getStatus() == AppointmentStatus.APPROVED_BY_DOCTOR
+                || appointmentPreviouslyApprovedByDoctor(appointment);
+        boolean assistantApproved = appointment.getStatus() == AppointmentStatus.APPROVED_BY_ASSISTANT
+                || appointmentPreviouslyApprovedByAssistant(appointment);
 
-        boolean approvedByDoctor = current == AppointmentStatus.APPROVED_BY_DOCTOR ||
-                (current == AppointmentStatus.APPROVED_BY_ASSISTANT && appointmentPreviouslyApprovedByDoctor(appointment));
-        boolean approvedByAssistant = current == AppointmentStatus.APPROVED_BY_ASSISTANT ||
-                (current == AppointmentStatus.APPROVED_BY_DOCTOR && appointmentPreviouslyApprovedByAssistant(appointment));
-
-        if (approvedByDoctor && approvedByAssistant) {
+        if (doctorApproved && assistantApproved) {
             appointment.setStatus(AppointmentStatus.FULLY_APPROVED);
         }
     }
+
+
+
+
 
     private boolean appointmentPreviouslyApprovedByDoctor(Appointment appointment) {
         return appointmentRepository.findById(appointment.getId())
                 .map(a -> a.getStatus() == AppointmentStatus.APPROVED_BY_DOCTOR || a.getStatus() == AppointmentStatus.FULLY_APPROVED)
                 .orElse(false);
     }
+
+
 
     private boolean appointmentPreviouslyApprovedByAssistant(Appointment appointment) {
         return appointmentRepository.findById(appointment.getId())
