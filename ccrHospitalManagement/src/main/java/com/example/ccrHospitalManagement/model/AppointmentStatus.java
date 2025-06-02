@@ -8,5 +8,8 @@ public enum AppointmentStatus {
     MODIFIED,                // Modificada por médico o asistente
     CONFIRMED_BY_PATIENT,    // Confirmada por paciente
     DENIED,                  // Rechazada por alguno
-    CANCELLED_BY_PATIENT     // Cancelada por el paciente
-}
+    CANCELLED_BY_PATIENT,     // Cancelada por el paciente
+    PROPOSED_BY_DOCTOR,
+    PROPOSED_BY_PATIENT,
+
+    }

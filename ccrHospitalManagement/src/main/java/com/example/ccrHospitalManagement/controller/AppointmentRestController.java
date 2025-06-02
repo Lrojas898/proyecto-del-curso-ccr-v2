@@ -83,35 +83,45 @@ public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE','PACIENTE')")
-    public ResponseEntity<AppointmentDTO> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @PathVariable Long id,
             @RequestBody Map<String, String> body,
             Authentication authentication) {
 
         try {
             String statusStr = body.get("status");
+
             if (statusStr == null) {
-                return ResponseEntity.badRequest().body(null);
+                return ResponseEntity.badRequest().body(Map.of("message", "Debe proporcionar un nuevo estado."));
             }
 
-            AppointmentStatus newStatus = AppointmentStatus.valueOf(statusStr);
+            AppointmentStatus newStatus;
+            try {
+                newStatus = AppointmentStatus.valueOf(statusStr);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Estado no válido: " + statusStr));
+            }
 
-            // No elimines el prefijo ROLE_ para no romper la lógica de autorización
+            // Extrae el rol de seguridad (ej: ROLE_DOCTOR, ROLE_PATIENT, etc.)
             String requesterRole = authentication.getAuthorities()
                     .stream()
-                    .map(a -> a.getAuthority()) // sin .replace("ROLE_", "")
+                    .map(auth -> auth.getAuthority())
                     .findFirst()
                     .orElse("ROLE_UNKNOWN");
 
-            return ResponseEntity.ok(
-                    mapper.toDto(service.updateAppointmentStatus(id, newStatus, requesterRole))
-            );
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            Appointment updatedAppointment = service.updateAppointmentStatus(id, newStatus, requesterRole);
+
+            return ResponseEntity.ok(mapper.toDto(updatedAppointment));
+
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error inesperado al actualizar el estado de la cita."));
         }
     }
+
+
 
 
 

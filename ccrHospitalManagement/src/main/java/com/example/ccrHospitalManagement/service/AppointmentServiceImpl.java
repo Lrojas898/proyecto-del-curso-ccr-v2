@@ -65,10 +65,25 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.deleteById(id);
     }
 
+
+    @Override
     public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, String requesterRole) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
 
+        AppointmentStatus currentStatus = appointment.getStatus();
+
+        // 1. Validar estados inmutables
+        if (currentStatus == AppointmentStatus.FULLY_APPROVED &&
+                !(newStatus == AppointmentStatus.CANCELLED_BY_PATIENT && requesterRole.equals("ROLE_PATIENT"))) {
+            throw new IllegalStateException("No se puede modificar una cita totalmente aprobada. Solo puede ser cancelada por el paciente.");
+        }
+
+        if (currentStatus == AppointmentStatus.DENIED || currentStatus == AppointmentStatus.CANCELLED_BY_PATIENT) {
+            throw new IllegalStateException("No se puede modificar una cita cancelada o denegada.");
+        }
+
+        // 2. Lógica de transición
         switch (newStatus) {
             case APPROVED_BY_DOCTOR -> {
                 if (!requesterRole.equals("ROLE_DOCTOR"))
@@ -77,39 +92,48 @@ public class AppointmentServiceImpl implements AppointmentService {
                 updateFullyApprovedIfNeeded(appointment);
             }
             case APPROVED_BY_ASSISTANT -> {
-                if (!requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR"))
+                if (!requesterRole.equals("ROLE_ASSISTANT"))
                     throw new IllegalArgumentException("Solo el asistente puede aprobar como asistente.");
                 appointment.setStatus(AppointmentStatus.APPROVED_BY_ASSISTANT);
                 updateFullyApprovedIfNeeded(appointment);
             }
-            case MODIFIED -> {
-                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR")))
-                    throw new IllegalArgumentException("Solo el médico o asistente pueden modificar.");
-                appointment.setStatus(AppointmentStatus.MODIFIED);
+            case PROPOSED_BY_DOCTOR -> {
+                if (!requesterRole.equals("ROLE_DOCTOR") && !requesterRole.equals("ROLE_ASSISTANT"))
+                    throw new IllegalArgumentException("Solo el médico o asistente pueden proponer cambios.");
+                appointment.setStatus(AppointmentStatus.PROPOSED_BY_DOCTOR);
+            }
+            case PROPOSED_BY_PATIENT -> {
+                if (!requesterRole.equals("ROLE_PATIENT"))
+                    throw new IllegalArgumentException("Solo el paciente puede proponer cambios.");
+                appointment.setStatus(AppointmentStatus.PROPOSED_BY_PATIENT);
             }
             case CONFIRMED_BY_PATIENT -> {
-                if (!requesterRole.equals("ROLE_PACIENTE"))
-                    throw new IllegalArgumentException("Solo el paciente puede confirmar la cita.");
+                if (!requesterRole.equals("ROLE_PATIENT"))
+                    throw new IllegalArgumentException("Solo el paciente puede confirmar cambios.");
                 appointment.setStatus(AppointmentStatus.CONFIRMED_BY_PATIENT);
             }
             case CANCELLED_BY_PATIENT -> {
-                if (!requesterRole.equals("ROLE_PACIENTE"))
-                    throw new IllegalArgumentException("Solo el paciente puede cancelar la cita.");
+                if (!requesterRole.equals("ROLE_PATIENT"))
+                    throw new IllegalArgumentException("Solo el paciente puede cancelar.");
                 appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
             }
             case DENIED -> {
-                if (!(requesterRole.equals("ROLE_DOCTOR") ||
-                      requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR") ||
-                      requesterRole.equals("ROLE_PACIENTE"))) {
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASSISTANT") || requesterRole.equals("ROLE_PATIENT")))
                     throw new IllegalArgumentException("No autorizado para denegar la cita.");
-                }
                 appointment.setStatus(AppointmentStatus.DENIED);
+            }
+            case MODIFIED -> {
+                if (!requesterRole.equals("ROLE_DOCTOR") && !requesterRole.equals("ROLE_ASSISTANT"))
+                    throw new IllegalArgumentException("Solo el médico o asistente pueden marcar como modificada.");
+                appointment.setStatus(AppointmentStatus.MODIFIED);
             }
             default -> throw new IllegalArgumentException("Transición de estado no válida.");
         }
 
         return appointmentRepository.save(appointment);
     }
+
+
 
     private void updateFullyApprovedIfNeeded(Appointment appointment) {
         AppointmentStatus current = appointment.getStatus();
