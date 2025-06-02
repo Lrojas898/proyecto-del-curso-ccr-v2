@@ -111,10 +111,10 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
         episode.setClinicalHistory(history);
 
         // Validar y asignar doctor
-        User doctor = userRepository.findById(dto.getDoctorId())
+        User doctor = userRepository.findById(dto.getDoctor() != null ? dto.getDoctor().getId() : null)
                 .filter(d -> hasRole(d, "DOCTOR"))
                 .orElseThrow(() -> new IllegalArgumentException("Usuario médico no válido"));
-        episode.setDoctor(doctor);
+
 
         // Validar y asignar cita (si existe)
         if (dto.getAppointmentId() != null) {

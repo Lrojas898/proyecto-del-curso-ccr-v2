@@ -52,23 +52,21 @@ public class AppointmentRestController {
         }
     }
 
+    
     @PostMapping
-    @PreAuthorize("hasRole('PACIENTE')")
-    public ResponseEntity<AppointmentDTO> create(@RequestBody AppointmentDTO dto) {
-        try {
-            System.out.println("📥 Appointment DTO recibido:");
-            System.out.println(dto);
-
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(mapper.toDto(service.createAppointment(mapper.toEntity(dto))));
-        } catch (IllegalArgumentException e) {
-            System.err.println(" Error de argumento: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+@PreAuthorize("hasRole('PACIENTE')")
+public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
+    try {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(mapper.toDto(service.createAppointment(mapper.toEntity(dto))));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Error inesperado al crear la cita."));
     }
+}
+
 
 
     @PutMapping

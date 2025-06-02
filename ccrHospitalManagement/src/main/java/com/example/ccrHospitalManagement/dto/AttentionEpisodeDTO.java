@@ -11,8 +11,7 @@ public class AttentionEpisodeDTO {
     private String diagnosis;
     private String description;
     private Long clinicalHistoryId;
-    private String doctorId;
+    private UserDTO doctor;
     private Long appointmentId;
-
     private List<AssistanceActDTO> assistanceActs;
 }
