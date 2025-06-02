@@ -27,6 +27,7 @@ public class DataInitializer {
     private final PasswordEncoder passwordEncoder;
     private final ExamTypeRepository examTypeRepository;
     private final ClinicalHistoryRepository clinicalHistoryRepository;
+    private final AssistanceActTypeRepository assistanceActTypeRepository;
 
 
     @Bean
@@ -71,6 +72,17 @@ public CommandLineRunner initData() {
                     new ExamType(null, "Resonancia magnética")
             ));
         }
+
+        // === Tipos de Actos Médicos (coinciden con el frontend) ===
+        if (assistanceActTypeRepository.count() == 0) {
+            assistanceActTypeRepository.saveAll(List.of(
+                    new AssistanceActType(null, "CONSULTATION"),
+                    new AssistanceActType(null, "PROCEDURE"),
+                    new AssistanceActType(null, "SURGERY"),
+                    new AssistanceActType(null, "TREATMENT")
+            ));
+        }
+
 
         // === Usuarios ===
         // DOCTORES

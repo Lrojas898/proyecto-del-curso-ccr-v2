@@ -19,7 +19,7 @@ public class AssistanceAct {
     @Column(nullable = false)
     private java.sql.Date issueDate; // issue_date -> issueDate
 
-    @Lob
+
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 

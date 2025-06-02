@@ -1,17 +1,15 @@
 package com.example.ccrHospitalManagement.controller;
 
+import com.example.ccrHospitalManagement.dto.AssistanceActDTO;
 import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
 import com.example.ccrHospitalManagement.dto.ClinicalHistoryDTO;
 import com.example.ccrHospitalManagement.dto.UserDTO;
-import com.example.ccrHospitalManagement.mapper.AttentionEpisodeMapper;
-import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapper;
-import com.example.ccrHospitalManagement.mapper.UserMapper;
-import com.example.ccrHospitalManagement.model.AttentionEpisode;
-import com.example.ccrHospitalManagement.model.ClinicalHistory;
-import com.example.ccrHospitalManagement.model.ExamResult;
-import com.example.ccrHospitalManagement.model.User;
+import com.example.ccrHospitalManagement.mapper.*;
+import com.example.ccrHospitalManagement.model.*;
+import com.example.ccrHospitalManagement.repository.AssistanceActTypeRepository;
 import com.example.ccrHospitalManagement.repository.UserRepository;
 import com.example.ccrHospitalManagement.service.AppointmentService;
+import com.example.ccrHospitalManagement.service.AssistanceActService;
 import com.example.ccrHospitalManagement.service.ClinicalHistoryService;
 import com.example.ccrHospitalManagement.service.ExamResultService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +33,10 @@ public class DoctorController {
     private final ClinicalHistoryMapper clinicalHistoryMapper;
     private final ExamResultService examResultService;
     private final AttentionEpisodeMapper attentionEpisodeMapper;
+    private final AssistanceActMapper assistanceActMapper;
+    private final AssistanceActTypeRepository assistanceActTypeRepository;
+    private final AssistanceActService assistanceActService;
+
 
 
 
@@ -124,5 +126,32 @@ public class DoctorController {
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    @PostMapping("/episodes/{episodeId}/acts")
+    public AssistanceActDTO addAssistanceAct(
+            @PathVariable Long episodeId,
+            @RequestBody AssistanceActDTO dto
+    ) {
+        AttentionEpisode episode = clinicalHistoryService.getEpisodeById(episodeId)
+                .orElseThrow(() -> new RuntimeException("Episodio no encontrado con ID " + episodeId));
+
+        if (dto.getTypeId() == null) {
+            throw new IllegalArgumentException("El ID del tipo de acto no puede ser null.");
+        }
+
+        AssistanceActType type = assistanceActTypeRepository.findById(dto.getTypeId())
+                .orElseThrow(() -> new RuntimeException("Tipo de acto asistencial no válido."));
+
+        AssistanceAct act = new AssistanceAct();
+        act.setIssueDate(dto.getDate());
+        act.setDescription(dto.getDescription());
+        act.setAttentionEpisode(episode);
+        act.setType(type);
+
+        AssistanceAct saved = assistanceActService.createAssistanceAct(act);
+        return assistanceActMapper.toDto(saved);
+    }
+
+
 
 }

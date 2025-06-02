@@ -1,7 +1,9 @@
 package com.example.ccrHospitalManagement.service;
 
+import com.example.ccrHospitalManagement.model.AssistanceAct;
 import com.example.ccrHospitalManagement.model.AttentionEpisode;
 import com.example.ccrHospitalManagement.model.ClinicalHistory;
+import com.example.ccrHospitalManagement.repository.AssistanceActRepository;
 import com.example.ccrHospitalManagement.repository.AttentionEpisodeRepository;
 import com.example.ccrHospitalManagement.repository.ClinicalHistoryRepository;
 import com.example.ccrHospitalManagement.repository.UserRepository;
@@ -21,6 +23,7 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
     private final ClinicalHistoryRepository clinicalHistoryRepository;
     private final UserRepository userRepository;
     private final AttentionEpisodeRepository attentionEpisodeRepository;
+    private final AssistanceActRepository assistanceActRepository;
 
     @Override
     public ClinicalHistory createClinicalHistory(ClinicalHistory history) {
@@ -103,6 +106,20 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         return clinicalHistoryRepository.findByUser_Id(userId);
     }
 
+
+    @Override
+    public AssistanceAct addAssistanceActToEpisode(Long episodeId, AssistanceAct act) {
+        AttentionEpisode episode = attentionEpisodeRepository.findById(episodeId)
+                .orElseThrow(() -> new RuntimeException("Episodio no encontrado"));
+
+        act.setAttentionEpisode(episode);
+        return assistanceActRepository.save(act);
+    }
+
+    @Override
+    public Optional<AttentionEpisode> getEpisodeById(Long id) {
+        return attentionEpisodeRepository.findById(id);
+    }
 
 
 
