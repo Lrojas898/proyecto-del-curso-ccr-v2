@@ -90,12 +90,18 @@ public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
 
         try {
             String statusStr = body.get("status");
+            if (statusStr == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
             AppointmentStatus newStatus = AppointmentStatus.valueOf(statusStr);
+
+            // No elimines el prefijo ROLE_ para no romper la lógica de autorización
             String requesterRole = authentication.getAuthorities()
                     .stream()
-                    .map(a -> a.getAuthority().replace("ROLE_", ""))
+                    .map(a -> a.getAuthority()) // sin .replace("ROLE_", "")
                     .findFirst()
-                    .orElse("UNKNOWN");
+                    .orElse("ROLE_UNKNOWN");
 
             return ResponseEntity.ok(
                     mapper.toDto(service.updateAppointmentStatus(id, newStatus, requesterRole))
@@ -106,6 +112,7 @@ public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
 
     @DeleteMapping("/{id}")
