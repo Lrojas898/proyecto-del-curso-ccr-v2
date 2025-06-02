@@ -98,4 +98,12 @@ public class ClinicalHistoryServiceImpl implements ClinicalHistoryService {
         return clinicalHistoryRepository.findByUser_Username(username);
     }
 
+
+    public Optional<ClinicalHistory> getByUserId(String userId) {
+        return clinicalHistoryRepository.findByUser_Id(userId);
+    }
+
+
+
+
 }

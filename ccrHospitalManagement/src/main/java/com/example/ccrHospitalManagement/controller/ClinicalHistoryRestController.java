@@ -119,4 +119,21 @@ public class ClinicalHistoryRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/by-patient/{id}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<ClinicalHistoryDTO> getHistoryByPatientId(@PathVariable String id) {
+        try {
+            Optional<ClinicalHistory> optional = service.getByUserId(id);
+            return optional.map(mapper::toDto)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
+
 }
