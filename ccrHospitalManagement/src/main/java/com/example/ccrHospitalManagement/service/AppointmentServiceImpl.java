@@ -37,8 +37,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Appointment> getAppointmentById(Long id) {
-        return appointmentRepository.findById(id);
+        return appointmentRepository.findById(id).map(appointment -> {
+            // Fuerza la carga de relaciones si son LAZY
+            appointment.getDoctor().getFirstName();
+            appointment.getPatient().getFirstName();
+            appointment.getLocation().getName();
+            return appointment;
+        });
     }
+
+
 
     @Override
     public Appointment UpdateAppointment(Appointment appointment) {
@@ -165,14 +173,22 @@ public class AppointmentServiceImpl implements AppointmentService {
 }
 
 
-@Override
-@Transactional
-public List<Appointment> getAppointmentsByPatientId(String patientId) {
-    return appointmentRepository.findByPatientId(patientId);
-}
+    @Override
+    @Transactional
+    public List<Appointment> getAppointmentsByPatientId(String patientId) {
+        List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+        // Fuerza carga
+        appointments.forEach(a -> {
+            a.getDoctor().getFirstName();
+            a.getPatient().getFirstName();
+            a.getLocation().getName();
+        });
+        return appointments;
+    }
 
 
-@Override
+
+    @Override
 public long countAllAppointments() {
     return appointmentRepository.count();
 }
@@ -229,5 +245,7 @@ public Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest
     public List<User> getPatientsByDoctorId(String doctorId) {
         return appointmentRepository.findDistinctPatientsByDoctorId(doctorId);
     }
+
+
 
 }
