@@ -73,7 +73,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         AppointmentStatus currentStatus = appointment.getStatus();
 
-        // 1. Estados inmutables
+        // Estados finales que no deben modificarse excepto cancelación por paciente
         if (currentStatus == AppointmentStatus.FULLY_APPROVED &&
                 !(newStatus == AppointmentStatus.CANCELLED_BY_PATIENT && requesterRole.equals("ROLE_PACIENTE"))) {
             throw new IllegalStateException("No se puede modificar una cita totalmente aprobada. Solo puede ser cancelada por el paciente.");
@@ -83,7 +83,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalStateException("No se puede modificar una cita cancelada o denegada.");
         }
 
-        // 2. Transiciones válidas por rol y estado actual
+        // Transiciones válidas por rol y estado
         switch (newStatus) {
             case APPROVED_BY_DOCTOR -> {
                 if (!requesterRole.equals("ROLE_DOCTOR"))
@@ -95,7 +95,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                     throw new IllegalStateException("No se puede aprobar esta cita en su estado actual.");
 
                 appointment.setStatus(AppointmentStatus.APPROVED_BY_DOCTOR);
-                updateFullyApprovedIfNeeded(appointment);
             }
 
             case APPROVED_BY_ASSISTANT -> {
@@ -108,7 +107,18 @@ public class AppointmentServiceImpl implements AppointmentService {
                     throw new IllegalStateException("No se puede aprobar esta cita en su estado actual.");
 
                 appointment.setStatus(AppointmentStatus.APPROVED_BY_ASSISTANT);
-                updateFullyApprovedIfNeeded(appointment);
+            }
+
+            case FULLY_APPROVED -> {
+                if (!requesterRole.equals("ROLE_DOCTOR"))
+                    throw new IllegalArgumentException("Solo el médico puede aprobar completamente.");
+
+                // Permitir sólo si previamente hubo una aprobación por asistente
+                if (currentStatus != AppointmentStatus.APPROVED_BY_ASSISTANT &&
+                        !appointmentPreviouslyApprovedByAssistant(appointment))
+                    throw new IllegalStateException("La cita debe haber sido aprobada por el asistente antes de completarse.");
+
+                appointment.setStatus(AppointmentStatus.FULLY_APPROVED);
             }
 
             case PROPOSED_BY_DOCTOR -> {
@@ -164,6 +174,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return appointmentRepository.save(appointment);
     }
+
 
 
 
