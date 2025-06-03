@@ -106,11 +106,11 @@ public CommandLineRunner initData() {
         // ADMIN
         createUserIfNotExists("admin", "123456", "admin@hospital.com", "Admin", "Principal", "Otro", eps1, pm1, "Administración", "ADMIN");
 
-        // === Crear citas de prueba para cada paciente con doctor1 ===
-        for (int i = 1; i <= 3; i++) {
-            String pacienteUsername = "paciente" + i;
-            createAppointmentIfNotExists(pacienteUsername, "doctor1", loc1, "Consulta general del paciente " + i);
-        }
+        // Crear citas únicas para paciente1, paciente2 y paciente3
+        createAppointmentIfNotExists("paciente1", "doctor1", loc1, "Consulta general paciente 1", 1, 9);
+        createAppointmentIfNotExists("paciente2", "doctor1", loc1, "Consulta general paciente 2", 3, 10);
+        createAppointmentIfNotExists("paciente3", "doctor1", loc1, "Consulta general paciente 3", 5, 11);
+
 
     };
 }
@@ -171,7 +171,7 @@ public CommandLineRunner initData() {
                 });
     }
 
-    private void createAppointmentIfNotExists(String patientUsername, String doctorUsername, Location location, String description) {
+    private void createAppointmentIfNotExists(String patientUsername, String doctorUsername, Location location, String description, int daysAhead, int hour) {
         Optional<User> patientOpt = Optional.ofNullable(userRepository.findByUsername(patientUsername));
         Optional<User> doctorOpt = Optional.ofNullable(userRepository.findByUsername(doctorUsername));
 
@@ -180,16 +180,20 @@ public CommandLineRunner initData() {
         User patient = patientOpt.get();
         User doctor = doctorOpt.get();
 
+        LocalDate date = LocalDate.now().plusDays(daysAhead);
+        LocalTime time = LocalTime.of(hour, 0); // Hora exacta pasada como parámetro
+
         boolean exists = appointmentRepository.findAll().stream()
                 .anyMatch(app -> app.getPatient().getId().equals(patient.getId())
                         && app.getDoctor().getId().equals(doctor.getId())
-                        && app.getDate().equals(LocalDate.now().plusDays(2)));
+                        && app.getDate().equals(date)
+                        && app.getStartTime().equals(time));
 
         if (exists) return;
 
         Appointment appointment = new Appointment();
-        appointment.setDate(LocalDate.now().plusDays(2));
-        appointment.setStartTime(LocalTime.of(10, 0));
+        appointment.setDate(date);
+        appointment.setStartTime(time);
         appointment.setDescription(description);
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
@@ -198,4 +202,5 @@ public CommandLineRunner initData() {
 
         appointmentRepository.save(appointment);
     }
+
 }
