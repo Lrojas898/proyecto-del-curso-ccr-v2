@@ -1,6 +1,7 @@
 package com.example.ccrHospitalManagement.repository;
 
 import com.example.ccrHospitalManagement.model.Appointment;
+import com.example.ccrHospitalManagement.model.AppointmentStatus;
 import com.example.ccrHospitalManagement.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT DISTINCT a.patient FROM Appointment a WHERE a.doctor.id = :doctorId")
     List<User> findDistinctPatientsByDoctorId(@Param("doctorId") String doctorId);
     boolean existsByDoctorIdAndDateAndStartTime(String id, LocalDate date, LocalTime startTime);
+    boolean existsByDoctorIdAndDateAndStartTimeAndStatus(String doctorId, LocalDate date, LocalTime time, AppointmentStatus status);
+
 
 
 }
