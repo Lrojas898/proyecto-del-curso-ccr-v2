@@ -32,6 +32,18 @@ public class ExamResultMapperDecorator {
     }
 
     public ExamResultDTO toDto(ExamResult entity) {
-        return mapper.toDto(entity);
+        ExamResultDTO dto = mapper.toDto(entity);
+
+        dto.setPatientId(entity.getPatient().getId());
+        dto.setPatientFirstName(entity.getPatient().getFirstName());
+        dto.setPatientLastName(entity.getPatient().getLastName());
+
+        dto.setTechnicianId(entity.getTechnician().getId());
+
+        dto.setExamTypeId(entity.getExamType().getId());
+        dto.setExamTypeName(entity.getExamType().getName());
+
+        return dto;
     }
+
 }

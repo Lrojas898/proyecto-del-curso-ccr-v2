@@ -53,7 +53,6 @@ public class ExamResultServiceTest {
         result.setId(1L);
         result.setResultDate(LocalDate.now());
         result.setDescription("Descripción válida del resultado.");
-        result.setAttached("link/result.pdf");
         result.setExamType(examType);
         result.setPatient(patient);
         result.setTechnician(technician);
