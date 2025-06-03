@@ -141,10 +141,11 @@ public CommandLineRunner initData() {
         user.setSpeciality(speciality);
         user.setEps(eps);
         user.setPrepaidMedicine(prepaid);
-        user.setRoles(Set.of(role));
+        userRepository.save(user); // Guardas el usuario sin roles aún
 
+        user.getRoles().add(role); // Agregas el rol al Set (ya inicializado si usas Lombok o constructor)
+        userRepository.save(user); // Vuelves a guardar para que persista la relación
 
-        userRepository.save(user);
 
         if (role.getName().equals("PACIENTE")) {
             ClinicalHistory history = new ClinicalHistory();
