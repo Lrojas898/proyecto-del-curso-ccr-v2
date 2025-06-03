@@ -1,9 +1,6 @@
 package com.example.ccrHospitalManagement.controller;
 
-import com.example.ccrHospitalManagement.dto.AssistanceActDTO;
-import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
-import com.example.ccrHospitalManagement.dto.ClinicalHistoryDTO;
-import com.example.ccrHospitalManagement.dto.UserDTO;
+import com.example.ccrHospitalManagement.dto.*;
 import com.example.ccrHospitalManagement.mapper.*;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.AssistanceActTypeRepository;
@@ -36,6 +33,7 @@ public class DoctorController {
     private final AssistanceActMapper assistanceActMapper;
     private final AssistanceActTypeRepository assistanceActTypeRepository;
     private final AssistanceActService assistanceActService;
+    private final AppointmentMapper appointmentMapper;
 
 
 
@@ -150,6 +148,25 @@ public class DoctorController {
 
         AssistanceAct saved = assistanceActService.createAssistanceAct(act);
         return assistanceActMapper.toDto(saved);
+    }
+
+    @GetMapping("/doctors/stats/total-patients")
+    public int getTotalPatientsOfDoctor(@AuthenticationPrincipal UserDetails userDetails) {
+        User doctor = userRepository.findByUsername(userDetails.getUsername());
+        if (doctor == null) {
+            throw new RuntimeException("Doctor no encontrado");
+        }
+
+        List<User> patients = appointmentService.getPatientsByDoctorId(doctor.getId());
+        return patients.size();
+    }
+
+    @GetMapping("/appointments/patient/{patientId}/doctor-view")
+    public List<AppointmentDTO> getAppointmentsByPatient(@PathVariable String patientId) {
+        return appointmentService.getAppointmentsByPatientId(patientId)
+                .stream()
+                .map(appointmentMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
