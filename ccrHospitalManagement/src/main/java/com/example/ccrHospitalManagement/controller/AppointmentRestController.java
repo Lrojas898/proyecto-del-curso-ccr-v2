@@ -14,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -28,187 +27,117 @@ public class AppointmentRestController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
     public ResponseEntity<List<AppointmentDTO>> getAll() {
-        try {
-            List<AppointmentDTO> appointments = service.getAllAppointments()
-                    .stream()
-                    .map(mapper::toDto)
-                    .toList();
-            return ResponseEntity.ok(appointments);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(service.getAllAppointments().stream().map(mapper::toDto).toList());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/patient/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
-    public ResponseEntity<AppointmentDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPatientId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getAppointmentsByPatientId(id).stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/patient/{id}/cancelled")
+    @PreAuthorize("hasAnyRole('ADMIN','PACIENTE','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getCancelledAppointmentsByPatientId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getCancelledAppointmentsByPatientId(id).stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/doctor/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByDoctorId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getAppointmentsByDoctorId(id).stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/doctor/{id}/cancelled")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
+    public ResponseEntity<List<AppointmentDTO>> getCancelledAppointmentsByDoctorId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getCancelledAppointmentsByDoctorId(id).stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/cancelled")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getAllCancelledAppointments() {
+        return ResponseEntity.ok(service.getAllCancelledAppointments().stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/finalizable")
+    @PreAuthorize("hasAnyRole('DOCTOR','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getFinalizableAppointments() {
+        return ResponseEntity.ok(service.getFinalizableAppointments().stream().map(mapper::toDto).toList());
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','PACIENTE','ASISTENTE')")
+    public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
         try {
-            return service.getAppointmentById(id)
-                    .map(mapper::toDto)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            Appointment appointment = service.createAppointment(mapper.toEntity(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(appointment));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
-    
-    @PostMapping
-@PreAuthorize("hasRole('PACIENTE')")
-public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
-    try {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(mapper.toDto(service.createAppointment(mapper.toEntity(dto))));
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("message", "Error inesperado al crear la cita."));
-    }
-}
-
-
-
-    @PutMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
-    public ResponseEntity<AppointmentDTO> update(@RequestBody AppointmentDTO dto) {
+    @PostMapping("/{id}/reschedule-request")
+    @PreAuthorize("hasRole('PACIENTE')")
+    public ResponseEntity<?> requestReschedule(@PathVariable Long id,
+                                               @RequestBody RescheduleRequest request,
+                                               Authentication authentication) {
         try {
-            return ResponseEntity.ok(mapper.toDto(service.UpdateAppointment(mapper.toEntity(dto))));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            String username = authentication.getName();
+            Appointment updated = service.handleRescheduleRequest(id, request, username);
+            return ResponseEntity.ok(mapper.toDto(updated));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/cancel-by-patient")
+    @PreAuthorize("hasRole('PACIENTE')")
+    public ResponseEntity<?> cancelByPatient(@PathVariable Long id, Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            Appointment cancelled = service.cancelByPatient(id, username);
+            return ResponseEntity.ok(mapper.toDto(cancelled));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/cancel-by-staff")
+    @PreAuthorize("hasAnyRole('DOCTOR','ASISTENTE')")
+    public ResponseEntity<?> cancelByStaff(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        try {
+            String reason = body.getOrDefault("reason", "");
+            Appointment cancelled = service.cancelByStaff(id, reason);
+            return ResponseEntity.ok(mapper.toDto(cancelled));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/finalize")
+    @PreAuthorize("hasAnyRole('DOCTOR','ASISTENTE')")
+    public ResponseEntity<?> finalizeAppointment(@PathVariable Long id) {
+        try {
+            Appointment finalized = service.finalizeAppointment(id);
+            return ResponseEntity.ok(mapper.toDto(finalized));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE','PACIENTE')")
-    public ResponseEntity<?> updateStatus(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> body,
-            Authentication authentication) {
-
+    @PreAuthorize("hasAnyRole('PACIENTE','DOCTOR','ASISTENTE')")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id,
+                                          @RequestBody Map<String, String> body,
+                                          Authentication authentication) {
         try {
-            String statusStr = body.get("status");
-
-            if (statusStr == null) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Debe proporcionar un nuevo estado."));
-            }
-
-            AppointmentStatus newStatus;
-            try {
-                newStatus = AppointmentStatus.valueOf(statusStr);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Estado no válido: " + statusStr));
-            }
-
-            // Extrae el rol de seguridad (ej: ROLE_DOCTOR, ROLE_PATIENT, etc.)
-            String requesterRole = authentication.getAuthorities()
-                    .stream()
-                    .map(auth -> auth.getAuthority())
-                    .findFirst()
-                    .orElse("ROLE_UNKNOWN");
-
-            Appointment updatedAppointment = service.updateAppointmentStatus(id, newStatus, requesterRole);
-
-            return ResponseEntity.ok(mapper.toDto(updatedAppointment));
-
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error inesperado al actualizar el estado de la cita."));
-        }
-    }
-
-
-
-
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        try {
-            service.removeAppointmentById(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @GetMapping("/patient/{id}")
-@PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
-public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPatientId(@PathVariable String id) {
-    try {
-        List<AppointmentDTO> appointments = service
-                .getAppointmentsByPatientId(id)
-                .stream()
-                .map(mapper::toDto)
-                .toList();
-        return ResponseEntity.ok(appointments);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-}
-
-@PostMapping("/{id}/reschedule-request")
-@PreAuthorize("hasRole('PACIENTE')")
-public ResponseEntity<AppointmentDTO> requestReschedule(
-        @PathVariable Long id,
-        @RequestBody RescheduleRequest request,
-        Authentication auth) {
-    try {
-        Appointment updated = service.handleRescheduleRequest(id, request, auth.getName());
-        return ResponseEntity.ok(mapper.toDto(updated));
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().build();
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-}
-
-@GetMapping("/count")
-@PreAuthorize("hasRole('ADMIN')")
-public ResponseEntity<?> getTotalAppointmentsCount() {
-    try {
-        long count = service.countAllAppointments();
-        return ResponseEntity.ok(Collections.singletonMap("count", count));
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error al obtener el conteo total de citas");
-    }
-}
-
-    @GetMapping("/doctor/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
-    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByDoctorId(@PathVariable String id) {
-        try {
-            List<AppointmentDTO> appointments = service
-                    .getAppointmentsByDoctorId(id)
-                    .stream()
-                    .map(mapper::toDto)
-                    .toList();
-            return ResponseEntity.ok(appointments);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @PutMapping("/{id}/reschedule")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<AppointmentDTO> rescheduleAppointment(
-            @PathVariable Long id,
-            @RequestBody RescheduleRequest request) {
-        try {
-            Appointment updated = service.rescheduleByDoctor(id, request.getNewDate(), request.getNewTime(), request.getReason());
+            AppointmentStatus status = AppointmentStatus.valueOf(body.get("status"));
+            String role = authentication.getAuthorities().iterator().next().getAuthority();
+            Appointment updated = service.updateAppointmentStatus(id, status, role);
             return ResponseEntity.ok(mapper.toDto(updated));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
-
 }

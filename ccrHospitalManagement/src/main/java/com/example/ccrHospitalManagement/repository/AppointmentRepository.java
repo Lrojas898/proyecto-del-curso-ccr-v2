@@ -20,7 +20,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<User> findDistinctPatientsByDoctorId(@Param("doctorId") String doctorId);
     boolean existsByDoctorIdAndDateAndStartTime(String id, LocalDate date, LocalTime startTime);
     boolean existsByDoctorIdAndDateAndStartTimeAndStatus(String doctorId, LocalDate date, LocalTime time, AppointmentStatus status);
-
-
-
+    List<Appointment> findByStatus(AppointmentStatus appointmentStatus);
 }
