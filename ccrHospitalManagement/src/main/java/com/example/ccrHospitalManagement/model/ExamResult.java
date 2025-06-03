@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "EXAM_RESULT")
@@ -22,9 +23,6 @@ public class ExamResult {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String attached;
-
     @ManyToOne
     @JoinColumn(name = "EXAM_TYPE_id", nullable = false)
     private ExamType examType;
@@ -36,4 +34,7 @@ public class ExamResult {
     @ManyToOne
     @JoinColumn(name = "USER_id_TECH", nullable = false)
     private User technician;
+
+    @OneToMany(mappedBy = "examResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExamResultDetail> results;
 }

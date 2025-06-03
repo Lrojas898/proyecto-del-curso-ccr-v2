@@ -114,6 +114,7 @@ public ResponseEntity<List<UserDTO>> getAllDoctors() {
     }
 }
 
+
 @GetMapping("/count")
 @PreAuthorize("hasRole('ADMIN')")
 public ResponseEntity<?> getUsersCount() {
@@ -124,6 +125,19 @@ public ResponseEntity<?> getUsersCount() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener el conteo de usuarios");
     }
 }
+
+@GetMapping("/patients")
+@PreAuthorize("hasAnyRole('ADMIN', 'LABTECH', 'DOCTOR')")
+public ResponseEntity<List<UserDTO>> getAllPatients() {
+    try {
+        List<User> patients = userService.getUsersByRole("PACIENTE");
+        List<UserDTO> dtos = patients.stream().map(userMapper::toDto).toList();
+        return ResponseEntity.ok(dtos);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
 
 
 

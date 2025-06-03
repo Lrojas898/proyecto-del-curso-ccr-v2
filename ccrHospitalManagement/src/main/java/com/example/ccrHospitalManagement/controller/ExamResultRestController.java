@@ -55,16 +55,20 @@ public class ExamResultRestController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','LABTECH')")
-    public ResponseEntity<ExamResultDTO> create(@RequestBody ExamResultDTO dto, Authentication auth) {
+    public ResponseEntity<?> create(@RequestBody ExamResultDTO dto, Authentication auth) {
         try {
+            var entity = service.createExamResult(mapper.toEntity(dto), auth);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(mapper.toDto(service.createExamResult(mapper.toEntity(dto), auth)));
+                    .body(mapper.toDto(entity));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body(Collections.singletonMap("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error interno al crear el examen"));
         }
     }
+
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
