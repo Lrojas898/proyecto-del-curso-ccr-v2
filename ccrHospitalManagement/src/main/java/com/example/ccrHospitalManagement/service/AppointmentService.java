@@ -5,6 +5,7 @@ import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
 import com.example.ccrHospitalManagement.model.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,15 +30,35 @@ public interface AppointmentService {
     List<Appointment> getAppointmentsByPatientId(String patientId);
      Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest request, String username);
 
-     long countAllAppointments();
+    @Transactional(readOnly = true)
+    List<Appointment> getCancelledAppointmentsByPatientId(String patientId);
+
+    long countAllAppointments();
 
     List<Appointment> getAppointmentsByDoctorId(String doctorId);
+
+    @Transactional(readOnly = true)
+    List<Appointment> getCancelledAppointmentsByDoctorId(String doctorId);
 
     Appointment rescheduleByDoctor(Long appointmentId, LocalDate newDate, LocalTime newTime, String reason);
 
     List<User> getPatientsByDoctorId(String doctorId);
 
 
+    Appointment cancelByPatient(Long id, String name);
+
+    Appointment cancelByStaff(Long id, String reason);
+
+
+    @Transactional
+    Appointment finalizeAppointment(Long appointmentId);
+
+
+    @Transactional(readOnly = true)
+    List<Appointment> getFinalizableAppointments();
+
+    @Transactional(readOnly = true)
+    List<Appointment> getAllCancelledAppointments();
 }
 
 

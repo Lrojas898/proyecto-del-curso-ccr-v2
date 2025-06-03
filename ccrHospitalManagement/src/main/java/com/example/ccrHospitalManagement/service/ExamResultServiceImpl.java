@@ -27,8 +27,17 @@ public class ExamResultServiceImpl implements ExamResultService {
         }
 
         validateExamResult(result, true);
+
+        // Asegurar relación bidireccional entre resultado y sus detalles
+        if (result.getResults() != null) {
+            for (var detail : result.getResults()) {
+                detail.setExamResult(result);
+            }
+        }
+
         return examResultRepository.save(result);
     }
+
 
     @Override
     public ExamResult updateExamResult(ExamResult result, Authentication auth) {
