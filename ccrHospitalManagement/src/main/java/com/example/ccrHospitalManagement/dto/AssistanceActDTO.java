@@ -10,4 +10,5 @@ public class AssistanceActDTO {
     private String description;
     private Long attentionEpisodeId;
     private Long typeId;
+    private UserDTO doctor;
 }

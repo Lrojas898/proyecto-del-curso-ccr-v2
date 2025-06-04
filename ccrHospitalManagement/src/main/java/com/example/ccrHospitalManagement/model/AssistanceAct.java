@@ -32,4 +32,8 @@ public class AssistanceAct {
     @JoinColumn(name = "attention_episode_id")
     private AttentionEpisode attentionEpisode;
 
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private User doctor;
+
 }

@@ -21,6 +21,7 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     private final ClinicalHistoryRepository clinicalHistoryRepository;
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final MedicalProtocolRepository medicalProtocolRepository;
 
     @Override
     public AttentionEpisode createAttentionEpisode(AttentionEpisode episode) {
@@ -103,18 +104,20 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
         return updateAttentionEpisode(episode);
     }
 
-    // Validaciones cruzadas DTO ↔ entidad
     private void validateAndLinkAssociations(AttentionEpisode episode, AttentionEpisodeDTO dto) {
+
         // Validar y asignar historia clínica
+        if (dto.getClinicalHistoryId() == null) {
+            throw new IllegalArgumentException("El ID de la historia clínica no puede ser null.");
+        }
         ClinicalHistory history = clinicalHistoryRepository.findById(dto.getClinicalHistoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Historia clínica no encontrada"));
         episode.setClinicalHistory(history);
 
-        // Validar y asignar doctor
-        User doctor = userRepository.findById(dto.getDoctor() != null ? dto.getDoctor().getId() : null)
-                .filter(d -> hasRole(d, "DOCTOR"))
-                .orElseThrow(() -> new IllegalArgumentException("Usuario médico no válido"));
-
+        // Validar que el doctor ya esté asignado
+        if (episode.getDoctor() == null) {
+            throw new IllegalArgumentException("Debe asignarse un médico responsable.");
+        }
 
         // Validar y asignar cita (si existe)
         if (dto.getAppointmentId() != null) {
@@ -122,7 +125,16 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
                     .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
             episode.setAppointment(appointment);
         }
+
+        // Validar y asignar protocolo médico (si existe)
+        if (dto.getProtocolId() != null) {
+            MedicalProtocol protocol = medicalProtocolRepository.findById(dto.getProtocolId())
+                    .orElseThrow(() -> new IllegalArgumentException("Protocolo médico no encontrado"));
+            episode.setMedicalProtocol(protocol);
+        }
     }
+
+
 
     private void validateEpisode(AttentionEpisode episode, boolean isCreate) {
         if (episode.getCreationDate() == null) {

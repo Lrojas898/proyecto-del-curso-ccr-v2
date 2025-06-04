@@ -4,13 +4,13 @@ import com.example.ccrHospitalManagement.dto.*;
 import com.example.ccrHospitalManagement.mapper.*;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.AssistanceActTypeRepository;
+import com.example.ccrHospitalManagement.repository.AttentionEpisodeRepository;
 import com.example.ccrHospitalManagement.repository.UserRepository;
-import com.example.ccrHospitalManagement.service.AppointmentService;
-import com.example.ccrHospitalManagement.service.AssistanceActService;
-import com.example.ccrHospitalManagement.service.ClinicalHistoryService;
-import com.example.ccrHospitalManagement.service.ExamResultService;
+import com.example.ccrHospitalManagement.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +34,8 @@ public class DoctorController {
     private final AssistanceActTypeRepository assistanceActTypeRepository;
     private final AssistanceActService assistanceActService;
     private final AppointmentMapper appointmentMapper;
-
+    private final AttentionEpisodeServiceImpl attentionEpisodeService;
+    private final AttentionEpisodeRepository attentionEpisodeRepository;
 
 
 
@@ -79,23 +80,26 @@ public class DoctorController {
             throw new RuntimeException("Doctor no encontrado");
         }
 
-        // Obtener historia clínica del paciente
         ClinicalHistory history = clinicalHistoryService.getClinicalHistoryByUserId(patientId)
                 .orElseThrow(() -> new RuntimeException("Historia clínica no encontrada para el paciente " + patientId));
 
-        // Completar datos del episodio
+        // Setear el ID de la historia clínica en el DTO
+        episodeDTO.setClinicalHistoryId(history.getId());
+
+        // Crear el objeto AttentionEpisode base
         AttentionEpisode episode = new AttentionEpisode();
         episode.setDescription(episodeDTO.getDescription());
         episode.setDiagnosis(episodeDTO.getDiagnosis());
         episode.setCreationDate(LocalDate.now());
-        episode.setClinicalHistory(history);
         episode.setDoctor(doctor);
 
-        // Guardar episodio
-        AttentionEpisode saved = clinicalHistoryService.saveEpisode(episode);
-        return attentionEpisodeMapper.toDto(saved);
+        // Usar el DTO actualizado
+        AttentionEpisode saved = attentionEpisodeService.createAttentionEpisodeWithAssociations(episode, episodeDTO);
 
+        return attentionEpisodeMapper.toDto(saved);
     }
+
+
 
     @PutMapping("/doctors/profile")
     public UserDTO updateDoctorProfile(@RequestBody UserDTO updatedDoctor, @AuthenticationPrincipal UserDetails userDetails) {
@@ -128,7 +132,8 @@ public class DoctorController {
     @PostMapping("/episodes/{episodeId}/acts")
     public AssistanceActDTO addAssistanceAct(
             @PathVariable Long episodeId,
-            @RequestBody AssistanceActDTO dto
+            @RequestBody AssistanceActDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
         AttentionEpisode episode = clinicalHistoryService.getEpisodeById(episodeId)
                 .orElseThrow(() -> new RuntimeException("Episodio no encontrado con ID " + episodeId));
@@ -140,15 +145,23 @@ public class DoctorController {
         AssistanceActType type = assistanceActTypeRepository.findById(dto.getTypeId())
                 .orElseThrow(() -> new RuntimeException("Tipo de acto asistencial no válido."));
 
+        User doctor = userRepository.findByUsername(userDetails.getUsername());
+        if (doctor == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
         AssistanceAct act = new AssistanceAct();
         act.setIssueDate(dto.getDate());
         act.setDescription(dto.getDescription());
         act.setAttentionEpisode(episode);
         act.setType(type);
+        act.setDoctor(doctor); // ✅ Aquí lo agregamos
 
         AssistanceAct saved = assistanceActService.createAssistanceAct(act);
         return assistanceActMapper.toDto(saved);
     }
+
+
 
     @GetMapping("/doctors/stats/total-patients")
     public int getTotalPatientsOfDoctor(@AuthenticationPrincipal UserDetails userDetails) {
@@ -168,7 +181,10 @@ public class DoctorController {
                 .map(appointmentMapper::toDto)
                 .collect(Collectors.toList());
     }
-
+    @GetMapping("/appointments/{appointmentId}/episode-exists")
+    public boolean checkIfEpisodeExists(@PathVariable Long appointmentId) {
+        return attentionEpisodeRepository.existsByAppointment_Id(appointmentId);
+    }
 
 
 }

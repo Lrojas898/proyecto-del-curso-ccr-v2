@@ -41,4 +41,8 @@ public class AttentionEpisode {
     @OneToMany(mappedBy = "attentionEpisode", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AssistanceAct> assistanceActs;
 
+    @ManyToOne
+    @JoinColumn(name = "MEDICAL_PROTOCOL_id")
+    private MedicalProtocol medicalProtocol;
+
 }

@@ -14,4 +14,9 @@ public class AttentionEpisodeDTO {
     private UserDTO doctor;
     private Long appointmentId;
     private List<AssistanceActDTO> assistanceActs;
+
+    private Long protocolId;
+    private String protocolName;
+
+
 }

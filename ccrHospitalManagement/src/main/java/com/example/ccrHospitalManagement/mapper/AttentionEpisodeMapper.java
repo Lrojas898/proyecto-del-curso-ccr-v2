@@ -37,6 +37,14 @@ public class AttentionEpisodeMapper {
                 episode.getAppointment() != null ? episode.getAppointment().getId() : null
         );
 
+        dto.setProtocolId(
+                episode.getMedicalProtocol() != null ? episode.getMedicalProtocol().getId() : null
+        );
+        dto.setProtocolName(
+                episode.getMedicalProtocol() != null ? episode.getMedicalProtocol().getName() : null
+        );
+
+
         dto.setDoctor(userMapper.toDto(episode.getDoctor()));
 
         List<AssistanceActDTO> acts = episode.getAssistanceActs() != null
