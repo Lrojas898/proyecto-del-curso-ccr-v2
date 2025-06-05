@@ -6,7 +6,7 @@ import java.sql.Date;
 @Data
 public class AssistanceActDTO {
     private Long id;
-    private Date date;
+    private Date issueDate;
     private String description;
     private Long attentionEpisodeId;
     private Long typeId;
