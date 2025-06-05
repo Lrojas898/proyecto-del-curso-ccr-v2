@@ -14,8 +14,13 @@ public class Diagnosis {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id", nullable = false)
+    private User createdBy;
+
+
     @Column(nullable = false)
-    private String name;  // Nombre del diagnóstico
+    private String name;
 
     @Column(length = 1000)
     private String description;
