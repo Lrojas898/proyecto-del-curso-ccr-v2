@@ -35,12 +35,15 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
 
     @Override
     public AttentionEpisode updateAttentionEpisode(AttentionEpisode episode) {
-        if (!episodeRepository.existsById(episode.getId())) {
-            throw new IllegalArgumentException("El episodio de atención no existe.");
-        }
+        AttentionEpisode existing = episodeRepository.findById(episode.getId())
+                .orElseThrow(() -> new IllegalArgumentException("El episodio de atención no existe."));
+
+        episode.setCreationDate(existing.getCreationDate());
+
         validateEpisode(episode, false);
         return episodeRepository.save(episode);
     }
+
 
     @Override
     public void removeAttentionEpisodeById(Long id) {

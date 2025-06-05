@@ -9,5 +9,5 @@ public class DiagnosisDTO {
     private Long id;
     private String name;
     private String description;
+    private String createdById;
 }
-
