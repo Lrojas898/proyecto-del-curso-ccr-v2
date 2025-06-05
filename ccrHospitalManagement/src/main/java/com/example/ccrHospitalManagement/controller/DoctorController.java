@@ -95,7 +95,7 @@ public class DoctorController {
         // Crear el objeto AttentionEpisode base
         AttentionEpisode episode = new AttentionEpisode();
         episode.setDescription(episodeDTO.getDescription());
-        episode.setDiagnosis(episodeDTO.getDiagnosis());
+       
         episode.setCreationDate(LocalDate.now());
         episode.setDoctor(doctor);
 
@@ -210,5 +210,16 @@ public ResponseEntity<Void> associateDiagnosesToEpisode(
 
     return ResponseEntity.ok().build();
 }
+
+@PutMapping("/episodes/{episodeId}")
+public ResponseEntity<AttentionEpisodeDTO> updateEpisode(
+        @PathVariable Long episodeId,
+        @RequestBody AttentionEpisodeDTO dto,
+        Authentication auth) {
+    
+    AttentionEpisodeDTO updated = attentionEpisodeService.updateEpisode(episodeId, dto, auth);
+    return ResponseEntity.ok(updated);
+}
+
 
 }

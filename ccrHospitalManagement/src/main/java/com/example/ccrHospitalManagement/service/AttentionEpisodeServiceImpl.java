@@ -1,6 +1,7 @@
 package com.example.ccrHospitalManagement.service;
 
 import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
+import com.example.ccrHospitalManagement.mapper.AttentionEpisodeMapper;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
     private final MedicalProtocolRepository medicalProtocolRepository;
+    private final AttentionEpisodeMapper attentionEpisodeMapper;
 
     @Override
     public AttentionEpisode createAttentionEpisode(AttentionEpisode episode) {
@@ -145,10 +149,6 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
             throw new IllegalArgumentException("La fecha de creación no puede ser futura.");
         }
 
-        if (episode.getDiagnosis() == null || episode.getDiagnosis().trim().length() < 10) {
-            throw new IllegalArgumentException("El diagnóstico debe tener al menos 10 caracteres.");
-        }
-
         if (episode.getDescription() == null || episode.getDescription().trim().length() < 10) {
             throw new IllegalArgumentException("La descripción debe tener al menos 10 caracteres.");
         }
@@ -175,4 +175,40 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     private boolean hasRole(User user, String roleName) {
         return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROLE_" + roleName));
     }
+
+    @Override
+public AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto, Authentication auth) {
+    AttentionEpisode episode = episodeRepository.findById(episodeId)
+        .orElseThrow(() -> new IllegalArgumentException("Episodio no encontrado con ID " + episodeId));
+
+    User doctor = getCurrentUser(); // o usar `auth.getName()` si prefieres
+    if (!episode.getDoctor().getId().equals(doctor.getId())) {
+        throw new SecurityException("No tienes permiso para editar este episodio.");
+    }
+
+    episode.setDescription(dto.getDescription());
+    episode.setCreationDate(dto.getCreationDate());
+
+    // Reasociar si se cambiaron cita o protocolo
+    updateAssociationsIfNeeded(episode, dto);
+
+    AttentionEpisode updated = episodeRepository.save(episode);
+    return attentionEpisodeMapper.toDto(updated);
+
+}
+
+private void updateAssociationsIfNeeded(AttentionEpisode episode, AttentionEpisodeDTO dto) {
+    if (dto.getAppointmentId() != null) {
+        Appointment appointment = appointmentRepository.findById(dto.getAppointmentId())
+            .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+        episode.setAppointment(appointment);
+    }
+
+    if (dto.getProtocolId() != null) {
+        MedicalProtocol protocol = medicalProtocolRepository.findById(dto.getProtocolId())
+            .orElseThrow(() -> new IllegalArgumentException("Protocolo médico no encontrado"));
+        episode.setMedicalProtocol(protocol);
+    }
+}
+
 }

@@ -21,9 +21,6 @@ public class AttentionEpisode {
     private LocalDate creationDate;
 
     @Column(columnDefinition = "TEXT")
-    private String diagnosis;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne
@@ -52,6 +49,5 @@ public class AttentionEpisode {
     inverseJoinColumns = @JoinColumn(name = "diagnosis_id")
 )
 private List<Diagnosis> diagnoses;
-
 
 }

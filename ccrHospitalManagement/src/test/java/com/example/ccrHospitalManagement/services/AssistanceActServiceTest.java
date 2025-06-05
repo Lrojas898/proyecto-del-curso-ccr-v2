@@ -45,7 +45,6 @@ class AssistanceActServiceTest {
         episode = new AttentionEpisode();
         episode.setId(40L); // Cambiado a Long
         episode.setCreationDate(LocalDate.now());
-        episode.setDiagnosis("Diagnóstico válido");
         episode.setDescription("Descripción válida");
         episode.setDoctor(doctor);
         episode.setClinicalHistory(clinicalHistory);

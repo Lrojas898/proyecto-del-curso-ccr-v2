@@ -42,7 +42,7 @@ public class AttentionEpisodeServiceTest {
         episode = new AttentionEpisode();
         episode.setId(4L);
         episode.setCreationDate(LocalDate.now().minusDays(1));
-        episode.setDiagnosis("Diagnóstico válido");
+      
         episode.setDescription("Descripción válida del episodio");
         episode.setClinicalHistory(history);
         episode.setDoctor(doctor);
@@ -67,12 +67,7 @@ public class AttentionEpisodeServiceTest {
         assertTrue(e.getMessage().contains("no puede ser futura"));
     }
 
-    @Test
-    void createAttentionEpisode_ShortDiagnosis_Throws() {
-        episode.setDiagnosis("Corto");
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("al menos 10 caracteres"));
-    }
+  
 
     @Test
     void createAttentionEpisode_ShortDescription_Throws() {
@@ -102,12 +97,6 @@ public class AttentionEpisodeServiceTest {
         assertTrue(e.getMessage().contains("fecha de creación"));
     }
 
-    @Test
-    void createAttentionEpisode_NullDiagnosis_Throws() {
-        episode.setDiagnosis(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("diagnóstico"));
-    }
 
     @Test
     void createAttentionEpisode_NullDescription_Throws() {

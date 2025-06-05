@@ -28,7 +28,7 @@ public class AttentionEpisodeMapper {
         AttentionEpisodeDTO dto = new AttentionEpisodeDTO();
         dto.setId(episode.getId());
         dto.setCreationDate(episode.getCreationDate());
-        dto.setDiagnosis(episode.getDiagnosis());
+
         dto.setDescription(episode.getDescription());
 
         dto.setClinicalHistoryId(
@@ -75,7 +75,7 @@ public class AttentionEpisodeMapper {
         AttentionEpisode entity = new AttentionEpisode();
         entity.setId(dto.getId());
         entity.setCreationDate(dto.getCreationDate());
-        entity.setDiagnosis(dto.getDiagnosis());
+       
         entity.setDescription(dto.getDescription());
 
         // doctor se setea en el servicio, no aquí

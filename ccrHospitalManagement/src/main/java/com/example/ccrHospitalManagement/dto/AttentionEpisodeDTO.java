@@ -8,7 +8,6 @@ import java.util.List;
 public class AttentionEpisodeDTO {
     private Long id;
     private LocalDate creationDate;
-    private String diagnosis;
     private String description;
     private Long clinicalHistoryId;
     private UserDTO doctor;
