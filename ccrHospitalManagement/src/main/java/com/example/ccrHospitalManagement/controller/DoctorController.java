@@ -5,9 +5,13 @@ import com.example.ccrHospitalManagement.mapper.*;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.AssistanceActTypeRepository;
 import com.example.ccrHospitalManagement.repository.AttentionEpisodeRepository;
+import com.example.ccrHospitalManagement.repository.DiagnosisRepository;
 import com.example.ccrHospitalManagement.repository.UserRepository;
 import com.example.ccrHospitalManagement.service.*;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,6 +41,7 @@ public class DoctorController {
     private final AppointmentMapper appointmentMapper;
     private final AttentionEpisodeServiceImpl attentionEpisodeService;
     private final AttentionEpisodeRepository attentionEpisodeRepository;
+    private final DiagnosisRepository diagnosisRepository;
 
 
 
@@ -186,5 +192,23 @@ public class DoctorController {
         return attentionEpisodeRepository.existsByAppointment_Id(appointmentId);
     }
 
+    @PutMapping("/episodes/{episodeId}/diagnoses")
+@PreAuthorize("hasRole('DOCTOR')")
+public ResponseEntity<Void> associateDiagnosesToEpisode(
+        @PathVariable Long episodeId,
+        @RequestBody List<Long> diagnosisIds) {
+
+    Optional<AttentionEpisode> episodeOpt = attentionEpisodeRepository.findById(episodeId);
+    if (!episodeOpt.isPresent()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    AttentionEpisode episode = episodeOpt.get();
+    List<Diagnosis> diagnoses = diagnosisRepository.findAllById(diagnosisIds);
+    episode.setDiagnoses(diagnoses);
+    attentionEpisodeRepository.save(episode);
+
+    return ResponseEntity.ok().build();
+}
 
 }

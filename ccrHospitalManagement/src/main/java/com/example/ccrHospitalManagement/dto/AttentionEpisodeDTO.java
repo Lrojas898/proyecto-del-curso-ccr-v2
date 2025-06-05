@@ -18,5 +18,6 @@ public class AttentionEpisodeDTO {
     private Long protocolId;
     private String protocolName;
 
+    private List<DiagnosisDTO> diagnoses;
 
 }

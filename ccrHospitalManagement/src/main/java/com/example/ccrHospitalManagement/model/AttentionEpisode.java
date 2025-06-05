@@ -45,4 +45,13 @@ public class AttentionEpisode {
     @JoinColumn(name = "MEDICAL_PROTOCOL_id")
     private MedicalProtocol medicalProtocol;
 
+    @ManyToMany
+@JoinTable(
+    name = "episode_diagnosis",
+    joinColumns = @JoinColumn(name = "episode_id"),
+    inverseJoinColumns = @JoinColumn(name = "diagnosis_id")
+)
+private List<Diagnosis> diagnoses;
+
+
 }

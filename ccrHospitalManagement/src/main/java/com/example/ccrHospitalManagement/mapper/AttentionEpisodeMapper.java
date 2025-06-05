@@ -19,6 +19,8 @@ public class AttentionEpisodeMapper {
     private final UserMapper userMapper;
     private final AssistanceActMapper assistanceActMapper;
     private final UserRepository userRepository; // usado en toEntity()
+    private final DiagnosisMapper diagnosisMapper;
+
 
     public AttentionEpisodeDTO toDto(AttentionEpisode episode) {
         if (episode == null) return null;
@@ -54,6 +56,15 @@ public class AttentionEpisodeMapper {
                 : null;
 
         dto.setAssistanceActs(acts);
+
+        if (episode.getDiagnoses() != null) {
+                dto.setDiagnoses(
+                    episode.getDiagnoses().stream()
+                        .map(diagnosisMapper::toDto)
+                        .collect(Collectors.toList())
+                );
+            }
+            
 
         return dto;
     }
