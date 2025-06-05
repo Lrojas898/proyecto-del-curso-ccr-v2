@@ -70,17 +70,20 @@ public class ExamResultRestController {
     }
 
 
-    @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ExamResultDTO> update(@RequestBody ExamResultDTO dto, Authentication auth) {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','LABTECH')")
+    public ResponseEntity<ExamResultDTO> update(@PathVariable Long id, @RequestBody ExamResultDTO dto, Authentication auth) {
         try {
-            return ResponseEntity.ok(mapper.toDto(service.updateExamResult(mapper.toEntity(dto), auth)));
+            dto.setId(id); // Asegura que el ID en el DTO sea el del path
+            var updated = service.updateExamResult(mapper.toEntity(dto), auth);
+            return ResponseEntity.ok(mapper.toDto(updated));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
