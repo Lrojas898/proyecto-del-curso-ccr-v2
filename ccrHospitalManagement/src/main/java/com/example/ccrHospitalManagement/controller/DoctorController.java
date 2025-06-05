@@ -151,7 +151,7 @@ public class DoctorController {
         }
 
         AssistanceAct act = new AssistanceAct();
-        act.setIssueDate(dto.getDate());
+        act.setIssueDate(dto.getIssueDate());
         act.setDescription(dto.getDescription());
         act.setAttentionEpisode(episode);
         act.setType(type);
