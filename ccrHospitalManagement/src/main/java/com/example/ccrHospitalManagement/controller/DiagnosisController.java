@@ -5,12 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.ccrHospitalManagement.mapper.DiagnosisMapper;
 import com.example.ccrHospitalManagement.model.Diagnosis;
@@ -42,5 +37,19 @@ public class DiagnosisController {
     public List<DiagnosisDTO> search(@RequestParam String q) {
         return mapper.toDTOList(repository.findByNameContainingIgnoreCase(q));
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<DiagnosisDTO> update(@PathVariable Long id, @RequestBody DiagnosisDTO dto) {
+        return repository.findById(id)
+                .map(existing -> {
+                    existing.setName(dto.getName());
+                    existing.setDescription(dto.getDescription());
+                    Diagnosis updated = repository.save(existing);
+                    return new ResponseEntity<>(mapper.toDto(updated), HttpStatus.OK);
+                })
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
 }
 
