@@ -21,14 +21,12 @@ public class ExamResultServiceImpl implements ExamResultService {
 
     @Override
     public ExamResult createExamResult(ExamResult result, Authentication auth) {
-        // Validación: solo técnicos pueden crear
         if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_LABTECH"))) {
             throw new IllegalArgumentException("Solo un técnico de laboratorio puede crear un resultado de examen.");
         }
 
         validateExamResult(result, true);
 
-        // Asegurar relación bidireccional entre resultado y sus detalles
         if (result.getResults() != null) {
             for (var detail : result.getResults()) {
                 detail.setExamResult(result);
@@ -41,20 +39,16 @@ public class ExamResultServiceImpl implements ExamResultService {
 
     @Override
     public ExamResult updateExamResult(ExamResult result, Authentication auth) {
-        // Verifica que el examen exista
         ExamResult existing = examResultRepository.findById(result.getId())
                 .orElseThrow(() -> new IllegalArgumentException("El resultado de examen no existe."));
 
-        // Roles del usuario autenticado
         boolean isAdmin = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
         boolean isLabtech = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_LABTECH"));
 
-        // Verifica permisos
         if (!isAdmin && !isLabtech) {
             throw new IllegalArgumentException("No autorizado para modificar este examen.");
         }
 
-        // Si es técnico, solo puede editar sus propios exámenes
         if (isLabtech) {
             String username = auth.getName(); // usuario logueado
             if (!existing.getTechnician().getUsername().equals(username)) {
@@ -62,10 +56,8 @@ public class ExamResultServiceImpl implements ExamResultService {
             }
         }
 
-        // Validación de campos
         validateExamResult(result, false);
 
-        // Relaciona detalles con el examen
         if (result.getResults() != null) {
             for (var detail : result.getResults()) {
                 detail.setExamResult(result);
