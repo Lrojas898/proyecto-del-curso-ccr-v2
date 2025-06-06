@@ -1,4 +1,3 @@
-
 package com.example.ccrHospitalManagement.services;
 
 import com.example.ccrHospitalManagement.model.*;
@@ -38,6 +37,7 @@ public class ExamResultServiceTest {
     private ExamResultServiceImpl examResultService;
 
     private ExamResult result;
+    private User technician;
 
     @BeforeEach
     void setUp() {
@@ -46,8 +46,9 @@ public class ExamResultServiceTest {
         User patient = new User();
         patient.setId("123456");
 
-        User technician = new User();
+        technician = new User();
         technician.setId("789012");
+        technician.setUsername("techUser"); // CORRECTAMENTE inicializado
 
         result = new ExamResult();
         result.setId(1L);
@@ -57,10 +58,9 @@ public class ExamResultServiceTest {
         result.setPatient(patient);
         result.setTechnician(technician);
 
-        // authTech con rol de técnico
         authTech = new Authentication() {
             @Override public Collection<? extends GrantedAuthority> getAuthorities() {
-                return java.util.Collections.singletonList(new SimpleGrantedAuthority("ROLE_TÉCNICO DE LABORATORIO"));
+                return java.util.Collections.singletonList(new SimpleGrantedAuthority("ROLE_LABTECH"));
             }
             @Override public Object getCredentials() { return null; }
             @Override public Object getDetails() { return null; }
@@ -70,7 +70,6 @@ public class ExamResultServiceTest {
             @Override public String getName() { return "techUser"; }
         };
 
-        // authAdmin con rol de admin
         authAdmin = new Authentication() {
             @Override public Collection<? extends GrantedAuthority> getAuthorities() {
                 return java.util.Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
@@ -84,13 +83,9 @@ public class ExamResultServiceTest {
         };
     }
 
-
-    // CREATE
-
     @Test
     void createExamResult_Valid() {
         when(examResultRepository.save(result)).thenReturn(result);
-
         ExamResult created = examResultService.createExamResult(result, authTech);
         assertNotNull(created);
         verify(examResultRepository).save(result);
@@ -169,37 +164,32 @@ public class ExamResultServiceTest {
         assertTrue(e.getMessage().contains("descripción"));
     }
 
-    // UPDATE
-
     @Test
     void updateExamResult_Valid() {
-        when(examResultRepository.existsById(1L)).thenReturn(true);
+        when(examResultRepository.findById(1L)).thenReturn(Optional.of(result));
         when(examResultRepository.save(result)).thenReturn(result);
-
         ExamResult updated = examResultService.updateExamResult(result, authAdmin);
         assertEquals(1L, updated.getId());
     }
 
     @Test
     void updateExamResult_NotFound_Throws() {
-        when(examResultRepository.existsById(1L)).thenReturn(false);
+        when(examResultRepository.findById(1L)).thenReturn(Optional.empty());
         Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.updateExamResult(result, authAdmin));
         assertTrue(e.getMessage().contains("no existe"));
     }
 
     @Test
     void updateExamResult_ByTech_Throws() {
-        when(examResultRepository.existsById(1L)).thenReturn(true);
+        result.getTechnician().setUsername("anotherUser");
+        when(examResultRepository.findById(1L)).thenReturn(Optional.of(result));
         Exception e = assertThrows(IllegalArgumentException.class, () -> examResultService.updateExamResult(result, authTech));
-        assertTrue(e.getMessage().contains("administrador"));
+        assertTrue(e.getMessage().contains("tú creaste"));
     }
-
-    // GET
 
     @Test
     void getAllExamResults_ReturnsList() {
         when(examResultRepository.findAll()).thenReturn(List.of(result));
-
         List<ExamResult> list = examResultService.getAllExamResults();
         assertEquals(1, list.size());
     }
@@ -207,7 +197,6 @@ public class ExamResultServiceTest {
     @Test
     void getExamResultById_Found() {
         when(examResultRepository.findById(1L)).thenReturn(Optional.of(result));
-
         Optional<ExamResult> res = examResultService.getExamResultById(1L);
         assertTrue(res.isPresent());
     }
@@ -215,17 +204,13 @@ public class ExamResultServiceTest {
     @Test
     void getExamResultById_NotFound() {
         when(examResultRepository.findById(99L)).thenReturn(Optional.empty());
-
         Optional<ExamResult> res = examResultService.getExamResultById(99L);
         assertTrue(res.isEmpty());
     }
 
-    // DELETE
-
     @Test
     void deleteExamResult_Valid() {
         when(examResultRepository.existsById(1L)).thenReturn(true);
-
         assertDoesNotThrow(() -> examResultService.removeExamResultById(1L));
         verify(examResultRepository).deleteById(1L);
     }
@@ -233,7 +218,6 @@ public class ExamResultServiceTest {
     @Test
     void deleteExamResult_NotFound_Throws() {
         when(examResultRepository.existsById(99L)).thenReturn(false);
-
         Exception e = assertThrows(IllegalArgumentException.class,
                 () -> examResultService.removeExamResultById(99L));
         assertEquals("No se puede eliminar un resultado que no existe.", e.getMessage());
