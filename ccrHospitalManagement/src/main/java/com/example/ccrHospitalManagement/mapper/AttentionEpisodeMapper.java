@@ -18,7 +18,7 @@ public class AttentionEpisodeMapper {
 
     private final UserMapper userMapper;
     private final AssistanceActMapper assistanceActMapper;
-    private final UserRepository userRepository; // usado en toEntity()
+    private final UserRepository userRepository;
     private final DiagnosisMapper diagnosisMapper;
 
 

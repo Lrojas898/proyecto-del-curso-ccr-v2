@@ -11,10 +11,10 @@ public class ExamResultDTO {
     private LocalDate resultDate;
     private String description;
     private Long examTypeId;
-    private String examTypeName; // nuevo
+    private String examTypeName;
     private String patientId;
-    private String patientFirstName; // nuevo
-    private String patientLastName;  // nuevo
+    private String patientFirstName; 
+    private String patientLastName;  
     private String technicianId;
     private List<ExamResultDetailDTO> results;
 }

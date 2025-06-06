@@ -36,7 +36,7 @@ public class JWTFilter extends OncePerRequestFilter {
             try {
                 username = jwtService.extractUsername(token);
             } catch (Exception e) {
-                // 🚨 Captura errores de firma u otros
+              
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }

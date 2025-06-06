@@ -66,7 +66,7 @@ public class DoctorController {
         ClinicalHistory history = clinicalHistoryService.getClinicalHistoryByUserId(patientId)
                 .orElseThrow(() -> new RuntimeException("Historia clínica no encontrada para el paciente " + patientId));
 
-        return clinicalHistoryMapper.toDto(history);  // ✅ ¡Este es el cambio clave!
+        return clinicalHistoryMapper.toDto(history); 
     }
 
 
@@ -161,7 +161,7 @@ public class DoctorController {
         act.setDescription(dto.getDescription());
         act.setAttentionEpisode(episode);
         act.setType(type);
-        act.setDoctor(doctor); // ✅ Aquí lo agregamos
+        act.setDoctor(doctor); 
 
         AssistanceAct saved = assistanceActService.createAssistanceAct(act);
         return assistanceActMapper.toDto(saved);

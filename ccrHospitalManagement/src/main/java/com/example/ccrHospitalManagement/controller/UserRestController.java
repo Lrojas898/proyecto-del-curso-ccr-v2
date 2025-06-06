@@ -67,7 +67,7 @@ public class UserRestController {
         try {
             String username = auth.getName();
             return userService.getUserByUsername(username)
-                    .map(userMapper::toDto)  // ✅ utilizar el mapper directamente
+                    .map(userMapper::toDto) 
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         } catch (Exception e) {
