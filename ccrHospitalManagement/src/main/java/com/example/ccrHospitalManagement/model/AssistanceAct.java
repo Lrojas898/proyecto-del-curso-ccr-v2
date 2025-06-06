@@ -5,6 +5,8 @@ package com.example.ccrHospitalManagement.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "ASSISTANCE_ACT")
 @Data
@@ -17,7 +19,7 @@ public class AssistanceAct {
     private Long id;
 
     @Column(nullable = false)
-    private java.sql.Date issueDate; // issue_date -> issueDate
+    private LocalDate issueDate; // issue_date -> issueDate
 
 
     @Column(nullable = false, columnDefinition = "text")

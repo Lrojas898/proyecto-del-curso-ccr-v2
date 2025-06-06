@@ -2,6 +2,7 @@ package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.AssistanceActDTO;
 import com.example.ccrHospitalManagement.mapper.AssistanceActMapper;
+import com.example.ccrHospitalManagement.model.AssistanceAct;
 import com.example.ccrHospitalManagement.service.AssistanceActService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @RestController
@@ -49,9 +52,13 @@ public class AssistanceActRestController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<AssistanceActDTO> create(@RequestBody AssistanceActDTO dto) {
+        AssistanceAct entity = mapper.toEntity(dto);
+        if (entity.getIssueDate() == null) {
+            entity.setIssueDate(LocalDate.now(ZoneId.systemDefault()));
+        }
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(mapper.toDto(service.createAssistanceAct(mapper.toEntity(dto))));
+                    .body(mapper.toDto(service.createAssistanceAct(entity)));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {

@@ -58,7 +58,7 @@ public class AssistanceActServiceImpl implements AssistanceActService {
             throw new IllegalArgumentException("Debe proporcionarse la fecha de emisión del acto.");
         }
 
-        LocalDate issueDate = act.getIssueDate().toLocalDate();
+        LocalDate issueDate = act.getIssueDate();
         if (issueDate.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha del acto no puede estar en el futuro.");
         }

@@ -142,8 +142,8 @@ public class DataInitializer {
                 AttentionEpisode savedEpisode = attentionEpisodeRepository.save(episode);
 
                 assistanceActRepository.saveAll(List.of(
-                        new AssistanceAct(null, Date.valueOf(LocalDate.now()), "Consulta médica", consulta, savedEpisode, doctor1),
-                        new AssistanceAct(null, Date.valueOf(LocalDate.now()), "Tratamiento inicial", tratamiento, savedEpisode, doctor1)
+                        new AssistanceAct(null, LocalDate.now(), "Consulta médica", consulta, savedEpisode, doctor1),
+                        new AssistanceAct(null, LocalDate.now(), "Tratamiento inicial", tratamiento, savedEpisode, doctor1)
                 ));
 
                 ExamType type = examTypes.get(i % examTypes.size());

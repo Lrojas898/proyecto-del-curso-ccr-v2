@@ -51,7 +51,7 @@ class AssistanceActServiceTest {
 
         act = new AssistanceAct();
         act.setId(1L); // Cambiado a Long
-        act.setIssueDate(Date.valueOf(LocalDate.now()));
+        act.setIssueDate(LocalDate.now());
         act.setDescription("Descripción válida de acto asistencial");
         act.setType(type);
         act.setAttentionEpisode(episode);
@@ -70,7 +70,7 @@ class AssistanceActServiceTest {
 
     @Test
     void createAssistanceAct_FutureDate_Throws() {
-        act.setIssueDate(Date.valueOf(LocalDate.now().plusDays(1)));
+        act.setIssueDate((LocalDate.now().plusDays(1)));
         Exception e = assertThrows(IllegalArgumentException.class, () -> assistanceActService.createAssistanceAct(act));
         assertTrue(e.getMessage().contains("no puede estar en el futuro"));
     }

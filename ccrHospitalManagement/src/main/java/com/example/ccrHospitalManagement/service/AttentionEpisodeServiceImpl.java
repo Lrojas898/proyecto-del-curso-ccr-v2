@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -104,6 +105,9 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
 
     @Override
     public AttentionEpisode createAttentionEpisodeWithAssociations(AttentionEpisode episode, AttentionEpisodeDTO dto) {
+        if (episode.getCreationDate() == null) {
+            episode.setCreationDate(LocalDate.now());
+        }
         validateAndLinkAssociations(episode, dto);
         return createAttentionEpisode(episode);
     }
@@ -147,6 +151,10 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
 
 
     private void validateEpisode(AttentionEpisode episode, boolean isCreate) {
+        if (episode.getCreationDate() == null) {
+            episode.setCreationDate(LocalDate.now(ZoneId.systemDefault()));
+        }
+
         if (episode.getCreationDate() == null) {
             throw new IllegalArgumentException("Debe establecerse la fecha de creación.");
         }
@@ -195,10 +203,8 @@ public AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto
     episode.setDescription(dto.getDescription());
     episode.setCreationDate(dto.getCreationDate());
 
-    // ⬇️ Actualizar Cita y Protocolo si cambiaron
     updateAssociationsIfNeeded(episode, dto);
 
-    // ⬇️ Nueva lógica: actualizar diagnósticos si vienen
     if (dto.getDiagnoses() != null) {
         List<Long> diagnosisIds = dto.getDiagnoses().stream()
             .map(DiagnosisDTO::getId)
@@ -209,7 +215,6 @@ public AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto
         episode.setDiagnoses(diagnoses); // reemplaza la lista completa
     }
 
-    // ⬇️ Opción futura: si quieres también actualizar actos médicos, se puede extender aquí
 
     AttentionEpisode updated = episodeRepository.save(episode);
     return attentionEpisodeMapper.toDto(updated);
