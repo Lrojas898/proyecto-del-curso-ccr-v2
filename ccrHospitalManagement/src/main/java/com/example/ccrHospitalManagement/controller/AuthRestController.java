@@ -19,7 +19,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Autenticación", description = "Endpoint para login y generación de JWT")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public class AuthRestController {
     private final UserMapper userMapper;
     private final UserService userService;
 
-    
+    @Operation(summary = "Iniciar sesión y obtener un token JWT")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {

@@ -26,6 +26,8 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("El nombre del rol es obligatorio.");
         }
 
+        validateRole(role, true); // ← AGREGAR ESTA LÍNEA
+
         roleRepository.findByName(role.getName())
                 .ifPresent(existing -> {
                     throw new IllegalArgumentException("Ya existe un rol con ese nombre.");
@@ -33,6 +35,7 @@ public class RoleServiceImpl implements RoleService {
 
         return roleRepository.save(role);
     }
+
 
 
     @Override

@@ -72,7 +72,7 @@ public class ExamResultServiceTest {
 
         authAdmin = new Authentication() {
             @Override public Collection<? extends GrantedAuthority> getAuthorities() {
-                return java.util.Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
             }
             @Override public Object getCredentials() { return null; }
             @Override public Object getDetails() { return null; }
@@ -82,6 +82,7 @@ public class ExamResultServiceTest {
             @Override public String getName() { return "adminUser"; }
         };
     }
+
 
     @Test
     void createExamResult_Valid() {

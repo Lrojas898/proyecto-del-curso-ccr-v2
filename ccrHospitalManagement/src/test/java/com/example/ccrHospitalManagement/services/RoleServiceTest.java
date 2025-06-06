@@ -1,3 +1,4 @@
+
 package com.example.ccrHospitalManagement.services;
 
 import com.example.ccrHospitalManagement.model.Role;
@@ -31,7 +32,6 @@ public class RoleServiceTest {
     @BeforeEach
     void setUp() {
         role = new Role();
-        role.setId(1L);
         role.setName("Admin");
     }
 
@@ -39,7 +39,7 @@ public class RoleServiceTest {
 
     @Test
     void createRole_WhenValid_ReturnsRole() {
-        role.setId(null); // El ID debe ser null para crear
+        role.setId(null);
         when(roleRepository.findByName("Admin")).thenReturn(Optional.empty());
         when(roleRepository.save(role)).thenReturn(role);
 
@@ -52,7 +52,7 @@ public class RoleServiceTest {
 
     @Test
     void createRole_WhenIdIsNotNull_ThrowsException() {
-        role.setId(1L); // debe lanzar error porque no debe tener ID
+        role.setId(1L); 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> roleService.createRole(role));
         assertEquals("No se debe proporcionar un ID al crear un rol.", e.getMessage());
@@ -94,6 +94,7 @@ public class RoleServiceTest {
 
     @Test
     void updateRole_WhenNotExists_ThrowsException() {
+        role.setId(1L);
         when(roleRepository.existsById(role.getId())).thenReturn(false);
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,

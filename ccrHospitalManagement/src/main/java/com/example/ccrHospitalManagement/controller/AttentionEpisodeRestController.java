@@ -12,11 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
+@Tag(name = "AttentionEpisode", description = "Endpoints para gestionar episodios de atención médica")
 @RestController
 @RequestMapping("/api/attention-episodes")
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class AttentionEpisodeRestController {
     private final MedicalProtocolService protocolService;
     private final MedicalProtocolMapper protocolMapper;
 
+    @Operation(summary = "Obtener todos los episodios de atención médica")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE')")
     public ResponseEntity<List<AttentionEpisodeDTO>> getAll() {
@@ -41,6 +46,7 @@ public class AttentionEpisodeRestController {
         }
     }
 
+    @Operation(summary = "Obtener un episodio de atención médica por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE')")
     public ResponseEntity<AttentionEpisodeDTO> getById(@PathVariable Long id) {
@@ -54,6 +60,7 @@ public class AttentionEpisodeRestController {
         }
     }
 
+    @Operation(summary = "Crear un nuevo episodio de atención médica")
     @PostMapping
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<AttentionEpisodeDTO> create(@RequestBody AttentionEpisodeDTO dto) {
@@ -71,6 +78,7 @@ public class AttentionEpisodeRestController {
         }
     }
 
+    @Operation(summary = "Actualizar un episodio de atención médica")
     @PutMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<AttentionEpisodeDTO> update(@RequestBody AttentionEpisodeDTO dto) {
@@ -85,6 +93,7 @@ public class AttentionEpisodeRestController {
         }
     }
 
+    @Operation(summary = "Eliminar un episodio de atención médica por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

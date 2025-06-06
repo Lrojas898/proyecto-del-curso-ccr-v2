@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "Roles", description = "CRUD para gestión de roles de usuario")
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class RoleRestController {
     private final RoleService service;
     private final RoleMapper mapper;
 
+    @Operation(summary = "Obtener todos los roles")
     @GetMapping
     public ResponseEntity<List<RoleDTO>> getAll() {
         try {
@@ -29,6 +33,7 @@ public class RoleRestController {
         }
     }
 
+    @Operation(summary = "Obtener un rol por ID")
     @GetMapping("/{id}")
     public ResponseEntity<RoleDTO> getById(@PathVariable Long id) {
         try {
@@ -41,6 +46,7 @@ public class RoleRestController {
         }
     }
 
+    @Operation(summary = "Crear un nuevo rol")
     @PostMapping
     public ResponseEntity<RoleDTO> create(@RequestBody RoleDTO dto) {
         try {
@@ -54,6 +60,7 @@ public class RoleRestController {
         }
     }
 
+    @Operation(summary = "Actualizar un rol existente")
     @PutMapping
     public ResponseEntity<RoleDTO> update(@RequestBody RoleDTO dto) {
         try {
@@ -65,6 +72,7 @@ public class RoleRestController {
         }
     }
 
+    @Operation(summary = "Eliminar un rol por ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {

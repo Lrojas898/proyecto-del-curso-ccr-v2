@@ -23,9 +23,9 @@ Con el fin de optimizar los procesos internos y mejorar la atención al paciente
 
 Desarrollar una **aplicación web integral** para la **gestión administrativa y operativa** de la clínica oncológica. La solución permitirá un control eficiente sobre las citas médicas, los expedientes clínicos, el personal médico, los laboratorios y la facturación. A través de esta plataforma, se garantizará un flujo de trabajo ágil, seguro y optimizado, que contribuye a la mejora de la calidad del servicio médico brindado a los pacientes.
 
-## Objetivo de entrega 2
+## Objetivo de entrega 3
 
-En esta entrega implementamos el patrón MVC utilizando Spring boot, Thymeleaf y Security para permitir a los usuarios registrarse e ingresar por medio de una interfaz basada en archivos html.
+En esta entrega se implemento los controladores REST principales con seguridad basada en JWT, usando DTOs y MapStruct, junto con pruebas automatizadas en Postman, asegurando una arquitectura limpia, segura y lista para despliegue en servidor.
 
 ## Requisitos Previos
 
@@ -70,12 +70,21 @@ Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes 
 
    Los datos predefinidos en la entrada del apartado de login, "admin" y "123456" es un usuario predefinido para acceder rapidamente y comprobar la parte administrativa de la aplicacion, hay que tener en cuenta que como parte de la entrega solo esta implementada la parte del menu -> "Admin Usuarios" donde esta la parte de gestion de usuarios. El usuario puede registrarse como usuario normal en el link registrate del apartado de login si no tiene una cuenta creada y llenar el formulario respectivo, al crear la cuenta puedes ingresar tu "usuario" y "password" en el apartado de login para iniciar sesion en tu cuenta.
 
+Para esta entrega se desarrollaron los endpoints rest de nuestra aplicación, pero no el frontend de los mismos (eso será en la próxima entrega), para ver el desarrollo se pueden usar los archivos de postman que se encuentran en el repositorio, en la carpeta de postman. se importa el ambiente, la coleccion, y se pueden correr los test que hicimos, tambien se puede ver su resultado en los videos anexos a esta entrega. 
+
+Otro punto a mencionar es la documentación hecha en swagger, para verla, accede a: 
+
+   ```bash
+    http://localhost:8081/g1/ccr/swagger-ui/index.html
+
+```
+
       
-6. **resultados de Jacoco**   
+7. **resultados de Jacoco**   
 Se tiene una cobertura del 100% en cuanto a los servicios solicitados
 ![alt text](<jacoco.png>)
 
-7. **Videos de prueba del proyecto**:
+8. **Videos de prueba del proyecto**:
 
    Aqui estaran todos los videos de prueba del proyecto, actualizado por cada entrega:
 

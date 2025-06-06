@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "Ubicaciones", description = "Operaciones CRUD para gestionar ubicaciones en el sistema")
 @RestController
 @RequestMapping("/api/locations")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class LocationRestController {
     private final LocationService service;
     private final LocationMapper mapper;
 
+    @Operation(summary = "Obtener todas las ubicaciones")
     @GetMapping
     public ResponseEntity<List<LocationDTO>> getAll() {
         try {
@@ -29,6 +33,7 @@ public class LocationRestController {
         }
     }
 
+    @Operation(summary = "Obtener una ubicación por ID")
     @GetMapping("/{id}")
     public ResponseEntity<LocationDTO> getById(@PathVariable Long id) {
         try {
@@ -41,6 +46,7 @@ public class LocationRestController {
         }
     }
 
+    @Operation(summary = "Crear una nueva ubicación")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LocationDTO> create(@RequestBody LocationDTO dto) {
@@ -54,6 +60,7 @@ public class LocationRestController {
         }
     }
 
+    @Operation(summary = "Actualizar una ubicación existente")
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LocationDTO> update(@RequestBody LocationDTO dto) {
@@ -66,6 +73,7 @@ public class LocationRestController {
         }
     }
 
+    @Operation(summary = "Eliminar una ubicación por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

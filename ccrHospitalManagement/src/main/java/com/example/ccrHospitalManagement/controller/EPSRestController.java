@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "EPS", description = "Gestión de Entidades Promotoras de Salud")
 @RestController
 @RequestMapping("/api/eps")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class EPSRestController {
     private final EpsService service;
     private final EpsMapper mapper;
 
+    @Operation(summary = "Obtener todas las EPS")
     @GetMapping
     public ResponseEntity<List<EPSDTO>> getAll() {
         try {
@@ -29,6 +33,7 @@ public class EPSRestController {
         }
     }
 
+    @Operation(summary = "Obtener EPS por ID")
     @GetMapping("/{id}")
     public ResponseEntity<EPSDTO> getById(@PathVariable String id) {
         try {
@@ -41,6 +46,7 @@ public class EPSRestController {
         }
     }
 
+    @Operation(summary = "Crear una nueva EPS")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EPSDTO> create(@RequestBody EPSDTO dto) {
@@ -54,6 +60,7 @@ public class EPSRestController {
         }
     }
 
+    @Operation(summary = "Actualizar una EPS existente")
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EPSDTO> update(@RequestBody EPSDTO dto) {
@@ -66,6 +73,7 @@ public class EPSRestController {
         }
     }
 
+    @Operation(summary = "Eliminar una EPS por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable String id) {

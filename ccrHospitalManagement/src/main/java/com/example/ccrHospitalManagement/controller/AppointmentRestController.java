@@ -12,10 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Appointment", description = "Operaciones relacionadas con citas médicas")
 @RestController
 @RequestMapping("/api/appointments")
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class AppointmentRestController {
     private final AppointmentService service;
     private final AppointmentMapper mapper;
 
+    @Operation(summary = "Obtener todas las citas médicas")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
     public ResponseEntity<List<AppointmentDTO>> getAll() {

@@ -10,10 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name = "Historias Clínicas", description = "Operaciones relacionadas con historias clínicas")
 @RestController
 @RequestMapping("/api/clinical-histories")
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class ClinicalHistoryRestController {
     private final ClinicalHistoryService service;
     private final ClinicalHistoryMapperDecorator mapper;
 
+    @Operation(summary = "Obtener todas las historias clínicas")
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<List<ClinicalHistoryDTO>> getAll() {
@@ -36,6 +40,7 @@ public class ClinicalHistoryRestController {
         }
     }
 
+    @Operation(summary = "Obtener una historia clínica por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE')")
     public ResponseEntity<ClinicalHistoryDTO> getById(@PathVariable Long id, Authentication auth) {
@@ -78,9 +83,6 @@ public class ClinicalHistoryRestController {
         }
     }
 
-
-
-
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<ClinicalHistoryDTO> create(@RequestBody ClinicalHistoryDTO dto) {
@@ -94,6 +96,7 @@ public class ClinicalHistoryRestController {
         }
     }
 
+    @Operation(summary = "Actualizar una historia clínica")
     @PutMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<ClinicalHistoryDTO> update(@RequestBody ClinicalHistoryDTO dto) {
@@ -107,6 +110,7 @@ public class ClinicalHistoryRestController {
         }
     }
 
+    @Operation(summary = "Eliminar una historia clínica por ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
