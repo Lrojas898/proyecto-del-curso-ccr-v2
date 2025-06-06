@@ -15,5 +15,5 @@ public interface ClinicalHistoryRepository extends JpaRepository<ClinicalHistory
     Optional<ClinicalHistory> findByUser_Id(String userId);
 
 
-
+    ClinicalHistory findByUserId(String id);
 }
