@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
+import java.util.Collections;
 
 @Tag(name = "Resultados de Exámenes", description = "Operaciones para gestionar resultados de exámenes médicos")
 @RestController
@@ -60,24 +61,28 @@ public class ExamResultRestController {
     @Operation(summary = "Crear un nuevo resultado de examen")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','LABTECH')")
-    public ResponseEntity<ExamResultDTO> create(@RequestBody ExamResultDTO dto, Authentication auth) {
+    public ResponseEntity<?> create(@RequestBody ExamResultDTO dto, Authentication auth) {
         try {
+            var entity = service.createExamResult(mapper.toEntity(dto), auth);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(mapper.toDto(service.createExamResult(mapper.toEntity(dto), auth)));
+                    .body(mapper.toDto(entity));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .body(Collections.singletonMap("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error interno al crear el examen"));
         }
     }
 
 
-    @Operation(summary = "Actualizar un resultado de examen")
-    @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ExamResultDTO> update(@RequestBody ExamResultDTO dto, Authentication auth) {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','LABTECH')")
+    public ResponseEntity<ExamResultDTO> update(@PathVariable Long id, @RequestBody ExamResultDTO dto, Authentication auth) {
         try {
-            return ResponseEntity.ok(mapper.toDto(service.updateExamResult(mapper.toEntity(dto), auth)));
+            dto.setId(id); 
+            var updated = service.updateExamResult(mapper.toEntity(dto), auth);
+            return ResponseEntity.ok(mapper.toDto(updated));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
@@ -85,7 +90,7 @@ public class ExamResultRestController {
         }
     }
 
-    @Operation(summary = "Eliminar un resultado de examen por ID")
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -98,4 +103,32 @@ public class ExamResultRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/me")
+@PreAuthorize("hasRole('PACIENTE')")
+public ResponseEntity<List<ExamResultDTO>> getMyResults(Authentication auth) {
+    try {
+        List<ExamResultDTO> myResults = service.getAllExamResults().stream()
+                .filter(result -> result.getPatient().getUsername().equals(auth.getName()))
+                .map(mapper::toDto)
+                .toList();
+        return ResponseEntity.ok(myResults);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+@GetMapping("/count")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> getTotalExamResultsCount() {
+    try {
+        long count = service.countAllExamResults();
+        return ResponseEntity.ok(Collections.singletonMap("count", count));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al obtener el conteo total de exámenes");
+    }
+}
+
+
 }

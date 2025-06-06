@@ -1,28 +1,28 @@
 package com.example.ccrHospitalManagement.service;
 
-import com.example.ccrHospitalManagement.dto.RoleDTO;
-import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
-import com.example.ccrHospitalManagement.dto.UserRoleDTO;
-import com.example.ccrHospitalManagement.model.*;
-import com.example.ccrHospitalManagement.repository.*;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.ccrHospitalManagement.dto.RoleDTO;
 import com.example.ccrHospitalManagement.dto.UserDTO;
+import com.example.ccrHospitalManagement.dto.UserRegistrationDto;
+import com.example.ccrHospitalManagement.dto.UserRoleDTO;
+import com.example.ccrHospitalManagement.mapper.UserMapper;
+import com.example.ccrHospitalManagement.model.*;
+import com.example.ccrHospitalManagement.repository.*;
 
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements  UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final EPSRepository epsRepository;
@@ -31,7 +31,8 @@ public class UserServiceImpl implements  UserService{
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
     private final AppointmentRepository appointmentRepository;
-
+    private final ClinicalHistoryService clinicalHistoryService;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
@@ -48,6 +49,9 @@ public class UserServiceImpl implements  UserService{
         PrepaidMedicine prepaid = prepaidRepository.findById(dto.getPrepaidMedicineNit())
                 .orElseThrow(() -> new IllegalArgumentException("Medicina prepagada no encontrada"));
 
+        Role defaultRole = roleRepository.findByName("PACIENTE")
+                .orElseThrow(() -> new IllegalArgumentException("Rol por defecto 'PACIENTE' no encontrado"));
+
         User user = new User();
         user.setId(dto.getId());
         user.setUsername(dto.getUsername());
@@ -58,11 +62,21 @@ public class UserServiceImpl implements  UserService{
         user.setAddress(dto.getAddress());
         user.setPhone(dto.getPhone());
         user.setSex(dto.getSex());
-        user.setDateOfBirth(dto.getDateOfBirth()); 
+        user.setDateOfBirth(dto.getDateOfBirth());
         user.setEps(eps);
         user.setPrepaidMedicine(prepaid);
+        user.setRoles(Set.of(defaultRole));
 
         userRepository.save(user);
+
+        if (defaultRole.getName().equals("PACIENTE")) {
+            ClinicalHistory history = new ClinicalHistory();
+            history.setDate(LocalDate.now());
+            history.setHour(LocalTime.now());
+            history.setGeneralObservations("Historia clínica creada automáticamente al registrar al paciente.");
+            history.setUser(user);
+            clinicalHistoryService.createClinicalHistory(history);
+        }
     }
 
     @Transactional
@@ -82,12 +96,16 @@ public class UserServiceImpl implements  UserService{
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        return Optional.of(userRepository.findByUsername(username));
     }
 
     @Transactional
@@ -105,6 +123,13 @@ public class UserServiceImpl implements  UserService{
         return userRepository.save(user);
     }
 
+
+    @Transactional
+    public User updateUser(User user) {
+        return userRepository.save(user);
+        
+    }
+
     @Transactional
     public void deleteUser(String id) {
         Optional<User> userOpt = userRepository.findById(id);
@@ -114,17 +139,14 @@ public class UserServiceImpl implements  UserService{
 
         User user = userOpt.get();
 
-        // Eliminar citas donde sea paciente
         List<Appointment> asPatient = appointmentRepository.findByPatientId(user.getId());
         appointmentRepository.deleteAll(asPatient);
 
-        // Eliminar citas donde sea doctor (si aplica)
         List<Appointment> asDoctor = appointmentRepository.findByDoctorId(user.getId());
         appointmentRepository.deleteAll(asDoctor);
 
         userRepository.deleteById(id);
     }
-
 
     public List<UserRoleDTO> getAllUsersWithRoles() {
         List<User> users = userRepository.findAll();
@@ -169,13 +191,16 @@ public class UserServiceImpl implements  UserService{
         userRepository.save(user);
     }
 
-    private UserDTO convertToDTO(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        return dto;
+    public List<User> getUsersByRole(String roleName) {
+    return userRepository.findAll().stream()
+            .filter(user -> user.getRoles().stream()
+                    .anyMatch(role -> role.getName().equalsIgnoreCase(roleName)))
+            .toList();
     }
+
+    public long countUsers() {
+        return userRepository.count(); // Asumiendo que usas JpaRepository<User, String>
+    }
+
+
 }

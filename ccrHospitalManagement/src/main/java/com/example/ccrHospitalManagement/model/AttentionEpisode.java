@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "ATTENTION_EPISODE")
@@ -20,9 +21,6 @@ public class AttentionEpisode {
     private LocalDate creationDate;
 
     @Column(columnDefinition = "TEXT")
-    private String diagnosis;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne
@@ -36,4 +34,20 @@ public class AttentionEpisode {
     @OneToOne
     @JoinColumn(name = "APPOINTMENT_id")
     private Appointment appointment;
+
+    @OneToMany(mappedBy = "attentionEpisode", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AssistanceAct> assistanceActs;
+
+    @ManyToOne
+    @JoinColumn(name = "MEDICAL_PROTOCOL_id")
+    private MedicalProtocol medicalProtocol;
+
+    @ManyToMany
+@JoinTable(
+    name = "episode_diagnosis",
+    joinColumns = @JoinColumn(name = "episode_id"),
+    inverseJoinColumns = @JoinColumn(name = "diagnosis_id")
+)
+private List<Diagnosis> diagnoses;
+
 }

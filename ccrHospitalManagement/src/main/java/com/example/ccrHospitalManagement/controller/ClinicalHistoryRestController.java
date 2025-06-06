@@ -2,6 +2,7 @@ package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.ClinicalHistoryDTO;
 import com.example.ccrHospitalManagement.mapper.ClinicalHistoryMapperDecorator;
+import com.example.ccrHospitalManagement.model.ClinicalHistory;
 import com.example.ccrHospitalManagement.service.ClinicalHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "Historias Clínicas", description = "Operaciones relacionadas con historias clínicas")
 @RestController
@@ -41,13 +43,14 @@ public class ClinicalHistoryRestController {
     @Operation(summary = "Obtener una historia clínica por ID")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE')")
-    public ResponseEntity<ClinicalHistoryDTO> getById(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<ClinicalHistoryDTO> getById(@PathVariable Long id, Authentication auth) {
         try {
             return service.getClinicalHistoryById(id)
                     .filter(history -> {
-                        if (authentication.getAuthorities().stream()
+                        // Si es PACIENTE, solo puede ver su propia historia
+                        if (auth.getAuthorities().stream()
                                 .anyMatch(a -> a.getAuthority().equals("ROLE_PACIENTE"))) {
-                            return history.getUser().getUsername().equals(authentication.getName());
+                            return history.getUser().getUsername().equals(auth.getName());
                         }
                         return true;
                     })
@@ -59,17 +62,37 @@ public class ClinicalHistoryRestController {
         }
     }
 
-    @Operation(summary = "Crear una nueva historia clínica")
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PACIENTE')")
+    public ResponseEntity<?> getMyHistory(Authentication auth) {
+        try {
+            String username = auth.getName();
+
+            Optional<ClinicalHistory> optional = service.getByUsername(username);
+
+            if (optional.isPresent()) {
+                ClinicalHistoryDTO dto = mapper.toDto(optional.get());
+                return ResponseEntity.ok(dto);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No se encontró historia clínica para el usuario autenticado");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al recuperar la historia clínica del paciente");
+        }
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<ClinicalHistoryDTO> create(@RequestBody ClinicalHistoryDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(mapper.toDto(service.createClinicalHistory(mapper.toEntity(dto))));
+            var created = service.createClinicalHistory(mapper.toEntity(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -78,11 +101,12 @@ public class ClinicalHistoryRestController {
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<ClinicalHistoryDTO> update(@RequestBody ClinicalHistoryDTO dto) {
         try {
-            return ResponseEntity.ok(mapper.toDto(service.UpdateClinicalHistory(mapper.toEntity(dto))));
+            var updated = service.UpdateClinicalHistory(mapper.toEntity(dto));
+            return ResponseEntity.ok(mapper.toDto(updated));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -99,4 +123,21 @@ public class ClinicalHistoryRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/by-patient/{id}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<ClinicalHistoryDTO> getHistoryByPatientId(@PathVariable String id) {
+        try {
+            Optional<ClinicalHistory> optional = service.getByUserId(id);
+            return optional.map(mapper::toDto)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
+
 }

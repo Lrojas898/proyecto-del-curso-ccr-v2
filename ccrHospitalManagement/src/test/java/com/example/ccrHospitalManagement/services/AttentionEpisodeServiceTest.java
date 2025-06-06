@@ -42,7 +42,7 @@ public class AttentionEpisodeServiceTest {
         episode = new AttentionEpisode();
         episode.setId(4L);
         episode.setCreationDate(LocalDate.now().minusDays(1));
-        episode.setDiagnosis("Diagnóstico válido");
+      
         episode.setDescription("Descripción válida del episodio");
         episode.setClinicalHistory(history);
         episode.setDoctor(doctor);
@@ -67,12 +67,7 @@ public class AttentionEpisodeServiceTest {
         assertTrue(e.getMessage().contains("no puede ser futura"));
     }
 
-    @Test
-    void createAttentionEpisode_ShortDiagnosis_Throws() {
-        episode.setDiagnosis("Corto");
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("al menos 10 caracteres"));
-    }
+  
 
     @Test
     void createAttentionEpisode_ShortDescription_Throws() {
@@ -96,18 +91,18 @@ public class AttentionEpisodeServiceTest {
     }
 
     @Test
-    void createAttentionEpisode_NullDate_Throws() {
+    void createAttentionEpisode_NullDate_AssignsToday() {
         episode.setCreationDate(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("fecha de creación"));
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    
+        AttentionEpisode result = service.createAttentionEpisode(episode);
+    
+        assertNotNull(result.getCreationDate());
+        assertEquals(LocalDate.now(), result.getCreationDate());
+        verify(repository).save(any());
     }
+    
 
-    @Test
-    void createAttentionEpisode_NullDiagnosis_Throws() {
-        episode.setDiagnosis(null);
-        Exception e = assertThrows(IllegalArgumentException.class, () -> service.createAttentionEpisode(episode));
-        assertTrue(e.getMessage().contains("diagnóstico"));
-    }
 
     @Test
     void createAttentionEpisode_NullDescription_Throws() {
@@ -120,20 +115,23 @@ public class AttentionEpisodeServiceTest {
 
     @Test
     void updateAttentionEpisode_Valid() {
-        when(repository.existsById(4L)).thenReturn(true);
+        when(repository.findById(4L)).thenReturn(Optional.of(episode));
         when(repository.save(episode)).thenReturn(episode);
-
+    
         AttentionEpisode result = service.updateAttentionEpisode(episode);
         assertEquals(4L, result.getId());
         verify(repository).save(episode);
     }
+    
 
     @Test
     void updateAttentionEpisode_NotFound_Throws() {
-        when(repository.existsById(4L)).thenReturn(false);
+        when(repository.findById(4L)).thenReturn(Optional.empty());
+    
         Exception e = assertThrows(IllegalArgumentException.class, () -> service.updateAttentionEpisode(episode));
         assertTrue(e.getMessage().contains("no existe"));
     }
+    
 
     // GET
 

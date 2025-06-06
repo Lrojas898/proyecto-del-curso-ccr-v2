@@ -8,5 +8,4 @@ import java.util.Optional;
 public interface UserService {
     void saveUser(UserRegistrationDto dto);
 
-
 }

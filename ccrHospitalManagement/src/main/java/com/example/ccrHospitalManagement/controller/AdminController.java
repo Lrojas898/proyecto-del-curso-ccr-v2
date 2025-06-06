@@ -21,7 +21,7 @@ public class AdminController {
         model.addAttribute("users", userService.getAllUsers());
         return "admin/user-list";
     }
-    //continuamos, Dios mediante, por aca.
+  
     @GetMapping("/users/{userId}/roles")
     public String showUserRoles(@PathVariable String userId, Model model) {
         UserRoleDTO userRoleDTO = userService.getUserWithRoles(userId);

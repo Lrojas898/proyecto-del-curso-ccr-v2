@@ -1,7 +1,9 @@
 package com.example.ccrHospitalManagement.service;
 
+import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
+import com.example.ccrHospitalManagement.model.User;
 import com.example.ccrHospitalManagement.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +38,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Appointment> getAppointmentById(Long id) {
-        return appointmentRepository.findById(id);
+        return appointmentRepository.findById(id).map(appointment -> {
+            appointment.getDoctor().getFirstName();
+            appointment.getPatient().getFirstName();
+            appointment.getLocation().getName();
+            return appointment;
+        });
     }
 
     @Override
@@ -55,75 +63,86 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.deleteById(id);
     }
 
+    @Override
     public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, String requesterRole) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
 
+        AppointmentStatus currentStatus = appointment.getStatus();
+
+        if (currentStatus == AppointmentStatus.CANCELLED_BY_PATIENT ||
+                currentStatus == AppointmentStatus.CANCELLED_BY_STAFF) {
+            throw new IllegalStateException("No se puede modificar una cita cancelada.");
+        }
+
+        // Añadir validación para rechazar aprobaciones múltiples
+        if (currentStatus == AppointmentStatus.FULLY_APPROVED && newStatus == AppointmentStatus.FULLY_APPROVED) {
+            throw new IllegalStateException("La cita ya está completamente aprobada.");
+        }
+
+        // Validación para FINALIZED: solo se puede finalizar una cita FULLY_APPROVED y que ya haya pasado
+        if (newStatus == AppointmentStatus.FINALIZED) {
+            if (currentStatus != AppointmentStatus.FULLY_APPROVED) {
+                throw new IllegalStateException("Solo se pueden finalizar citas que estén completamente aprobadas.");
+            }
+
+            if (appointment.getDate().isAfter(LocalDate.now()) ||
+                    (appointment.getDate().isEqual(LocalDate.now()) && appointment.getStartTime().isAfter(LocalTime.now()))) {
+                throw new IllegalStateException("Solo se pueden finalizar citas que ya hayan pasado.");
+            }
+        }
+
         switch (newStatus) {
-            case APPROVED_BY_DOCTOR -> {
-                if (!requesterRole.equals("ROLE_DOCTOR"))
-                    throw new IllegalArgumentException("Solo el médico puede aprobar como doctor.");
-                appointment.setStatus(AppointmentStatus.APPROVED_BY_DOCTOR);
-                updateFullyApprovedIfNeeded(appointment);
+            case FULLY_APPROVED -> {
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE") ||
+                        (requesterRole.equals("ROLE_PACIENTE") && currentStatus == AppointmentStatus.PROPOSED_BY_STAFF)))
+                    throw new IllegalArgumentException("Solo el médico, asistente o paciente (para propuestas del staff) pueden aprobar completamente.");
+
+                if (currentStatus != AppointmentStatus.PENDING &&
+                        currentStatus != AppointmentStatus.PROPOSED_BY_PATIENT &&
+                        !(currentStatus == AppointmentStatus.PROPOSED_BY_STAFF && requesterRole.equals("ROLE_PACIENTE"))) {
+                    throw new IllegalStateException("No se puede aprobar esta cita en su estado actual.");
+                }
+
+                appointment.setStatus(AppointmentStatus.FULLY_APPROVED);
             }
-            case APPROVED_BY_ASSISTANT -> {
-                if (!requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR"))
-                    throw new IllegalArgumentException("Solo el asistente puede aprobar como asistente.");
-                appointment.setStatus(AppointmentStatus.APPROVED_BY_ASSISTANT);
-                updateFullyApprovedIfNeeded(appointment);
+
+            case CANCELLED_BY_STAFF -> {
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE")))
+                    throw new IllegalArgumentException("Solo el personal puede cancelar esta cita.");
+
+                appointment.setStatus(AppointmentStatus.CANCELLED_BY_STAFF);
             }
-            case MODIFIED -> {
-                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR")))
-                    throw new IllegalArgumentException("Solo el médico o asistente pueden modificar.");
-                appointment.setStatus(AppointmentStatus.MODIFIED);
-            }
-            case CONFIRMED_BY_PATIENT -> {
-                if (!requesterRole.equals("ROLE_PACIENTE"))
-                    throw new IllegalArgumentException("Solo el paciente puede confirmar la cita.");
-                appointment.setStatus(AppointmentStatus.CONFIRMED_BY_PATIENT);
-            }
+
             case CANCELLED_BY_PATIENT -> {
                 if (!requesterRole.equals("ROLE_PACIENTE"))
-                    throw new IllegalArgumentException("Solo el paciente puede cancelar la cita.");
+                    throw new IllegalArgumentException("Solo el paciente puede cancelar.");
+
                 appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
             }
-            case DENIED -> {
-                if (!(requesterRole.equals("ROLE_DOCTOR") ||
-                      requesterRole.equals("ROLE_ASISTENTE_DE_DOCTOR") ||
-                      requesterRole.equals("ROLE_PACIENTE"))) {
-                    throw new IllegalArgumentException("No autorizado para denegar la cita.");
-                }
-                appointment.setStatus(AppointmentStatus.DENIED);
+
+            case PROPOSED_BY_STAFF -> {
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE")))
+                    throw new IllegalArgumentException("Solo el médico o asistente pueden proponer cambios.");
+                appointment.setStatus(AppointmentStatus.PROPOSED_BY_STAFF);
             }
+
+            case PROPOSED_BY_PATIENT -> {
+                if (!requesterRole.equals("ROLE_PACIENTE"))
+                    throw new IllegalArgumentException("Solo el paciente puede proponer cambios.");
+                appointment.setStatus(AppointmentStatus.PROPOSED_BY_PATIENT);
+            }
+
+            case FINALIZED -> {
+                if (!(requesterRole.equals("ROLE_DOCTOR") || requesterRole.equals("ROLE_ASISTENTE")))
+                    throw new IllegalArgumentException("Solo el médico o asistente pueden finalizar una cita.");
+                appointment.setStatus(AppointmentStatus.FINALIZED);
+            }
+
             default -> throw new IllegalArgumentException("Transición de estado no válida.");
         }
 
         return appointmentRepository.save(appointment);
-    }
-
-    private void updateFullyApprovedIfNeeded(Appointment appointment) {
-        AppointmentStatus current = appointment.getStatus();
-
-        boolean approvedByDoctor = current == AppointmentStatus.APPROVED_BY_DOCTOR ||
-                (current == AppointmentStatus.APPROVED_BY_ASSISTANT && appointmentPreviouslyApprovedByDoctor(appointment));
-        boolean approvedByAssistant = current == AppointmentStatus.APPROVED_BY_ASSISTANT ||
-                (current == AppointmentStatus.APPROVED_BY_DOCTOR && appointmentPreviouslyApprovedByAssistant(appointment));
-
-        if (approvedByDoctor && approvedByAssistant) {
-            appointment.setStatus(AppointmentStatus.FULLY_APPROVED);
-        }
-    }
-
-    private boolean appointmentPreviouslyApprovedByDoctor(Appointment appointment) {
-        return appointmentRepository.findById(appointment.getId())
-                .map(a -> a.getStatus() == AppointmentStatus.APPROVED_BY_DOCTOR || a.getStatus() == AppointmentStatus.FULLY_APPROVED)
-                .orElse(false);
-    }
-
-    private boolean appointmentPreviouslyApprovedByAssistant(Appointment appointment) {
-        return appointmentRepository.findById(appointment.getId())
-                .map(a -> a.getStatus() == AppointmentStatus.APPROVED_BY_ASSISTANT || a.getStatus() == AppointmentStatus.FULLY_APPROVED)
-                .orElse(false);
     }
 
     private void validateAppointment(Appointment appointment, boolean isCreate) {
@@ -138,7 +157,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalArgumentException("La hora de inicio es obligatoria.");
         }
         if (appointment.getStartTime().isBefore(LocalTime.of(8, 0)) ||
-            appointment.getStartTime().isAfter(LocalTime.of(18, 0))) {
+                appointment.getStartTime().isAfter(LocalTime.of(18, 0))) {
             throw new IllegalArgumentException("La hora debe estar entre las 08:00 y las 18:00.");
         }
 
@@ -153,5 +172,211 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointment.getLocation() == null) {
             throw new IllegalArgumentException("Debe especificarse una ubicación.");
         }
+
+        if (isCreate && appointmentRepository.existsByDoctorIdAndDateAndStartTime(
+                appointment.getDoctor().getId(),
+                appointment.getDate(),
+                appointment.getStartTime())) {
+            throw new IllegalArgumentException("El doctor ya tiene una cita programada en esa fecha y hora.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<Appointment> getAppointmentsByPatientId(String patientId) {
+        List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+        appointments.forEach(a -> {
+            a.getDoctor().getFirstName();
+            a.getPatient().getFirstName();
+            a.getLocation().getName();
+        });
+        return appointments;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Appointment> getCancelledAppointmentsByPatientId(String patientId) {
+        List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+        return appointments.stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.CANCELLED_BY_PATIENT ||
+                        a.getStatus() == AppointmentStatus.CANCELLED_BY_STAFF)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countAllAppointments() {
+        return appointmentRepository.count();
+    }
+
+    @Override
+    @Transactional
+    public Appointment handleRescheduleRequest(Long appointmentId, RescheduleRequest request, String username) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+
+        if (!appointment.getPatient().getUsername().equals(username)) {
+            throw new IllegalArgumentException("No autorizado para reprogramar esta cita.");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.FULLY_APPROVED) {
+            throw new IllegalStateException("Las citas aprobadas no pueden ser reprogramadas, solo canceladas.");
+        }
+
+        if (appointmentRepository.existsByDoctorIdAndDateAndStartTimeAndStatus(
+                appointment.getDoctor().getId(), request.getNewDate(), request.getNewTime(), AppointmentStatus.FULLY_APPROVED)) {
+            throw new IllegalArgumentException("Ya existe una cita aprobada con este doctor en ese horario.");
+        }
+
+        appointment.setDate(request.getNewDate());
+        appointment.setStartTime(request.getNewTime());
+
+        String originalDescription = appointment.getDescription() != null ? appointment.getDescription() : "";
+        appointment.setDescription(originalDescription + " (Reprogramación solicitada: " + request.getReason() + ")");
+
+        // Cambiar automáticamente el estado a PROPOSED_BY_PATIENT
+        appointment.setStatus(AppointmentStatus.PROPOSED_BY_PATIENT);
+
+        return appointmentRepository.save(appointment);
+    }
+
+    @Override
+    @Transactional
+    public List<Appointment> getAppointmentsByDoctorId(String doctorId) {
+        return appointmentRepository.findByDoctorId(doctorId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Appointment> getCancelledAppointmentsByDoctorId(String doctorId) {
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctorId);
+        return appointments.stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.CANCELLED_BY_PATIENT ||
+                        a.getStatus() == AppointmentStatus.CANCELLED_BY_STAFF)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public Appointment rescheduleByDoctor(Long appointmentId, LocalDate newDate, LocalTime newTime, String reason) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada con ID: " + appointmentId));
+
+        if (appointment.getStatus() == AppointmentStatus.FULLY_APPROVED) {
+            throw new IllegalStateException("Las citas aprobadas no pueden ser reprogramadas, solo canceladas.");
+        }
+
+        if (appointmentRepository.existsByDoctorIdAndDateAndStartTimeAndStatus(
+                appointment.getDoctor().getId(), newDate, newTime, AppointmentStatus.FULLY_APPROVED)) {
+            throw new IllegalArgumentException("Ya existe una cita aprobada con este doctor en ese horario.");
+        }
+
+        appointment.setDate(newDate);
+        appointment.setStartTime(newTime);
+
+        if (reason != null && !reason.trim().isEmpty()) {
+            String updatedDescription = appointment.getDescription() != null
+                    ? appointment.getDescription() + "\n(Reprogramada por el doctor: " + reason + ")"
+                    : "(Reprogramada por el doctor: " + reason + ")";
+            appointment.setDescription(updatedDescription);
+        }
+
+        // Cambiar automáticamente el estado a PROPOSED_BY_STAFF
+        appointment.setStatus(AppointmentStatus.PROPOSED_BY_STAFF);
+
+        return appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public List<User> getPatientsByDoctorId(String doctorId) {
+        return appointmentRepository.findDistinctPatientsByDoctorId(doctorId);
+    }
+
+    // Método para cancelar cita por el paciente
+    @Override
+    @Transactional
+    public Appointment cancelByPatient(Long appointmentId, String username) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+
+        if (!appointment.getPatient().getUsername().equals(username)) {
+            throw new IllegalArgumentException("No autorizado para cancelar esta cita.");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED_BY_PATIENT ||
+                appointment.getStatus() == AppointmentStatus.CANCELLED_BY_STAFF) {
+            throw new IllegalStateException("La cita ya está cancelada.");
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED_BY_PATIENT);
+        return appointmentRepository.save(appointment);
+    }
+
+    // Método para cancelar cita por el médico o asistente
+    @Override
+    @Transactional
+    public Appointment cancelByStaff(Long appointmentId, String reason) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED_BY_PATIENT ||
+                appointment.getStatus() == AppointmentStatus.CANCELLED_BY_STAFF) {
+            throw new IllegalStateException("La cita ya está cancelada.");
+        }
+
+        if (reason != null && !reason.trim().isEmpty()) {
+            String updatedDescription = appointment.getDescription() != null
+                    ? appointment.getDescription() + "\n(Cancelada por el personal: " + reason + ")"
+                    : "(Cancelada por el personal: " + reason + ")";
+            appointment.setDescription(updatedDescription);
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED_BY_STAFF);
+        return appointmentRepository.save(appointment);
+    }
+
+    // Método para finalizar una cita
+    @Transactional
+    @Override
+    public Appointment finalizeAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+
+        if (appointment.getStatus() != AppointmentStatus.FULLY_APPROVED) {
+            throw new IllegalStateException("Solo se pueden finalizar citas que estén completamente aprobadas.");
+        }
+
+        // Verificar que la fecha de la cita ya haya pasado
+        if (appointment.getDate().isAfter(LocalDate.now()) ||
+                (appointment.getDate().isEqual(LocalDate.now()) && appointment.getStartTime().isAfter(LocalTime.now()))) {
+            throw new IllegalStateException("Solo se pueden finalizar citas que ya hayan pasado.");
+        }
+
+        appointment.setStatus(AppointmentStatus.FINALIZED);
+        return appointmentRepository.save(appointment);
+    }
+
+    // Método para obtener citas pasadas que pueden ser finalizadas
+    @Transactional(readOnly = true)
+    @Override
+    public List<Appointment> getFinalizableAppointments() {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        List<Appointment> appointments = appointmentRepository.findByStatus(AppointmentStatus.FULLY_APPROVED);
+        return appointments.stream()
+                .filter(a -> a.getDate().isBefore(today) ||
+                        (a.getDate().isEqual(today) && a.getStartTime().isBefore(now)))
+                .collect(Collectors.toList());
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Appointment> getAllCancelledAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+        return appointments.stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.CANCELLED_BY_PATIENT ||
+                        a.getStatus() == AppointmentStatus.CANCELLED_BY_STAFF)
+                .collect(Collectors.toList());
     }
 }

@@ -12,6 +12,6 @@ public interface AttentionEpisodeRepository extends JpaRepository<AttentionEpiso
     // En AttentionEpisodeRepository.java
 
     List<AttentionEpisode> findByClinicalHistory_User_Id(String userId);
-
+    boolean existsByAppointment_Id(Long appointmentId);
 
 }

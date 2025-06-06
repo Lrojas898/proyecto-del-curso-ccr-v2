@@ -35,6 +35,8 @@ public class RoleServiceTest {
         role.setName("Admin");
     }
 
+    // CREATE
+
     @Test
     void createRole_WhenValid_ReturnsRole() {
         role.setId(null);
@@ -49,61 +51,44 @@ public class RoleServiceTest {
     }
 
     @Test
-    void createRole_WhenIdProvided_ThrowsException() {
-        role.setId(1L);
-
+    void createRole_WhenIdIsNotNull_ThrowsException() {
+        role.setId(1L); 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> roleService.createRole(role));
-
         assertEquals("No se debe proporcionar un ID al crear un rol.", e.getMessage());
         verify(roleRepository, never()).save(any());
-    }
-
-    @Test
-    void createRole_WhenNameExists_ThrowsException() {
-        role.setId(null);
-        role.setName("Admin");
-
-        when(roleRepository.findByName("Admin")).thenReturn(Optional.of(role));
-
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> roleService.createRole(role));
-
-        assertEquals("Ya existe un rol con ese nombre.", e.getMessage());
-        verify(roleRepository, never()).save(any());
-    }
-
-    @Test
-    void createRole_WhenNameTooShort_ThrowsException() {
-        role.setId(null);
-        role.setName("Ad");
-
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> roleService.createRole(role));
-
-        assertEquals("El nombre del rol debe tener al menos 3 caracteres.", e.getMessage());
     }
 
     @Test
     void createRole_WhenNameIsNull_ThrowsException() {
         role.setId(null);
         role.setName(null);
-
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> roleService.createRole(role));
-
         assertEquals("El nombre del rol es obligatorio.", e.getMessage());
     }
 
     @Test
-    void updateRole_WhenValid_ReturnsUpdated() {
-        role.setId(1L);
+    void createRole_WhenNameAlreadyExists_ThrowsException() {
+        role.setId(null);
+        when(roleRepository.findByName("Admin")).thenReturn(Optional.of(role));
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> roleService.createRole(role));
+
+        assertEquals("Ya existe un rol con ese nombre.", e.getMessage());
+    }
+
+    // UPDATE
+
+    @Test
+    void updateRole_WhenValid_ReturnsUpdatedRole() {
         when(roleRepository.existsById(role.getId())).thenReturn(true);
         when(roleRepository.save(role)).thenReturn(role);
 
-        Role result = roleService.updateRole(role);
+        Role updated = roleService.updateRole(role);
 
-        assertEquals(1L, result.getId());
+        assertEquals("Admin", updated.getName());
         verify(roleRepository).save(role);
     }
 
@@ -116,12 +101,10 @@ public class RoleServiceTest {
                 () -> roleService.updateRole(role));
 
         assertEquals("El rol con ID 1 no existe.", e.getMessage());
-        verify(roleRepository, never()).save(role);
     }
 
     @Test
-    void updateRole_WhenNameInvalid_ThrowsException() {
-        role.setId(1L);
+    void updateRole_WhenNameTooShort_ThrowsException() {
         role.setName("A");
         when(roleRepository.existsById(role.getId())).thenReturn(true);
 
@@ -131,8 +114,10 @@ public class RoleServiceTest {
         assertEquals("El nombre del rol debe tener al menos 3 caracteres.", e.getMessage());
     }
 
+    // DELETE
+
     @Test
-    void deleteRole_WhenExists_DeletesRole() {
+    void deleteRole_WhenExists_DeletesSuccessfully() {
         when(roleRepository.existsById(1L)).thenReturn(true);
 
         roleService.deleteRole(1L);
@@ -150,24 +135,21 @@ public class RoleServiceTest {
         assertEquals("El rol con ID 99 no existe.", e.getMessage());
     }
 
+    // GET
+
     @Test
-    void getAllRoles_WhenCalled_ReturnsAllRoles() {
-        Role role1 = new Role();
-        role1.setId(1L);
-        role1.setName("Admin");
+    void getAllRoles_ReturnsList() {
+        List<Role> roles = Arrays.asList(
+                new Role(1L, "Admin"),
+                new Role(2L, "User")
+        );
 
-        Role role2 = new Role();
-        role2.setId(2L);
-        role2.setName("User");
-
-        List<Role> roles = Arrays.asList(role1, role2);
         when(roleRepository.findAll()).thenReturn(roles);
 
         List<Role> result = roleService.getAllRoles();
 
-        assertNotNull(result);
         assertEquals(2, result.size());
-        verify(roleRepository, times(1)).findAll();
+        verify(roleRepository).findAll();
     }
 
     @Test

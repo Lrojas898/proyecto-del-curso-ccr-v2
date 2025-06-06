@@ -1,9 +1,12 @@
 package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
+import com.example.ccrHospitalManagement.dto.MedicalProtocolDTO;
 import com.example.ccrHospitalManagement.mapper.AttentionEpisodeMapper;
+import com.example.ccrHospitalManagement.mapper.MedicalProtocolMapper;
 import com.example.ccrHospitalManagement.model.AttentionEpisode;
 import com.example.ccrHospitalManagement.service.AttentionEpisodeService;
+import com.example.ccrHospitalManagement.service.MedicalProtocolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Tag(name = "AttentionEpisode", description = "Endpoints para gestionar episodios de atención médica")
@@ -23,6 +28,8 @@ public class AttentionEpisodeRestController {
 
     private final AttentionEpisodeService service;
     private final AttentionEpisodeMapper mapper;
+    private final MedicalProtocolService protocolService;
+    private final MedicalProtocolMapper protocolMapper;
 
     @Operation(summary = "Obtener todos los episodios de atención médica")
     @GetMapping
@@ -59,6 +66,9 @@ public class AttentionEpisodeRestController {
     public ResponseEntity<AttentionEpisodeDTO> create(@RequestBody AttentionEpisodeDTO dto) {
         try {
             AttentionEpisode entity = mapper.toEntity(dto);
+            if (entity.getCreationDate() == null) {
+                entity.setCreationDate(LocalDate.now(ZoneId.systemDefault()));
+            }
             AttentionEpisode saved = service.createAttentionEpisodeWithAssociations(entity, dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(saved));
         } catch (IllegalArgumentException e) {
@@ -92,6 +102,20 @@ public class AttentionEpisodeRestController {
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/protocols")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<List<MedicalProtocolDTO>> getAvailableProtocols() {
+        try {
+            List<MedicalProtocolDTO> protocols = protocolService.getAllProtocols()
+                    .stream()
+                    .map(protocolMapper::toDTO)
+                    .toList();
+            return ResponseEntity.ok(protocols);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

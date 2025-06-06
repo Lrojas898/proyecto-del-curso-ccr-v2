@@ -21,29 +21,52 @@ public class ExamResultServiceImpl implements ExamResultService {
 
     @Override
     public ExamResult createExamResult(ExamResult result, Authentication auth) {
-        // Validación: solo técnicos pueden crear
         if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_LABTECH"))) {
             throw new IllegalArgumentException("Solo un técnico de laboratorio puede crear un resultado de examen.");
         }
 
         validateExamResult(result, true);
+
+        if (result.getResults() != null) {
+            for (var detail : result.getResults()) {
+                detail.setExamResult(result);
+            }
+        }
+
         return examResultRepository.save(result);
     }
+
 
     @Override
     public ExamResult updateExamResult(ExamResult result, Authentication auth) {
-        if (!examResultRepository.existsById(result.getId())) {
-            throw new IllegalArgumentException("El resultado de examen no existe.");
+        ExamResult existing = examResultRepository.findById(result.getId())
+                .orElseThrow(() -> new IllegalArgumentException("El resultado de examen no existe."));
+
+        boolean isAdmin = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        boolean isLabtech = auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_LABTECH"));
+
+        if (!isAdmin && !isLabtech) {
+            throw new IllegalArgumentException("No autorizado para modificar este examen.");
         }
 
-        // Validación: solo el ADMIN puede modificar
-        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-            throw new IllegalArgumentException("Solo el administrador puede modificar un resultado de examen.");
+        if (isLabtech) {
+            String username = auth.getName(); // usuario logueado
+            if (!existing.getTechnician().getUsername().equals(username)) {
+                throw new IllegalArgumentException("Solo puedes modificar exámenes que tú creaste.");
+            }
         }
 
         validateExamResult(result, false);
+
+        if (result.getResults() != null) {
+            for (var detail : result.getResults()) {
+                detail.setExamResult(result);
+            }
+        }
+
         return examResultRepository.save(result);
     }
+
     @Override
     @Transactional(readOnly = true)
     public List<ExamResult> getAllExamResults() {
@@ -55,6 +78,12 @@ public class ExamResultServiceImpl implements ExamResultService {
     public Optional<ExamResult> getExamResultById(Long id) {
         return examResultRepository.findById(id);
     }
+
+    @Override
+    public long countAllExamResults() {
+        return examResultRepository.count();
+    }
+
 
     @Override
     public void removeExamResultById(Long id) {
@@ -86,4 +115,9 @@ public class ExamResultServiceImpl implements ExamResultService {
             throw new IllegalArgumentException("El paciente y el técnico no pueden ser la misma persona.");
         }
     }
+
+    public List<ExamResult> getExamResultsByUsername(String username) {
+    return examResultRepository.findByPatient_Username(username);
+}
+
 }

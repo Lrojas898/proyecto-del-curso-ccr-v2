@@ -1,6 +1,7 @@
 package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.UserDTO;
+import com.example.ccrHospitalManagement.mapper.UserMapper;
 import com.example.ccrHospitalManagement.model.User;
 import com.example.ccrHospitalManagement.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -8,11 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 
 @Tag(name = "Usuarios", description = "Operaciones CRUD para la gestión de usuarios del sistema")
 @RestController
@@ -21,6 +24,7 @@ import java.util.Optional;
 public class UserRestController {
 
     private final UserServiceImpl userService;
+    private final UserMapper userMapper;
 
     @Operation(summary = "Registrar un nuevo usuario")
     @GetMapping
@@ -36,7 +40,7 @@ public class UserRestController {
 
     @Operation(summary = "Obtener un usuario por ID")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PACIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PACIENTE','ASISTENTE' )")
     public ResponseEntity<?> getUserById(@PathVariable String id) {
         try {
             Optional<User> user = userService.getUserById(id);
@@ -60,4 +64,89 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado al eliminar el usuario");
         }
     }
+
+
+     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDTO> getCurrentUser(org.springframework.security.core.Authentication auth) {
+        try {
+            String username = auth.getName();
+            return userService.getUserByUsername(username)
+                    .map(userMapper::toDto) 
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserDTO dto, Authentication auth) {
+        try {
+            String username = auth.getName();
+            Optional<User> userOpt = userService.getUserByUsername(username);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = userOpt.get();
+
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+
+        User updatedUser = userService.updateUser(user);
+        return ResponseEntity.ok(userMapper.toDto(updatedUser));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+@GetMapping("/doctors")
+@PreAuthorize("hasAnyRole('ADMIN', 'PACIENTE', 'ASISTENTE')")
+public ResponseEntity<List<UserDTO>> getAllDoctors() {
+    try {
+        List<User> doctors = userService.getUsersByRole("DOCTOR");
+        List<UserDTO> doctorDTOs = doctors.stream()
+                .map(userMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(doctorDTOs);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+
+@GetMapping("/count")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> getUsersCount() {
+    try {
+        long count = userService.countUsers(); 
+        return ResponseEntity.ok(Collections.singletonMap("count", count));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener el conteo de usuarios");
+    }
+}
+
+@GetMapping("/patients")
+@PreAuthorize("hasAnyRole('ADMIN', 'LABTECH', 'DOCTOR', 'ASISTENTE')")
+public ResponseEntity<List<UserDTO>> getAllPatients() {
+    try {
+        List<User> patients = userService.getUsersByRole("PACIENTE");
+        List<UserDTO> dtos = patients.stream().map(userMapper::toDto).toList();
+        return ResponseEntity.ok(dtos);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+
+
+
+
+
+
 }

@@ -1,7 +1,9 @@
 package com.example.ccrHospitalManagement.controller;
 
 import com.example.ccrHospitalManagement.dto.AppointmentDTO;
+import com.example.ccrHospitalManagement.dto.RescheduleRequest;
 import com.example.ccrHospitalManagement.mapper.AppointmentMapper;
+import com.example.ccrHospitalManagement.model.Appointment;
 import com.example.ccrHospitalManagement.model.AppointmentStatus;
 import com.example.ccrHospitalManagement.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Appointment", description = "Operaciones relacionadas con citas médicas")
 @RestController
@@ -29,95 +32,117 @@ public class AppointmentRestController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
     public ResponseEntity<List<AppointmentDTO>> getAll() {
-        try {
-            List<AppointmentDTO> appointments = service.getAllAppointments()
-                    .stream()
-                    .map(mapper::toDto)
-                    .toList();
-            return ResponseEntity.ok(appointments);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(service.getAllAppointments().stream().map(mapper::toDto).toList());
     }
 
-    @Operation(summary = "Obtener una cita médica por ID")
-    @GetMapping("/{id}")
+    @GetMapping("/patient/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PACIENTE','ASISTENTE')")
-    public ResponseEntity<AppointmentDTO> getById(@PathVariable Long id) {
-        try {
-            return service.getAppointmentById(id)
-                    .map(mapper::toDto)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPatientId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getAppointmentsByPatientId(id).stream().map(mapper::toDto).toList());
     }
 
-    @Operation(summary = "Crear una nueva cita médica")
-    @PostMapping
-    @PreAuthorize("hasRole('PACIENTE')")
-    public ResponseEntity<AppointmentDTO> create(@RequestBody AppointmentDTO dto) {
-        try {
-            System.out.println("Creating appointment: " + dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(mapper.toDto(service.createAppointment(mapper.toEntity(dto))));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    @GetMapping("/patient/{id}/cancelled")
+    @PreAuthorize("hasAnyRole('ADMIN','PACIENTE','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getCancelledAppointmentsByPatientId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getCancelledAppointmentsByPatientId(id).stream().map(mapper::toDto).toList());
     }
 
-    @Operation(summary = "Actualizar una cita médica")
-    @PutMapping
+    @GetMapping("/doctor/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
-    public ResponseEntity<AppointmentDTO> update(@RequestBody AppointmentDTO dto) {
+    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByDoctorId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getAppointmentsByDoctorId(id).stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/doctor/{id}/cancelled")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
+    public ResponseEntity<List<AppointmentDTO>> getCancelledAppointmentsByDoctorId(@PathVariable String id) {
+        return ResponseEntity.ok(service.getCancelledAppointmentsByDoctorId(id).stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/cancelled")
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getAllCancelledAppointments() {
+        return ResponseEntity.ok(service.getAllCancelledAppointments().stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/finalizable")
+    @PreAuthorize("hasAnyRole('DOCTOR','ASISTENTE')")
+    public ResponseEntity<List<AppointmentDTO>> getFinalizableAppointments() {
+        return ResponseEntity.ok(service.getFinalizableAppointments().stream().map(mapper::toDto).toList());
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','PACIENTE','ASISTENTE')")
+    public ResponseEntity<?> create(@RequestBody AppointmentDTO dto) {
         try {
-            return ResponseEntity.ok(mapper.toDto(service.UpdateAppointment(mapper.toEntity(dto))));
+            Appointment appointment = service.createAppointment(mapper.toEntity(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(appointment));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
-    @Operation(summary = "Actualizar el estado de una cita médica")
+    @PostMapping("/{id}/reschedule-request")
+    @PreAuthorize("hasRole('PACIENTE')")
+    public ResponseEntity<?> requestReschedule(@PathVariable Long id,
+                                               @RequestBody RescheduleRequest request,
+                                               Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            Appointment updated = service.handleRescheduleRequest(id, request, username);
+            return ResponseEntity.ok(mapper.toDto(updated));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/cancel-by-patient")
+    @PreAuthorize("hasRole('PACIENTE')")
+    public ResponseEntity<?> cancelByPatient(@PathVariable Long id, Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            Appointment cancelled = service.cancelByPatient(id, username);
+            return ResponseEntity.ok(mapper.toDto(cancelled));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/cancel-by-staff")
+    @PreAuthorize("hasAnyRole('DOCTOR','ASISTENTE')")
+    public ResponseEntity<?> cancelByStaff(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        try {
+            String reason = body.getOrDefault("reason", "");
+            Appointment cancelled = service.cancelByStaff(id, reason);
+            return ResponseEntity.ok(mapper.toDto(cancelled));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/finalize")
+    @PreAuthorize("hasAnyRole('DOCTOR','ASISTENTE')")
+    public ResponseEntity<?> finalizeAppointment(@PathVariable Long id) {
+        try {
+            Appointment finalized = service.finalizeAppointment(id);
+            return ResponseEntity.ok(mapper.toDto(finalized));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','ASISTENTE','PACIENTE')")
-    public ResponseEntity<AppointmentDTO> updateStatus(
-            @PathVariable Long id,
-            @RequestParam AppointmentStatus newStatus,
-            Authentication authentication) {
-
-        String requesterRole = authentication.getAuthorities()
-                .stream()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .findFirst()
-                .orElse("UNKNOWN");
-
+    @PreAuthorize("hasAnyRole('PACIENTE','DOCTOR','ASISTENTE')")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id,
+                                          @RequestBody Map<String, String> body,
+                                          Authentication authentication) {
         try {
-            return ResponseEntity.ok(
-                    mapper.toDto(service.updateAppointmentStatus(id, newStatus, requesterRole))
-            );
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @Operation(summary = "Eliminar una cita médica por ID")
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        try {
-            service.removeAppointmentById(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            AppointmentStatus status = AppointmentStatus.valueOf(body.get("status"));
+            String role = authentication.getAuthorities().iterator().next().getAuthority();
+            Appointment updated = service.updateAppointmentStatus(id, status, role);
+            return ResponseEntity.ok(mapper.toDto(updated));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

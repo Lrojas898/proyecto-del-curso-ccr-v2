@@ -4,6 +4,7 @@ import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
 import com.example.ccrHospitalManagement.model.AttentionEpisode;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
 
 public interface AttentionEpisodeService {
     AttentionEpisode createAttentionEpisode(AttentionEpisode episode);
@@ -18,5 +19,6 @@ public interface AttentionEpisodeService {
 
     AttentionEpisode createAttentionEpisodeWithAssociations(AttentionEpisode episode, AttentionEpisodeDTO dto);
     AttentionEpisode updateAttentionEpisodeWithAssociations(AttentionEpisode episode, AttentionEpisodeDTO dto);
+    AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto, Authentication auth);
 }
 

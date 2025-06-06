@@ -8,14 +8,10 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { AssistanceActMapper.class, AttentionEpisodeMapper.class })
 public interface ClinicalHistoryMapper {
     ClinicalHistoryDTO toDto(ClinicalHistory history);
     ClinicalHistory toEntity(ClinicalHistoryDTO dto);
 
-    AttentionEpisodeDTO toDto(AttentionEpisode episode);
-    AttentionEpisode toEntity(AttentionEpisodeDTO dto);
-
-    List<AttentionEpisodeDTO> toDtoList(List<AttentionEpisode> episodes);
-    List<AttentionEpisode> toEntityList(List<AttentionEpisodeDTO> dtos);
 }
+

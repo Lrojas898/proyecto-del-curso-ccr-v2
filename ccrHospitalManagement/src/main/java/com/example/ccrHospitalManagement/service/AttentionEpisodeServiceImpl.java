@@ -1,6 +1,8 @@
 package com.example.ccrHospitalManagement.service;
 
 import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
+import com.example.ccrHospitalManagement.dto.DiagnosisDTO;
+import com.example.ccrHospitalManagement.mapper.AttentionEpisodeMapper;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +27,9 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     private final ClinicalHistoryRepository clinicalHistoryRepository;
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final MedicalProtocolRepository medicalProtocolRepository;
+    private final AttentionEpisodeMapper attentionEpisodeMapper;
+    private final DiagnosisRepository diagnosisRepository;
 
     @Override
     public AttentionEpisode createAttentionEpisode(AttentionEpisode episode) {
@@ -30,12 +39,15 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
 
     @Override
     public AttentionEpisode updateAttentionEpisode(AttentionEpisode episode) {
-        if (!episodeRepository.existsById(episode.getId())) {
-            throw new IllegalArgumentException("El episodio de atención no existe.");
-        }
+        AttentionEpisode existing = episodeRepository.findById(episode.getId())
+                .orElseThrow(() -> new IllegalArgumentException("El episodio de atención no existe."));
+
+        episode.setCreationDate(existing.getCreationDate());
+
         validateEpisode(episode, false);
         return episodeRepository.save(episode);
     }
+
 
     @Override
     public void removeAttentionEpisodeById(Long id) {
@@ -93,6 +105,9 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
 
     @Override
     public AttentionEpisode createAttentionEpisodeWithAssociations(AttentionEpisode episode, AttentionEpisodeDTO dto) {
+        if (episode.getCreationDate() == null) {
+            episode.setCreationDate(LocalDate.now());
+        }
         validateAndLinkAssociations(episode, dto);
         return createAttentionEpisode(episode);
     }
@@ -103,18 +118,20 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
         return updateAttentionEpisode(episode);
     }
 
-    // Validaciones cruzadas DTO ↔ entidad
     private void validateAndLinkAssociations(AttentionEpisode episode, AttentionEpisodeDTO dto) {
+
         // Validar y asignar historia clínica
+        if (dto.getClinicalHistoryId() == null) {
+            throw new IllegalArgumentException("El ID de la historia clínica no puede ser null.");
+        }
         ClinicalHistory history = clinicalHistoryRepository.findById(dto.getClinicalHistoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Historia clínica no encontrada"));
         episode.setClinicalHistory(history);
 
-        // Validar y asignar doctor
-        User doctor = userRepository.findById(dto.getDoctorId())
-                .filter(d -> hasRole(d, "DOCTOR"))
-                .orElseThrow(() -> new IllegalArgumentException("Usuario médico no válido"));
-        episode.setDoctor(doctor);
+        // Validar que el doctor ya esté asignado
+        if (episode.getDoctor() == null) {
+            throw new IllegalArgumentException("Debe asignarse un médico responsable.");
+        }
 
         // Validar y asignar cita (si existe)
         if (dto.getAppointmentId() != null) {
@@ -122,19 +139,28 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
                     .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
             episode.setAppointment(appointment);
         }
+
+        // Validar y asignar protocolo médico (si existe)
+        if (dto.getProtocolId() != null) {
+            MedicalProtocol protocol = medicalProtocolRepository.findById(dto.getProtocolId())
+                    .orElseThrow(() -> new IllegalArgumentException("Protocolo médico no encontrado"));
+            episode.setMedicalProtocol(protocol);
+        }
     }
 
+
+
     private void validateEpisode(AttentionEpisode episode, boolean isCreate) {
+        if (episode.getCreationDate() == null) {
+            episode.setCreationDate(LocalDate.now(ZoneId.systemDefault()));
+        }
+
         if (episode.getCreationDate() == null) {
             throw new IllegalArgumentException("Debe establecerse la fecha de creación.");
         }
 
         if (episode.getCreationDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha de creación no puede ser futura.");
-        }
-
-        if (episode.getDiagnosis() == null || episode.getDiagnosis().trim().length() < 10) {
-            throw new IllegalArgumentException("El diagnóstico debe tener al menos 10 caracteres.");
         }
 
         if (episode.getDescription() == null || episode.getDescription().trim().length() < 10) {
@@ -163,4 +189,50 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     private boolean hasRole(User user, String roleName) {
         return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROLE_" + roleName));
     }
+
+@Override
+public AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto, Authentication auth) {
+    AttentionEpisode episode = episodeRepository.findById(episodeId)
+        .orElseThrow(() -> new IllegalArgumentException("Episodio no encontrado con ID " + episodeId));
+
+    User doctor = getCurrentUser(); // o usar auth.getName()
+    if (!episode.getDoctor().getId().equals(doctor.getId())) {
+        throw new SecurityException("No tienes permiso para editar este episodio.");
+    }
+
+    episode.setDescription(dto.getDescription());
+    episode.setCreationDate(dto.getCreationDate());
+
+    updateAssociationsIfNeeded(episode, dto);
+
+    if (dto.getDiagnoses() != null) {
+        List<Long> diagnosisIds = dto.getDiagnoses().stream()
+            .map(DiagnosisDTO::getId)
+            .filter(Objects::nonNull)
+            .toList();
+
+        List<Diagnosis> diagnoses = diagnosisRepository.findAllById(diagnosisIds);
+        episode.setDiagnoses(diagnoses); // reemplaza la lista completa
+    }
+
+
+    AttentionEpisode updated = episodeRepository.save(episode);
+    return attentionEpisodeMapper.toDto(updated);
+}
+
+
+private void updateAssociationsIfNeeded(AttentionEpisode episode, AttentionEpisodeDTO dto) {
+    if (dto.getAppointmentId() != null) {
+        Appointment appointment = appointmentRepository.findById(dto.getAppointmentId())
+            .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+        episode.setAppointment(appointment);
+    }
+
+    if (dto.getProtocolId() != null) {
+        MedicalProtocol protocol = medicalProtocolRepository.findById(dto.getProtocolId())
+            .orElseThrow(() -> new IllegalArgumentException("Protocolo médico no encontrado"));
+        episode.setMedicalProtocol(protocol);
+    }
+}
+
 }
