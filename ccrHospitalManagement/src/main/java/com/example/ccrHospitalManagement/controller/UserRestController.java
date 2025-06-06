@@ -36,7 +36,7 @@ public class UserRestController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PACIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'PACIENTE','ASISTENTE' )")
     public ResponseEntity<?> getUserById(@PathVariable String id) {
         try {
             Optional<User> user = userService.getUserById(id);
@@ -127,7 +127,7 @@ public ResponseEntity<?> getUsersCount() {
 }
 
 @GetMapping("/patients")
-@PreAuthorize("hasAnyRole('ADMIN', 'LABTECH', 'DOCTOR')")
+@PreAuthorize("hasAnyRole('ADMIN', 'LABTECH', 'DOCTOR', 'ASISTENTE')")
 public ResponseEntity<List<UserDTO>> getAllPatients() {
     try {
         List<User> patients = userService.getUsersByRole("PACIENTE");

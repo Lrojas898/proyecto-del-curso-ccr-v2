@@ -37,29 +37,29 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initData() {
         return args -> {
-            // EPS
+
             EPS eps1 = new EPS("EPS001", "Sanitas");
             EPS eps2 = new EPS("EPS002", "Sura");
             EPS eps3 = new EPS("EPS003", "Nueva EPS");
             epsRepository.saveAll(List.of(eps1, eps2, eps3));
 
-            // Medicina Prepagada
+
             PrepaidMedicine pm1 = new PrepaidMedicine("PM001", "Coomeva");
             PrepaidMedicine pm2 = new PrepaidMedicine("PM002", "Colsanitas");
             PrepaidMedicine pm3 = new PrepaidMedicine("PM003", "Aliansalud");
             prepaidRepository.saveAll(List.of(pm1, pm2, pm3));
 
-            // Roles
+
             List<String> roleNames = List.of("ADMIN", "DOCTOR", "PACIENTE", "ASISTENTE", "LABTECH");
             for (String roleName : roleNames) {
                 roleRepository.findByName(roleName).orElseGet(() -> roleRepository.save(new Role(null, roleName)));
             }
 
-            // Ubicaciones
+
             Location loc1 = createLocationIfNotExists("Consultorio 101", "Ala Norte", "Medicina General");
             Location loc2 = createLocationIfNotExists("Laboratorio 1", "Sótano", "Laboratorio Clínico");
 
-            // Tipos de examen
+
             if (examTypeRepository.count() == 0) {
                 examTypeRepository.saveAll(List.of(
                         new ExamType(null, "Hemograma"),
@@ -67,7 +67,7 @@ public class DataInitializer {
                 ));
             }
 
-            // Tipos de acto
+
             if (assistanceActTypeRepository.count() == 0) {
                 assistanceActTypeRepository.saveAll(List.of(
                         new AssistanceActType(null, "CONSULTATION"),
@@ -75,30 +75,21 @@ public class DataInitializer {
                 ));
             }
 
-            // Usuarios
+
             createUserIfNotExists("doctor1", "123456", "doc1@hospital.com", "Carlos", "Gómez", "Hombre", eps1, pm1, "Medicina Interna", "DOCTOR");
             createUserIfNotExists("doctor2", "123456", "doc2@hospital.com", "Ana", "Ruiz", "Mujer", eps2, pm2, "Pediatría", "DOCTOR");
             createUserIfNotExists("doctor3", "123456", "doc3@hospital.com", "Luis", "Martínez", "Hombre", eps3, pm3, "Dermatología", "DOCTOR");
-
             createUserIfNotExists("paciente1", "123456", "pac1@gmail.com", "Laura", "Pérez", "Mujer", eps1, pm2, null, "PACIENTE");
             createUserIfNotExists("paciente2", "123456", "pac2@gmail.com", "Miguel", "Torres", "Hombre", eps2, pm1, null, "PACIENTE");
             createUserIfNotExists("paciente3", "123456", "pac3@gmail.com", "Sofía", "Rodríguez", "Mujer", eps3, pm3, null, "PACIENTE");
-
             createUserIfNotExists("asistente1", "123456", "asis1@hospital.com", "María", "Ramírez", "Mujer", eps1, pm1, "Asistencia Médica", "ASISTENTE");
             createUserIfNotExists("asistente2", "123456", "asis2@hospital.com", "Pedro", "Sánchez", "Hombre", eps2, pm2, "Asistencia Clínica", "ASISTENTE");
-
             createUserIfNotExists("labtech1", "123456", "lab1@hospital.com", "Camila", "Morales", "Mujer", eps1, pm1, "Laboratorio", "LABTECH");
             createUserIfNotExists("labtech2", "123456", "lab2@hospital.com", "Andrés", "Fernández", "Hombre", eps2, pm2, "Bioquímica", "LABTECH");
             createUserIfNotExists("labtech3", "123456", "lab3@hospital.com", "Luisa", "Salazar", "Mujer", eps3, pm3, "Microbiología", "LABTECH");
-
             createUserIfNotExists("admin", "123456", "admin@hospital.com", "Admin", "Principal", "Otro", eps1, pm1, "Administración", "ADMIN");
 
-            // Citas
-            createAppointmentIfNotExists("paciente1", "doctor1", loc1, "Consulta paciente 1", 1, 9);
-            createAppointmentIfNotExists("paciente2", "doctor2", loc1, "Consulta paciente 2", 2, 10);
-            createAppointmentIfNotExists("paciente3", "doctor3", loc1, "Consulta paciente 3", 3, 11);
 
-            // Diagnósticos
             User doctor1 = userRepository.findByUsername("doctor1");
             List<Diagnosis> baseDiagnoses = List.of(
                     new Diagnosis(null, doctor1, "Gripe", "Infección viral común"),
@@ -106,19 +97,30 @@ public class DataInitializer {
             );
             diagnosisRepository.saveAll(baseDiagnoses);
 
-            // Protocolo
+
             if (medicalProtocolRepository.count() == 0) {
                 MedicalProtocol protocolo = new MedicalProtocol(null, "Protocolo General", "Guía médica general", new ArrayList<>());
-                ProtocolTask t1 = new ProtocolTask(null, "Signos vitales", "Medición básica", true, 1, protocolo);
-                protocolo.getTasks().add(t1);
+                protocolo.getTasks().addAll(List.of(
+                        new ProtocolTask(null, "Signos vitales", "Medición básica", true, 1, protocolo),
+                        new ProtocolTask(null, "Consulta médica", "Atención presencial", false, 2, protocolo),
+                        new ProtocolTask(null, "Recetar medicamento", "Prescripción médica", true, 3, protocolo),
+                        new ProtocolTask(null, "Revisión seguimiento", "Evaluación no obligatoria", false, 4, protocolo)
+                ));
                 medicalProtocolRepository.save(protocolo);
             }
 
-            // Episodios, actos y resultados de laboratorio
+
+            createAppointmentIfNotExists("paciente1", "doctor1", loc1, "Consulta paciente 1", 1, 9);
+            createAppointmentIfNotExists("paciente2", "doctor2", loc1, "Consulta paciente 2", 2, 10);
+            createAppointmentIfNotExists("paciente3", "doctor3", loc1, "Consulta paciente 3", 3, 11);
+            createAppointmentWithStatus("paciente1", "doctor1", "Cita finalizada", AppointmentStatus.FINALIZED, 0, 8);
+            createAppointmentWithStatus("paciente1", "doctor1", "Cita cancelada por paciente", AppointmentStatus.CANCELLED_BY_PATIENT, -1, 10);
+
+
             List<User> patients = userRepository.findAll().stream()
                     .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("PACIENTE"))).toList();
             List<Diagnosis> allDiagnoses = diagnosisRepository.findAll();
-            MedicalProtocol protocol = medicalProtocolRepository.findAll().stream().findFirst().orElse(null);
+            MedicalProtocol protocol = medicalProtocolRepository.findAll().get(0);
             AssistanceActType consulta = (AssistanceActType) assistanceActTypeRepository.findByName("CONSULTATION").orElse(null);
             AssistanceActType tratamiento = (AssistanceActType) assistanceActTypeRepository.findByName("TREATMENT").orElse(null);
             List<User> labTechs = userRepository.findAll().stream()
@@ -161,12 +163,12 @@ public class DataInitializer {
         };
     }
 
-    private void createUserIfNotExists(String username, String rawPassword, String email,
-                                       String firstName, String lastName, String sex,
+    private void createUserIfNotExists(String username, String rawPassword, String email, String firstName, String lastName, String sex,
                                        EPS eps, PrepaidMedicine prepaid, String speciality, String roleName) {
         if (userRepository.existsByUsername(username)) return;
         Role role = roleRepository.findByName(roleName).orElseThrow();
-        User user = new User(username, username, passwordEncoder.encode(rawPassword), email, firstName, lastName, "Calle 123", "3000000000", sex, LocalDate.of(1990, 1, 1), speciality, eps, prepaid, new HashSet<>(Set.of(role)));
+        User user = new User(username, username, passwordEncoder.encode(rawPassword), email, firstName, lastName, "Calle 123", "3000000000",
+                sex, LocalDate.of(1990, 1, 1), speciality, eps, prepaid, new HashSet<>(Set.of(role)));
         userRepository.save(user);
         if (role.getName().equals("PACIENTE")) {
             ClinicalHistory history = new ClinicalHistory();
@@ -192,6 +194,23 @@ public class DataInitializer {
         if (exists) return;
 
         Appointment appointment = new Appointment(null, date, time, description, location, patient, doctor, AppointmentStatus.PENDING);
+        appointmentRepository.save(appointment);
+    }
+
+    private void createAppointmentWithStatus(String patientUsername, String doctorUsername, String description, AppointmentStatus status, int daysOffset, int hour) {
+        User patient = userRepository.findByUsername(patientUsername);
+        User doctor = userRepository.findByUsername(doctorUsername);
+        Location location = locationRepository.findAll().get(0);
+
+        Appointment appointment = new Appointment();
+        appointment.setDate(LocalDate.now().plusDays(daysOffset));
+        appointment.setStartTime(LocalTime.of(hour, 0));
+        appointment.setDescription(description);
+        appointment.setPatient(patient);
+        appointment.setDoctor(doctor);
+        appointment.setLocation(location);
+        appointment.setStatus(status);
+
         appointmentRepository.save(appointment);
     }
 
