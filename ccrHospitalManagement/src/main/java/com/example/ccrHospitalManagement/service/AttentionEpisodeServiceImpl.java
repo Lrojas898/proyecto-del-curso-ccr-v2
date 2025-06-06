@@ -1,6 +1,7 @@
 package com.example.ccrHospitalManagement.service;
 
 import com.example.ccrHospitalManagement.dto.AttentionEpisodeDTO;
+import com.example.ccrHospitalManagement.dto.DiagnosisDTO;
 import com.example.ccrHospitalManagement.mapper.AttentionEpisodeMapper;
 import com.example.ccrHospitalManagement.model.*;
 import com.example.ccrHospitalManagement.repository.*;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 
@@ -26,6 +28,7 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
     private final AppointmentRepository appointmentRepository;
     private final MedicalProtocolRepository medicalProtocolRepository;
     private final AttentionEpisodeMapper attentionEpisodeMapper;
+    private final DiagnosisRepository diagnosisRepository;
 
     @Override
     public AttentionEpisode createAttentionEpisode(AttentionEpisode episode) {
@@ -179,12 +182,12 @@ public class AttentionEpisodeServiceImpl implements AttentionEpisodeService {
         return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROLE_" + roleName));
     }
 
-    @Override
+@Override
 public AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto, Authentication auth) {
     AttentionEpisode episode = episodeRepository.findById(episodeId)
         .orElseThrow(() -> new IllegalArgumentException("Episodio no encontrado con ID " + episodeId));
 
-    User doctor = getCurrentUser(); // o usar `auth.getName()` si prefieres
+    User doctor = getCurrentUser(); // o usar auth.getName()
     if (!episode.getDoctor().getId().equals(doctor.getId())) {
         throw new SecurityException("No tienes permiso para editar este episodio.");
     }
@@ -192,13 +195,26 @@ public AttentionEpisodeDTO updateEpisode(Long episodeId, AttentionEpisodeDTO dto
     episode.setDescription(dto.getDescription());
     episode.setCreationDate(dto.getCreationDate());
 
-    // Reasociar si se cambiaron cita o protocolo
+    // ⬇️ Actualizar Cita y Protocolo si cambiaron
     updateAssociationsIfNeeded(episode, dto);
+
+    // ⬇️ Nueva lógica: actualizar diagnósticos si vienen
+    if (dto.getDiagnoses() != null) {
+        List<Long> diagnosisIds = dto.getDiagnoses().stream()
+            .map(DiagnosisDTO::getId)
+            .filter(Objects::nonNull)
+            .toList();
+
+        List<Diagnosis> diagnoses = diagnosisRepository.findAllById(diagnosisIds);
+        episode.setDiagnoses(diagnoses); // reemplaza la lista completa
+    }
+
+    // ⬇️ Opción futura: si quieres también actualizar actos médicos, se puede extender aquí
 
     AttentionEpisode updated = episodeRepository.save(episode);
     return attentionEpisodeMapper.toDto(updated);
-
 }
+
 
 private void updateAssociationsIfNeeded(AttentionEpisode episode, AttentionEpisodeDTO dto) {
     if (dto.getAppointmentId() != null) {
