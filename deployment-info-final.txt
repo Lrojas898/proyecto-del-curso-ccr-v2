@@ -1,0 +1,91 @@
+🎉 SONARQUBE DEPLOYMENT COMPLETADO EXITOSAMENTE! 🎉
+================================================================
+
+📊 INFORMACIÓN DE LA VM:
+Resource Group: rg-sonarqube-ccr-v2
+VM Name: vm-sonarqube-ccr
+Public IP: 68.211.121.135
+Location: Chile Central
+VM Size: Standard_B2s (2 vCPUs, 4GB RAM)
+OS: Ubuntu 22.04
+
+🌐 SONARQUBE:
+URL: http://68.211.121.135:9000
+Status: ✅ FUNCIONANDO
+Version: 10.3.0.82913
+Credenciales iniciales:
+  - Usuario: admin
+  - Contraseña: admin
+
+🔗 CONECTIVIDAD:
+SSH: ssh azureuser@68.211.121.135
+Puerto 9000: ✅ ABIERTO
+Puerto 22: ✅ ABIERTO
+
+💰 COSTOS ESTIMADOS:
+VM Standard_B2s: ~$35-45 USD/mes
+Cuando no uses (parar VM): ~$20-25/mes
+
+🎯 PRÓXIMOS PASOS MANUALES:
+
+1. ✅ VERIFICAR SONARQUBE:
+   Abrir: http://68.211.121.135:9000
+   Login: admin / admin
+   ✅ Estado: UP y funcionando
+
+2. 🔑 CONFIGURAR SONARQUBE:
+   - Cambiar contraseña por defecto
+   - Generar token: My Account → Security → Tokens
+   - Name: azure-devops-pipeline
+   - Type: Global Analysis Token
+   - ⚠️ COPIAR Y GUARDAR EL TOKEN
+
+3. 🏗️ AZURE DEVOPS:
+   - Ir a: https://dev.azure.com
+   - Crear proyecto: ccr-hospital-management
+   - Subir código del repositorio
+
+4. 🔗 SERVICE CONNECTION:
+   - Server URL: http://68.211.121.135:9000
+   - Token: [EL TOKEN DEL PASO 2]
+   - Name: SonarQube-Server
+
+5. ⚙️ PIPELINE:
+   - Usar archivo: azure-pipelines.yml
+   - 4 etapas: Build, Security, SonarQube, Deploy
+
+📋 ARCHIVOS CREADOS:
+✅ 01-create-vm.sh - Crear VM
+✅ 02-install-sonarqube.sh - Instalar SonarQube
+✅ 03-verify-sonarqube.sh - Verificar funcionamiento
+✅ 04-configure-azure-devops.sh - Configurar Azure DevOps
+✅ azure-pipelines.yml - Pipeline completo
+✅ azure-devops-setup-instructions.md - Instrucciones detalladas
+
+🛠️ COMANDOS ÚTILES:
+# Ver estado VM
+az vm show --resource-group rg-sonarqube-ccr-v2 --name vm-sonarqube-ccr --show-details
+
+# Conectar SSH
+ssh azureuser@68.211.121.135
+
+# Ver logs SonarQube
+ssh azureuser@68.211.121.135 "cd /opt/sonarqube && sudo docker logs sonarqube"
+
+# Reiniciar SonarQube
+ssh azureuser@68.211.121.135 "cd /opt/sonarqube && sudo docker-compose restart sonarqube"
+
+# Parar VM (para ahorrar costos)
+az vm stop --resource-group rg-sonarqube-ccr-v2 --name vm-sonarqube-ccr
+
+# Iniciar VM
+az vm start --resource-group rg-sonarqube-ccr-v2 --name vm-sonarqube-ccr
+
+⚠️ RECORDATORIOS IMPORTANTES:
+1. Cambiar contraseña de admin inmediatamente
+2. La VM cuesta dinero 24/7 - párala cuando no la uses
+3. Hacer backup del token de SonarQube
+4. El pipeline está optimizado para proyectos Java/Maven
+
+Date: $(date)
+================================================================
