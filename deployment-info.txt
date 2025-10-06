@@ -1,0 +1,25 @@
+SonarQube Deployment Information
+================================
+Resource Group: rg-sonarqube-ccr
+VM Name: vm-sonarqube-ccr
+Public IP: 68.211.124.225
+SonarQube URL: http://68.211.124.225:9000
+SSH Command: ssh azureuser@68.211.124.225
+
+Default Credentials:
+Username: admin
+Password: admin
+
+IMPORTANT: Change the default password immediately after first login!
+
+Azure Region: Chile Central (chilecentral)
+VM Size: Standard_B1ms (1 vCPU, 2GB RAM)
+Estimated Cost: $22-30 USD/month
+
+Next Steps:
+1. Open http://68.211.124.225:9000 in your browser
+2. Login with admin/admin
+3. Change the default password
+4. Generate a token for Azure DevOps pipeline
+5. Create Service Connection in Azure DevOps
+6. Run the pipeline using azure-pipelines.yml

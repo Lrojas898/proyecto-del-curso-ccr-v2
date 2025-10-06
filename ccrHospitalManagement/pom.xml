@@ -35,6 +35,13 @@
 		<lombok.version>1.18.36</lombok.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<spring-boot.version>3.4.3</spring-boot.version>
+
+		<!-- SonarQube properties -->
+		<sonar.host.url>http://localhost:9000</sonar.host.url>
+		<sonar.projectKey>ccrHospitalManagement</sonar.projectKey>
+		<sonar.projectName>CCR Hospital Management</sonar.projectName>
+		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -254,6 +261,12 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.11.0.3922</version>
 			</plugin>
 
 		</plugins>
