@@ -1,4 +1,6 @@
 # Actividad en Clase: Sonarqube en Repositorio Github 
+LUIS MANUEL ROJAS CORREA A00399289
+INGE SOFT V ICESI
 
 *Repositorio Utilizado:* [https://github.com/Computacion-2/proyecto-del-curso-ccr\#](https://github.com/Computacion-2/proyecto-del-curso-ccr#)
 
