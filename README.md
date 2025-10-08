@@ -3,16 +3,7 @@ LUIS MANUEL ROJAS CORREA A00399289
 INGE SOFT V ICESI
 
 *Repositorio Utilizado:* [https://github.com/Computacion-2/proyecto-del-curso-ccr\#](https://github.com/Computacion-2/proyecto-del-curso-ccr#)
-
-Credenciales SonnarQube:
-
-Username: admin
-
-Password: ilovedevops
-
-**nota: debe ingresar asegurando que las configuraciones de su web server NO envian request en https, sino en http**
-
-<img width="956" height="1012" alt="image" src="https://github.com/user-attachments/assets/d0ca5392-b20e-4607-b900-f1e957167169" />
+<img width="812" height="402" alt="image" src="https://github.com/user-attachments/assets/38eb7d20-8231-4d8c-bf71-58838f7fe7ea" />
 
 SonarQube es una plataforma de código abierto utilizada para la inspección continua de la calidad del código. Funciona como una herramienta de análisis estático que examina el código fuente de un proyecto para detectar bugs, vulnerabilidades de seguridad y malas prácticas de programación. Su objetivo es proporcionar métricas en un panel de control visual para que los equipos de desarrollo puedan mejorar la mantenibilidad, fiabilidad y seguridad de su software a lo largo del ciclo de vida del desarrollo.
 
@@ -26,7 +17,19 @@ El análisis procesó un total de 148 archivos del proyecto, incluyendo 131 arch
 
 # Tarea Miércoles: Despliegue Sonarqube
 
+
+Credenciales SonnarQube:
+
+Username: admin
+
+Password: ilovedevops
+
 *Repositorio de GitHub Usado: [https://github.com/Lrojas898/proyecto-del-curso-ccr-v2](https://github.com/Lrojas898/proyecto-del-curso-ccr-v2)*
+
+
+**nota: debe ingresar asegurando que las configuraciones de su web server NO envian request en https, sino en http**
+
+<img width="956" height="1012" alt="image" src="https://github.com/user-attachments/assets/d0ca5392-b20e-4607-b900-f1e957167169" />
 
 ### **Azure Virtual Machine**
 
