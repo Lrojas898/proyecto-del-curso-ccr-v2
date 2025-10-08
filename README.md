@@ -30,6 +30,10 @@ El análisis procesó un total de 148 archivos del proyecto, incluyendo 131 arch
 
 ### **Azure Virtual Machine**
 
+<img width="1908" height="971" alt="image" src="https://github.com/user-attachments/assets/b4b32970-27f6-420a-abdd-9eef52ba191b" />
+
+<img width="1906" height="951" alt="image" src="https://github.com/user-attachments/assets/3affb152-8ced-4bb0-8b15-a97a657425b4" />
+
 Azure Virtual Machine (VM) es un servicio de Infraestructura como Servicio (IaaS) que ofrece máquinas virtuales escalables. En este proyecto, se desplegó una VM con sistema operativo Linux Ubuntu en la región de Chile Central, asignada al grupo de recursos rg-sonarqube-ccr-v2. Esta VM funciona como host para SonarQube y su configuración de red incluye reglas de seguridad para permitir el tráfico a través de los puertos 22 (SSH) y 9000 (HTTP).
 
 
