@@ -128,12 +128,12 @@ jobs:
     - name: SonarQube Analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: http://68.211.121.135:9000
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
         cd ccrHospitalManagement
         mvn sonar:sonar \
-          -Dsonar.projectKey=ccrHospitalManagement \
-          -Dsonar.projectName=ccrHospitalManagement \
+          -Dsonar.projectKey=ccrHospitalManagementV2 \
+          -Dsonar.projectName=ccrHospitalManagementV2 \
           -Dsonar.host.url=$SONAR_HOST_URL \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.sources=src/main \
