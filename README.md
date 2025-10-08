@@ -7,7 +7,7 @@ Username: admin
 Password: ilovedevops
 nota: debe ingresar asegurando que las configuraciones de su web server NO envian request en https, sino en http 
 
-![Uploading image.png…]()
+<img width="956" height="1012" alt="image" src="https://github.com/user-attachments/assets/d0ca5392-b20e-4607-b900-f1e957167169" />
 
 SonarQube es una plataforma de código abierto utilizada para la inspección continua de la calidad del código. Funciona como una herramienta de análisis estático que examina el código fuente de un proyecto para detectar bugs, vulnerabilidades de seguridad y malas prácticas de programación. Su objetivo es proporcionar métricas en un panel de control visual para que los equipos de desarrollo puedan mejorar la mantenibilidad, fiabilidad y seguridad de su software a lo largo del ciclo de vida del desarrollo.
 
